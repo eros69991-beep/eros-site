@@ -1,6 +1,8 @@
 .DS_Store
 .superpowers/
 .worktrees/
+work/
+outputs/
 node_modules/
 dist/
 coverage/
