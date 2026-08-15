@@ -94,7 +94,7 @@ Success means the experiential and commercial paths coexist without one disguisi
 └── /bag
 ```
 
-Search and Bag may appear as responsive overlays while retaining canonical routes so browser Back, deep links, and focus restoration remain predictable.
+Search and Bag use canonical routes. On desktop they render as route-backed overlays above the originating page; on mobile they render as full-screen route surfaces. Browser Back, deep links, and focus restoration therefore remain predictable.
 
 ### Primary browsing rules
 
@@ -105,7 +105,7 @@ Search and Bag may appear as responsive overlays while retaining canonical route
 - Product Detail is visually quieter than its World.
 - Archive provides complete structural access without becoming Home's primary action.
 - Search and Bag are reachable from every route.
-- Browser Back restores the originating route, selection, scroll position, and focus when practical.
+- When navigation begins inside the app, browser Back restores the originating route, selection, scroll position, and focus. A direct deep link has no originating in-app context to restore.
 
 ## 5. Global interface and navigation
 
@@ -264,7 +264,7 @@ This is a content contract, not a shared visual template.
 - Each World's realtime scene runs behind or around semantic React content.
 - WebGL must never obscure original product media, prices, sizes, or controls.
 
-Earlier concept images are art-direction references. They may support composition and asset production, but a single image may never substitute for required realtime atmosphere and motion.
+Earlier concept images are art-direction inputs for composition and asset production. A single image may never substitute for required realtime atmosphere and motion.
 
 ## 9. Seasonal Worlds
 
@@ -386,7 +386,7 @@ The Studio is a darker, lower-visual-weight archive/workroom context with concis
 - material and making direction;
 - future workspace, prototype, and process media;
 - Archive access;
-- Contact placeholder structure without a live submission form.
+- A static Contact information region without a submission form or invented contact details.
 
 It must not invent a founder biography or generic fashion-brand origin story.
 
@@ -477,9 +477,9 @@ Owns reduced-motion, Lite, static layered-space, and no-WebGL navigation equival
 
 `@react-three/postprocessing` is active in every WebGL scene through an `EffectComposer`.
 
-- Desktop may use the full approved effect set with restrained values.
+- Desktop uses the World-specific approved effect set with restrained values.
 - Mobile retains the composer but reduces sampling, precision, and effect cost.
-- The most expensive nonessential pass may be disabled by the Lite tier.
+- Lite disables depth of field and other high-cost nonessential passes first while retaining the composer, tone, and restrained Bloom.
 - Reduced Motion removes motion, not static tone, atmosphere, or optical identity.
 - No-WebGL fallback is the only mode without the composer.
 - Bloom, depth of field, noise, chromatic effects, and vignetting must be justified per scene rather than globally maximized.
@@ -551,21 +551,21 @@ Budgets are acceptance criteria, not aspirations.
 
 - Target 60 FPS on a representative midrange discrete GPU.
 - Complex transitions must not remain below 45 FPS.
-- Home critical assets: approximately 3 MB or less before optional deferred assets.
+- Home critical assets: no more than 3 MB before deferred assets.
 - Typical texture maximum: 2K.
 - Default DPR ceiling: 1.5.
 - Scene draw-call target: 120 or fewer.
-- Particle target: approximately 4,000 or fewer.
+- Particle ceiling: 4,000.
 
 ### Mobile
 
 - Target stable 30–45 FPS on a representative modern midrange phone.
-- Home critical assets: approximately 1.5 MB or less.
-- Initial World entry assets: approximately 2 MB or less.
+- Home critical assets: no more than 1.5 MB.
+- Initial World entry assets: no more than 2 MB.
 - Typical texture maximum: 1K.
 - Default DPR ceiling: 1.25.
 - Scene draw-call target: 60 or fewer.
-- Particle target: approximately 800–1,200.
+- Particle range: 800–1,200, with 1,200 as the ceiling.
 - Avoid mobile realtime shadows when a cheaper lighting solution preserves the design.
 
 ### Quality adaptation
