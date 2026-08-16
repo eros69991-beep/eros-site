@@ -99,6 +99,28 @@ describe('site store', () => {
     expect(store.getState().recentWorld).toBeNull()
   })
 
+  it('falls back to memory when persistence cannot be read', () => {
+    const unavailableStorage: StorageAdapter = {
+      getItem: () => {
+        throw new Error('Storage unavailable')
+      },
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    }
+
+    const store = createSiteStore(unavailableStorage)
+
+    expect(store.getState().bag).toEqual([])
+    expect(store.getState().recentWorld).toBeNull()
+    expect(store.getState().storageAvailable).toBe(false)
+
+    store.getState().addToBag('demo-spring-001', 'M')
+
+    expect(store.getState().bag).toEqual([
+      { objectId: 'demo-spring-001', size: 'M', quantity: 1 },
+    ])
+  })
+
   it('keeps in-memory state when persistence fails', () => {
     const unavailableStorage: StorageAdapter = {
       getItem: () => null,
