@@ -1,5 +1,13 @@
 import type { ObjectDefinition } from './types'
 
+export const usdFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+})
+
+export const formatUsd = (price: number): string => usdFormatter.format(price)
+
 const demonstrationMedia = (slug: string, name: string): ObjectDefinition['media'] => [
   {
     src: `/media/demonstration/${slug}.jpg`,
