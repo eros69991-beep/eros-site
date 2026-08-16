@@ -84,6 +84,8 @@ describe('WorldGate', () => {
     expect(document.body.style.overflow).toBe('hidden')
     expect(screen.queryByRole('button', { name: /start of world gate/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /end of world gate/i })).not.toBeInTheDocument()
+    expect(document.querySelectorAll('[aria-hidden="true"][tabindex]')).toHaveLength(0)
+    expect(gate.querySelectorAll('[tabindex]')).toHaveLength(0)
 
     await user.tab({ shift: true })
     expect(within(gate).getByRole('link', { name: 'BAG' })).toHaveFocus()

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from 'react'
 import { Link, useLocation, type Location } from 'react-router-dom'
 import { worlds } from '../../domain/worlds'
 import { useSiteStore } from '../../state/siteStore'
@@ -55,20 +55,26 @@ export function WorldGate({ openerRef }: WorldGateProps) {
   const closeForNavigation = () => setWorldGateOpen(false)
   const backgroundLocation = (location.state as OverlayState | null)?.backgroundLocation ?? location
   const overlayState = { backgroundLocation }
+  const trapTabAtBoundary = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab') return
+
+    if (event.shiftKey && event.target === firstControlRef.current) {
+      event.preventDefault()
+      lastControlRef.current?.focus()
+    }
+
+    if (!event.shiftKey && event.target === lastControlRef.current) {
+      event.preventDefault()
+      firstControlRef.current?.focus()
+    }
+  }
 
   return (
     <div className={styles.backdrop}>
-      <span
-        aria-hidden="true"
-        className={styles.focusSentinel}
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-        tabIndex={0}
-        onFocus={() => lastControlRef.current?.focus()}
-      />
       <section aria-label="World Gate" aria-modal="true" className={styles.gate} role="dialog">
         <div className={styles.gateHeader}>
           <h2>WORLD GATE</h2>
-          <button ref={firstControlRef} className={styles.closeButton} type="button" onClick={closeGate}>
+          <button ref={firstControlRef} className={styles.closeButton} type="button" onClick={closeGate} onKeyDown={trapTabAtBoundary}>
             CLOSE
           </button>
         </div>
@@ -81,16 +87,9 @@ export function WorldGate({ openerRef }: WorldGateProps) {
           <Link className={styles.gateLink} to="/archive" onClick={closeForNavigation}>ARCHIVE</Link>
           <Link className={styles.gateLink} to="/studio" onClick={closeForNavigation}>STUDIO</Link>
           <Link className={styles.gateLink} to="/search" state={overlayState} onClick={closeForNavigation}>SEARCH</Link>
-          <Link ref={lastControlRef} className={styles.gateLink} to="/bag" state={overlayState} onClick={closeForNavigation}>BAG</Link>
+          <Link ref={lastControlRef} className={styles.gateLink} to="/bag" state={overlayState} onClick={closeForNavigation} onKeyDown={trapTabAtBoundary}>BAG</Link>
         </nav>
       </section>
-      <span
-        aria-hidden="true"
-        className={styles.focusSentinel}
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-        tabIndex={0}
-        onFocus={() => firstControlRef.current?.focus()}
-      />
     </div>
   )
 }
