@@ -82,6 +82,8 @@ describe('WorldGate', () => {
     const gate = screen.getByRole('dialog', { name: /world gate/i })
     const close = within(gate).getByRole('button', { name: 'CLOSE' })
     expect(document.body.style.overflow).toBe('hidden')
+    expect(screen.queryByRole('button', { name: /start of world gate/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /end of world gate/i })).not.toBeInTheDocument()
 
     await user.tab({ shift: true })
     expect(within(gate).getByRole('link', { name: 'BAG' })).toHaveFocus()
@@ -109,5 +111,27 @@ describe('WorldGate', () => {
     expect(screen.getByRole('heading', { name: 'SPRING' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'SEARCH' })).toBeInTheDocument()
     expect(screen.getAllByRole('main')).toHaveLength(1)
+  })
+
+  it('keeps the original route behind Search followed by Bag', async () => {
+    const user = userEvent.setup()
+    render(<TestRouter initialEntries={['/world/spring']} />)
+
+    await user.click(screen.getByRole('link', { name: 'SEARCH' }))
+    await user.click(screen.getByRole('link', { name: 'BAG 0' }))
+
+    expect(screen.getByRole('heading', { name: 'SPRING' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'BAG' })).toBeInTheDocument()
+  })
+
+  it('keeps the original route behind Bag followed by Search', async () => {
+    const user = userEvent.setup()
+    render(<TestRouter initialEntries={['/world/spring']} />)
+
+    await user.click(screen.getByRole('link', { name: 'BAG 0' }))
+    await user.click(screen.getByRole('link', { name: 'SEARCH' }))
+
+    expect(screen.getByRole('heading', { name: 'SPRING' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'SEARCH' })).toBeInTheDocument()
   })
 })

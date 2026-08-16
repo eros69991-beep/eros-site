@@ -1,5 +1,5 @@
 import type { RefObject } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, type Location } from 'react-router-dom'
 import { useSiteStore } from '../../state/siteStore'
 import styles from './navigation.module.css'
 
@@ -7,11 +7,16 @@ interface GlobalHeaderProps {
   menuButtonRef: RefObject<HTMLButtonElement | null>
 }
 
+interface OverlayState {
+  backgroundLocation?: Location
+}
+
 export function GlobalHeader({ menuButtonRef }: GlobalHeaderProps) {
   const location = useLocation()
   const bagCount = useSiteStore((state) => state.bag.reduce((total, line) => total + line.quantity, 0))
   const setWorldGateOpen = useSiteStore((state) => state.setWorldGateOpen)
-  const overlayState = { backgroundLocation: location }
+  const backgroundLocation = (location.state as OverlayState | null)?.backgroundLocation ?? location
+  const overlayState = { backgroundLocation }
 
   return (
     <header className={styles.header}>

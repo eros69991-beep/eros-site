@@ -81,6 +81,7 @@
   width: 1px;
   height: 1px;
   overflow: hidden;
+  pointer-events: none;
 }
 
 @media (max-width: 44rem) {

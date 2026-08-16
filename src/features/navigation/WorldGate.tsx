@@ -1,11 +1,15 @@
 import { useEffect, useRef, type RefObject } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, type Location } from 'react-router-dom'
 import { worlds } from '../../domain/worlds'
 import { useSiteStore } from '../../state/siteStore'
 import styles from './navigation.module.css'
 
 interface WorldGateProps {
   openerRef: RefObject<HTMLButtonElement | null>
+}
+
+interface OverlayState {
+  backgroundLocation?: Location
 }
 
 export function WorldGate({ openerRef }: WorldGateProps) {
@@ -49,14 +53,16 @@ export function WorldGate({ openerRef }: WorldGateProps) {
   }
 
   const closeForNavigation = () => setWorldGateOpen(false)
-  const overlayState = { backgroundLocation: location }
+  const backgroundLocation = (location.state as OverlayState | null)?.backgroundLocation ?? location
+  const overlayState = { backgroundLocation }
 
   return (
     <div className={styles.backdrop}>
-      <button
-        aria-label="Start of World Gate"
+      <span
+        aria-hidden="true"
         className={styles.focusSentinel}
-        type="button"
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
         onFocus={() => lastControlRef.current?.focus()}
       />
       <section aria-label="World Gate" aria-modal="true" className={styles.gate} role="dialog">
@@ -78,10 +84,11 @@ export function WorldGate({ openerRef }: WorldGateProps) {
           <Link ref={lastControlRef} className={styles.gateLink} to="/bag" state={overlayState} onClick={closeForNavigation}>BAG</Link>
         </nav>
       </section>
-      <button
-        aria-label="End of World Gate"
+      <span
+        aria-hidden="true"
         className={styles.focusSentinel}
-        type="button"
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
         onFocus={() => firstControlRef.current?.focus()}
       />
     </div>
