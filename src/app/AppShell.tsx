@@ -10,6 +10,8 @@ import { ProductPage } from '../features/product/ProductPage'
 import { SearchPage } from '../features/search/SearchPage'
 import { StudioPage } from '../features/studio/StudioPage'
 import { WorldPage } from '../features/worlds/WorldPage'
+import sceneStyles from '../features/fallback/fallback.module.css'
+import { SceneHost } from '../scene/SceneHost'
 
 interface OverlayState {
   backgroundLocation?: Location
@@ -23,14 +25,17 @@ export function AppShell() {
   const background = isOverlayRoute ? backgroundLocation : undefined
 
   return (
-    <div className="app-shell">
-      <GlobalHeader menuButtonRef={menuButtonRef} />
-      <main aria-label="EROS Studio">
-        {background ? <BackgroundRoute location={background} /> : null}
-        <div className={background ? 'route-overlay' : undefined}>
-          <Outlet />
-        </div>
-      </main>
+    <div className={`app-shell ${sceneStyles.appShell}`}>
+      <SceneHost />
+      <div className={sceneStyles.semanticLayer}>
+        <GlobalHeader menuButtonRef={menuButtonRef} />
+        <main aria-label="EROS Studio">
+          {background ? <BackgroundRoute location={background} /> : null}
+          <div className={background ? 'route-overlay' : undefined}>
+            <Outlet />
+          </div>
+        </main>
+      </div>
       <WorldGate openerRef={menuButtonRef} />
     </div>
   )
