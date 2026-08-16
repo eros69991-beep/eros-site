@@ -1,6 +1,7 @@
 import './styles/tokens.css'
 import './styles/global.css'
+import { AppRouter } from './AppRouter'
 
 export function App() {
-  return <main aria-label="EROS Studio">EROS STUDIO</main>
+  return <AppRouter />
 }

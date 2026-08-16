@@ -5,3 +5,14 @@
 body {
   margin: 0;
 }
+
+.route-background {
+  min-height: 100%;
+}
+
+.route-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: var(--route-overlay-background, #ffffff);
+}
