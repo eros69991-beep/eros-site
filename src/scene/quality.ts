@@ -8,12 +8,56 @@ export interface PerformanceSignals {
   webgl: boolean
 }
 
+export interface MobilePerformanceDeviceSignals {
+  userAgentDataMobile: boolean | null
+  userAgent: string
+  maxTouchPoints: number
+  coarsePointer: boolean
+}
+
+export interface SceneBudget {
+  dpr: number
+  maxDrawCalls: number
+  maxParticles: number
+  depthOfField: boolean
+}
+
 export const QUALITY_BUDGETS = {
   high: { dpr: 1.5, maxDrawCalls: 120, maxParticles: 4000, depthOfField: true },
   balanced: { dpr: 1.25, maxDrawCalls: 90, maxParticles: 2200, depthOfField: true },
   lite: { dpr: 1, maxDrawCalls: 60, maxParticles: 1200, depthOfField: false },
   static: { dpr: 1, maxDrawCalls: 0, maxParticles: 0, depthOfField: false },
 } as const
+
+const MOBILE_SCENE_CAP = {
+  dpr: 1.25,
+  maxDrawCalls: 60,
+  maxParticles: 1200,
+} as const
+
+export function classifyMobilePerformanceDevice(
+  signals: MobilePerformanceDeviceSignals,
+): boolean {
+  if (signals.userAgentDataMobile === true) return true
+
+  const mobileUserAgent = /Android|iPad|iPhone|iPod|Mobile/i.test(signals.userAgent)
+  const desktopModeIPad = /Macintosh/i.test(signals.userAgent) && signals.maxTouchPoints > 1
+  if (mobileUserAgent || desktopModeIPad) return true
+
+  return signals.coarsePointer && signals.maxTouchPoints > 0
+}
+
+export function getEffectiveSceneBudget(tier: QualityTier, mobile: boolean): SceneBudget {
+  const tierBudget = QUALITY_BUDGETS[tier]
+  if (!mobile) return tierBudget
+
+  return {
+    dpr: Math.min(tierBudget.dpr, MOBILE_SCENE_CAP.dpr),
+    maxDrawCalls: Math.min(tierBudget.maxDrawCalls, MOBILE_SCENE_CAP.maxDrawCalls),
+    maxParticles: Math.min(tierBudget.maxParticles, MOBILE_SCENE_CAP.maxParticles),
+    depthOfField: tierBudget.depthOfField,
+  }
+}
 
 export function selectInitialQuality(signals: PerformanceSignals): QualityTier {
   if (!signals.webgl) return 'static'

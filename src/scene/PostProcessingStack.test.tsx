@@ -4,7 +4,14 @@ import {
   SCENE_EFFECT_PROFILES,
   getEffectProfileForPath,
 } from './contracts'
-import { PostProcessingStack } from './PostProcessingStack'
+import { PostProcessingStack, RealtimeSceneLayer } from './PostProcessingStack'
+
+vi.mock('@react-three/fiber', () => ({
+  Canvas: ({ children, dpr }: { children: ReactNode; dpr: number }) => (
+    <div data-testid="scene-canvas" data-dpr={String(dpr)}>{children}</div>
+  ),
+  useFrame: () => undefined,
+}))
 
 vi.mock('@react-three/postprocessing', () => ({
   EffectComposer: ({ children }: { children: ReactNode }) => (
@@ -90,5 +97,19 @@ describe('PostProcessingStack', () => {
       { bloomIntensity: 0.10, bloomThreshold: 0.92, noiseOpacity: 0.004, vignetteOffset: 0.16, vignetteDarkness: 0.18, depthOfField: false },
       { bloomIntensity: 0.10, bloomThreshold: 0.92, noiseOpacity: 0.004, vignetteOffset: 0.16, vignetteDarkness: 0.18, depthOfField: false },
     ])
+  })
+
+  it('applies the effective mobile DPR cap to a high-tier Canvas', () => {
+    render(
+      <RealtimeSceneLayer
+        profile={SCENE_EFFECT_PROFILES.universe}
+        quality="high"
+        mobile
+        reducedMotion={false}
+        onDegrade={() => undefined}
+      />,
+    )
+
+    expect(screen.getByTestId('scene-canvas')).toHaveAttribute('data-dpr', '1.25')
   })
 })

@@ -10,7 +10,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo } from 'react'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
-import { QUALITY_BUDGETS, createQualityMonitor } from './quality'
+import { createQualityMonitor, getEffectiveSceneBudget } from './quality'
 import { resolveEffectProfile, type EffectProfile } from './contracts'
 
 type RealtimeQualityTier = Exclude<QualityTier, 'static'>
@@ -57,6 +57,7 @@ function FrameQualityMonitor({
 interface RealtimeSceneLayerProps {
   profile: EffectProfile
   quality: RealtimeQualityTier
+  mobile: boolean
   reducedMotion: boolean
   onDegrade(tier: QualityTier): void
 }
@@ -64,14 +65,17 @@ interface RealtimeSceneLayerProps {
 export function RealtimeSceneLayer({
   profile,
   quality,
+  mobile,
   reducedMotion,
   onDegrade,
 }: RealtimeSceneLayerProps) {
+  const budget = getEffectiveSceneBudget(quality, mobile)
+
   return (
     <div className={styles.sceneLayer} aria-hidden="true">
       <Canvas
         className={styles.canvasSurface}
-        dpr={QUALITY_BUDGETS[quality].dpr}
+        dpr={budget.dpr}
         frameloop={reducedMotion ? 'demand' : 'always'}
         gl={{ antialias: quality !== 'lite', alpha: true }}
       >

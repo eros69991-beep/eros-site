@@ -5,7 +5,7 @@ import { SceneFallback } from '../features/fallback/SceneFallback'
 import { StaticUniverse } from '../features/fallback/StaticUniverse'
 import { useSiteStore } from '../state/siteStore'
 import { getEffectProfileForPath } from './contracts'
-import { selectInitialQuality } from './quality'
+import { classifyMobilePerformanceDevice, selectInitialQuality } from './quality'
 import { SceneErrorBoundary } from './SceneErrorBoundary'
 import { supportsWebGL } from './webgl'
 
@@ -13,8 +13,11 @@ interface OverlayState {
   backgroundLocation?: Location
 }
 
-interface NavigatorWithMemory extends Navigator {
+interface NavigatorWithPerformanceSignals extends Navigator {
   deviceMemory?: number
+  userAgentData?: {
+    mobile?: boolean
+  }
 }
 
 const RealtimeSceneLayer = lazy(async () => {
@@ -28,19 +31,35 @@ function readReducedMotion() {
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-function readMobileLayout() {
+function readCoarsePointer() {
   return typeof window !== 'undefined'
     && typeof window.matchMedia === 'function'
-    && window.matchMedia('(max-width: 48rem)').matches
+    && window.matchMedia('(pointer: coarse)').matches
 }
 
-function getInitialQuality(webgl: boolean, reducedMotion: boolean): QualityTier {
+function readMobilePerformanceDevice() {
+  if (typeof navigator === 'undefined') return false
+  const browserNavigator = navigator as NavigatorWithPerformanceSignals
+
+  return classifyMobilePerformanceDevice({
+    userAgentDataMobile: browserNavigator.userAgentData?.mobile ?? null,
+    userAgent: browserNavigator.userAgent,
+    maxTouchPoints: browserNavigator.maxTouchPoints,
+    coarsePointer: readCoarsePointer(),
+  })
+}
+
+function getInitialQuality(
+  webgl: boolean,
+  reducedMotion: boolean,
+  mobile: boolean,
+): QualityTier {
   const browserNavigator = typeof navigator === 'undefined'
     ? null
-    : navigator as NavigatorWithMemory
+    : navigator as NavigatorWithPerformanceSignals
 
   return selectInitialQuality({
-    mobile: readMobileLayout(),
+    mobile,
     deviceMemory: browserNavigator?.deviceMemory ?? null,
     cores: browserNavigator?.hardwareConcurrency ?? 4,
     reducedMotion,
@@ -67,7 +86,10 @@ export function SceneHost() {
   const reducedMotion = useReducedMotionPreference()
   const setStoredQuality = useSiteStore((state) => state.setQualityTier)
   const [webglAvailable] = useState(supportsWebGL)
-  const [quality, setQuality] = useState(() => getInitialQuality(webglAvailable, reducedMotion))
+  const [mobile] = useState(readMobilePerformanceDevice)
+  const [quality, setQuality] = useState(() => (
+    getInitialQuality(webglAvailable, reducedMotion, mobile)
+  ))
   const [retryKey, setRetryKey] = useState(0)
   const [forceStatic, setForceStatic] = useState(false)
 
@@ -105,6 +127,7 @@ export function SceneHost() {
         <RealtimeSceneLayer
           profile={profile}
           quality={quality}
+          mobile={mobile}
           reducedMotion={reducedMotion}
           onDegrade={updateQuality}
         />

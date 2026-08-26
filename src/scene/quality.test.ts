@@ -1,4 +1,10 @@
-import { QUALITY_BUDGETS, createQualityMonitor, selectInitialQuality } from './quality'
+import {
+  QUALITY_BUDGETS,
+  classifyMobilePerformanceDevice,
+  createQualityMonitor,
+  getEffectiveSceneBudget,
+  selectInitialQuality,
+} from './quality'
 import { supportsWebGL } from './webgl'
 
 describe('selectInitialQuality', () => {
@@ -39,6 +45,35 @@ describe('selectInitialQuality', () => {
       balanced: { dpr: 1.25, maxDrawCalls: 90, maxParticles: 2200, depthOfField: true },
       lite: { dpr: 1, maxDrawCalls: 60, maxParticles: 1200, depthOfField: false },
       static: { dpr: 1, maxDrawCalls: 0, maxParticles: 0, depthOfField: false },
+    })
+  })
+})
+
+describe('mobile performance classification and caps', () => {
+  it('keeps a wide landscape phone mobile-classified from device capabilities', () => {
+    expect(classifyMobilePerformanceDevice({
+      userAgentDataMobile: true,
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)',
+      maxTouchPoints: 5,
+      coarsePointer: true,
+    })).toBe(true)
+  })
+
+  it('caps a high optical tier to the effective mobile scene budget', () => {
+    expect(getEffectiveSceneBudget('high', true)).toEqual({
+      dpr: 1.25,
+      maxDrawCalls: 60,
+      maxParticles: 1200,
+      depthOfField: true,
+    })
+  })
+
+  it('leaves the tier budget unchanged for non-mobile devices', () => {
+    expect(getEffectiveSceneBudget('high', false)).toEqual({
+      dpr: 1.5,
+      maxDrawCalls: 120,
+      maxParticles: 4000,
+      depthOfField: true,
     })
   })
 })
