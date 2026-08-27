@@ -1,0 +1,60 @@
+.overlay {
+  align-items: center;
+  background: color-mix(in srgb, var(--ink, #080808) 82%, transparent);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1.5rem;
+  position: fixed;
+  z-index: 30;
+}
+
+.panel {
+  color: var(--paper, #f3f0e9);
+  max-width: 30rem;
+  text-align: center;
+}
+
+.eyebrow,
+.status {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  margin: 0 0 0.75rem;
+}
+
+.panel h2 {
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  font-weight: 400;
+  margin: 0;
+}
+
+.status {
+  margin: 1rem 0 0;
+}
+
+.recovery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.recovery button {
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.08em;
+  padding: 0.75rem 1rem;
+}
+
+.recovery button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
