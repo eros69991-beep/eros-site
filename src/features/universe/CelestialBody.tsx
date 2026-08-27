@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import type { CelestialDefinition } from '../../domain/types'
 import { useSiteStore } from '../../state/siteStore'
 import { getSceneTime } from '../../scene/sceneClock'
-import { CELESTIAL_COLORS } from './universeConfig'
+import { CELESTIAL_COLORS, DISPLAY_PHASE_OFFSETS } from './universeConfig'
 import { getOrbitTransform } from './universeMath'
 
 interface CelestialBodyProps {
@@ -21,7 +21,11 @@ export function CelestialBody({ body, reducedMotion }: CelestialBodyProps) {
   useFrame(() => {
     const mesh = meshRef.current
     if (!mesh) return
-    const transform = getOrbitTransform(body, reducedMotion ? 0 : getSceneTime())
+    const transform = getOrbitTransform(
+      body,
+      reducedMotion ? 0 : getSceneTime(),
+      DISPLAY_PHASE_OFFSETS[body.id],
+    )
     mesh.position.set(...transform.position)
     mesh.rotation.y = transform.rotationY
   })
@@ -44,6 +48,12 @@ export function CelestialBody({ body, reducedMotion }: CelestialBodyProps) {
         metalness={isStudio ? 0.04 : 0.16}
         roughness={isStudio ? 0.9 : 0.72}
       />
+      {isStudio ? (
+        <mesh scale={1.06}>
+          <icosahedronGeometry args={[body.scale, 4]} />
+          <meshBasicMaterial color="#111318" opacity={0.82} toneMapped={false} transparent />
+        </mesh>
+      ) : null}
     </mesh>
   )
 }

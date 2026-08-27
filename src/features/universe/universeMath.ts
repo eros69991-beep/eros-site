@@ -14,8 +14,12 @@ export interface SeededStar {
   twinkleAmplitude: number
 }
 
-export function getOrbitTransform(body: CelestialDefinition, elapsedSeconds: number): OrbitTransform {
-  const theta = body.phase + (elapsedSeconds / body.orbitPeriodSeconds) * Math.PI * 2
+export function getOrbitTransform(
+  body: CelestialDefinition,
+  elapsedSeconds: number,
+  phaseOffset = 0,
+): OrbitTransform {
+  const theta = body.phase + phaseOffset + (elapsedSeconds / body.orbitPeriodSeconds) * Math.PI * 2
   return {
     position: [
       Math.cos(theta) * body.orbitRadius,

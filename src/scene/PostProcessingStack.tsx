@@ -77,7 +77,7 @@ export function RealtimeSceneLayer({
   return (
     <div className={styles.sceneLayer} aria-hidden="true">
       <Canvas
-        camera={{ fov: 42, position: [0, 0.45, mobile ? 50 : 24] }}
+        camera={{ fov: 42, position: [0, 0.45, mobile ? 58 : 24] }}
         className={styles.canvasSurface}
         dpr={budget.dpr}
         frameloop={reducedMotion ? 'demand' : 'always'}
