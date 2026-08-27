@@ -38,6 +38,10 @@ vi.mock('@react-three/postprocessing', () => ({
   ),
 }))
 
+vi.mock('../features/universe/UniverseScene', () => ({
+  UniverseScene: () => null,
+}))
+
 function renderStack(quality: ComponentProps<typeof PostProcessingStack>['quality']) {
   return render(
     <PostProcessingStack profile={SCENE_EFFECT_PROFILES.universe} quality={quality} />,

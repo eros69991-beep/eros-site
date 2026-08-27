@@ -10,6 +10,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo } from 'react'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
+import { UniverseScene } from '../features/universe/UniverseScene'
 import { createQualityMonitor, getEffectiveSceneBudget } from './quality'
 import { resolveEffectProfile, type EffectProfile } from './contracts'
 
@@ -60,6 +61,7 @@ interface RealtimeSceneLayerProps {
   mobile: boolean
   reducedMotion: boolean
   onDegrade(tier: QualityTier): void
+  scenePath?: string
 }
 
 export function RealtimeSceneLayer({
@@ -68,18 +70,21 @@ export function RealtimeSceneLayer({
   mobile,
   reducedMotion,
   onDegrade,
+  scenePath = '/',
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
 
   return (
     <div className={styles.sceneLayer} aria-hidden="true">
       <Canvas
+        camera={{ fov: 42, position: [0, 0.45, mobile ? 50 : 24] }}
         className={styles.canvasSurface}
         dpr={budget.dpr}
         frameloop={reducedMotion ? 'demand' : 'always'}
         gl={{ antialias: quality !== 'lite', alpha: true }}
       >
         <FrameQualityMonitor quality={quality} onDegrade={onDegrade} />
+        {scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
         <PostProcessingStack profile={profile} quality={quality} />
       </Canvas>
     </div>

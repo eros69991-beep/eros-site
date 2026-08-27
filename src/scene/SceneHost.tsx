@@ -130,6 +130,7 @@ export function SceneHost() {
           mobile={mobile}
           reducedMotion={reducedMotion}
           onDegrade={updateQuality}
+          scenePath={scenePath}
         />
       </Suspense>
     </SceneErrorBoundary>
