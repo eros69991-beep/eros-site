@@ -18,6 +18,12 @@ export interface SpringAtmosphere {
   particleCount: number
 }
 
+const MIST_BASE_SWAY = 0.15
+const MAX_VERTICAL_DRIFT = 0.025
+const MIST_DRIFT_MULTIPLIER = 4
+
+export const SPRING_MIST_OFFSET_LIMIT = MIST_BASE_SWAY + MAX_VERTICAL_DRIFT * MIST_DRIFT_MULTIPLIER
+
 export function getSpringAtmosphere(
   progress: number,
   reducedMotion: boolean,
@@ -33,4 +39,12 @@ export function getSpringAtmosphere(
     verticalDrift: reducedMotion ? 0 : value * 0.025,
     particleCount,
   }
+}
+
+export function getSpringMistOffset(time: number, verticalDrift: number): number {
+  const stableTime = Number.isFinite(time) ? time : 0
+  const boundedDrift = Math.min(MAX_VERTICAL_DRIFT, Math.max(0, verticalDrift))
+
+  return Math.sin(stableTime * 0.18) * MIST_BASE_SWAY
+    + Math.sin(stableTime * 0.071) * boundedDrift * MIST_DRIFT_MULTIPLIER
 }

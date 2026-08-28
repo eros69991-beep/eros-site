@@ -1,4 +1,9 @@
-import { SPRING_EFFECTS, getSpringAtmosphere } from './springAtmosphere'
+import {
+  SPRING_EFFECTS,
+  SPRING_MIST_OFFSET_LIMIT,
+  getSpringAtmosphere,
+  getSpringMistOffset,
+} from './springAtmosphere'
 
 describe('Spring atmosphere', () => {
   it('moves from a darker, denser sealed state toward permeability', () => {
@@ -38,5 +43,15 @@ describe('Spring atmosphere', () => {
     })
     expect(SPRING_EFFECTS.bloomIntensity).toBeLessThanOrEqual(0.3)
     expect(SPRING_EFFECTS.noiseOpacity).toBeLessThanOrEqual(0.02)
+  })
+
+  it('keeps mist motion within the Spring composition over long sessions', () => {
+    const atmosphere = getSpringAtmosphere(1, false, 'high')
+    const offsets = [0, 18, 1_000_000, 1_000_000_000].map((time) => (
+      getSpringMistOffset(time, atmosphere.verticalDrift)
+    ))
+
+    expect(offsets.every((offset) => Number.isFinite(offset))).toBe(true)
+    expect(offsets.every((offset) => Math.abs(offset) <= SPRING_MIST_OFFSET_LIMIT)).toBe(true)
   })
 })

@@ -9,7 +9,7 @@ import {
 } from 'three'
 import type { WorldSceneProps } from '../../../scene/contracts'
 import { getSceneTime } from '../../../scene/sceneClock'
-import { getSpringAtmosphere } from './springAtmosphere'
+import { getSpringAtmosphere, getSpringMistOffset } from './springAtmosphere'
 
 interface MistTransform {
   x: number
@@ -67,8 +67,7 @@ function MistSheets({ reducedMotion, quality, verticalDrift }: {
 
   useFrame(() => {
     if (reducedMotion || !groupRef.current) return
-    const time = getSceneTime()
-    groupRef.current.position.y = Math.sin(time * 0.18) * 0.15 + verticalDrift * time
+    groupRef.current.position.y = getSpringMistOffset(getSceneTime(), verticalDrift)
   })
 
   return (

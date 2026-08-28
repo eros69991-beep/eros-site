@@ -79,6 +79,7 @@ export function RealtimeSceneLayer({
   scenePath = '/',
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
+  const worldSceneQuality: RealtimeQualityTier = mobile ? 'lite' : quality
   const [worldProgress] = useState({ current: 0 })
 
   return (
@@ -92,7 +93,7 @@ export function RealtimeSceneLayer({
       >
         <FrameQualityMonitor quality={quality} onDegrade={onDegrade} />
         {WorldScene ? (
-          <WorldScene quality={quality} progress={worldProgress} reducedMotion={reducedMotion} />
+          <WorldScene quality={worldSceneQuality} progress={worldProgress} reducedMotion={reducedMotion} />
         ) : scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
         <PostProcessingStack profile={profile} quality={quality} />
       </Canvas>

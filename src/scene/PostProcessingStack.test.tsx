@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
+import type { WorldSceneProps } from './contracts'
 import {
   SCENE_EFFECT_PROFILES,
   getEffectProfileForPath,
@@ -115,5 +116,27 @@ describe('PostProcessingStack', () => {
     )
 
     expect(screen.getByTestId('scene-canvas')).toHaveAttribute('data-dpr', '1.25')
+  })
+
+  it('caps a mobile Spring scene at Lite particles while retaining the balanced composer', () => {
+    function SpringSceneProbe({ quality }: WorldSceneProps) {
+      return <i data-testid="spring-scene" data-quality={quality} />
+    }
+
+    render(
+      <RealtimeSceneLayer
+        profile={SCENE_EFFECT_PROFILES.spring}
+        worldScene={SpringSceneProbe}
+        quality="balanced"
+        mobile
+        reducedMotion={false}
+        onDegrade={() => undefined}
+        scenePath="/world/spring"
+      />,
+    )
+
+    expect(screen.getByTestId('spring-scene')).toHaveAttribute('data-quality', 'lite')
+    expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
+    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.28 * 0.8)
   })
 })
