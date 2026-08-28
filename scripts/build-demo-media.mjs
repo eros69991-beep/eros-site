@@ -1,6 +1,6 @@
 import { access, mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises'
 import { constants } from 'node:fs'
-import { dirname, extname, join, relative, resolve } from 'node:path'
+import { dirname, join, relative, resolve } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import console from 'node:console'
@@ -42,6 +42,9 @@ const mediaDefinitions = [
 
 const sourcePathFor = (key) => join(sourceRoot, `${key}.png`)
 const outputNameFor = (key, width, format) => `${key}-${width}.${format}`
+const generatedOutputNames = new Set(mediaDefinitions.flatMap(({ key }) => (
+  widths.flatMap((width) => Object.keys(formats).map((format) => outputNameFor(key, width, format)))
+)))
 
 const ensureSourcesExist = async () => {
   const missing = []
@@ -63,8 +66,7 @@ const clearGeneratedOutputs = async () => {
   const entries = await readdir(outputRoot, { withFileTypes: true })
   for (const entry of entries) {
     if (!entry.isFile() || entry.name === 'README.md') continue
-    const extension = extname(entry.name)
-    if (extension === '.avif' || extension === '.webp' || entry.name === 'manifest.json') {
+    if (generatedOutputNames.has(entry.name) || entry.name === 'manifest.json') {
       await unlink(join(outputRoot, entry.name))
     }
   }
