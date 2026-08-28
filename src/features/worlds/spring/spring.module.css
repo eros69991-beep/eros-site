@@ -1,0 +1,12 @@
+.springScene {
+  --spring-mineral-black: #0c100e;
+  --spring-wet-graphite: #1b2420;
+  --spring-thaw-film: #c8d3cc;
+  --spring-life-trace: #8ac6a8;
+}
+
+.mistSheets,
+.condensation,
+.fractureTrace {
+  isolation: isolate;
+}

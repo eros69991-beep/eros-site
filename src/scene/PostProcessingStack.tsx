@@ -7,12 +7,16 @@ import {
   Vignette,
 } from '@react-three/postprocessing'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
 import { UniverseScene } from '../features/universe/UniverseScene'
 import { createQualityMonitor, getEffectiveSceneBudget } from './quality'
-import { resolveEffectProfile, type EffectProfile } from './contracts'
+import {
+  resolveEffectProfile,
+  type EffectProfile,
+  type WorldSceneComponent,
+} from './contracts'
 
 type RealtimeQualityTier = Exclude<QualityTier, 'static'>
 
@@ -57,6 +61,7 @@ function FrameQualityMonitor({
 
 interface RealtimeSceneLayerProps {
   profile: EffectProfile
+  worldScene?: WorldSceneComponent | undefined
   quality: RealtimeQualityTier
   mobile: boolean
   reducedMotion: boolean
@@ -66,6 +71,7 @@ interface RealtimeSceneLayerProps {
 
 export function RealtimeSceneLayer({
   profile,
+  worldScene: WorldScene,
   quality,
   mobile,
   reducedMotion,
@@ -73,6 +79,7 @@ export function RealtimeSceneLayer({
   scenePath = '/',
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
+  const [worldProgress] = useState({ current: 0 })
 
   return (
     <div className={styles.sceneLayer} aria-hidden="true">
@@ -84,7 +91,9 @@ export function RealtimeSceneLayer({
         gl={{ antialias: quality !== 'lite', alpha: true }}
       >
         <FrameQualityMonitor quality={quality} onDegrade={onDegrade} />
-        {scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
+        {WorldScene ? (
+          <WorldScene quality={quality} progress={worldProgress} reducedMotion={reducedMotion} />
+        ) : scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
         <PostProcessingStack profile={profile} quality={quality} />
       </Canvas>
     </div>

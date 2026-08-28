@@ -1,10 +1,11 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, type Location } from 'react-router-dom'
-import type { QualityTier } from '../domain/types'
+import type { QualityTier, WorldId } from '../domain/types'
 import { SceneFallback } from '../features/fallback/SceneFallback'
 import { StaticUniverse } from '../features/fallback/StaticUniverse'
+import { sceneRegistry } from '../features/worlds/sceneRegistry'
 import { useSiteStore } from '../state/siteStore'
-import { getEffectProfileForPath } from './contracts'
+import { SCENE_EFFECT_PROFILES } from './contracts'
 import { classifyMobilePerformanceDevice, selectInitialQuality } from './quality'
 import { SceneErrorBoundary } from './SceneErrorBoundary'
 import { supportsWebGL } from './webgl'
@@ -81,6 +82,11 @@ function useReducedMotionPreference() {
   return reducedMotion
 }
 
+function getWorldIdFromPath(pathname: string): WorldId | null {
+  const match = /^\/world\/(spring|summer|autumn|winter)(?:\/|$)/.exec(pathname)
+  return match?.[1] as WorldId | undefined ?? null
+}
+
 export function SceneHost() {
   const location = useLocation()
   const reducedMotion = useReducedMotionPreference()
@@ -102,13 +108,18 @@ export function SceneHost() {
     setStoredQuality(quality)
   }, [quality, setStoredQuality])
 
+  const overlayState = location.state as OverlayState | null
+  const scenePath = overlayState?.backgroundLocation?.pathname ?? location.pathname
+  const worldId = getWorldIdFromPath(scenePath)
+  const descriptor = worldId ? sceneRegistry[worldId] : undefined
+  const WorldScene = useMemo(() => (descriptor ? lazy(descriptor.load) : undefined), [descriptor])
+  const profile = descriptor?.effects ?? (scenePath === '/'
+    ? SCENE_EFFECT_PROFILES.universe
+    : SCENE_EFFECT_PROFILES.neutral)
+
   if (!webglAvailable || forceStatic || quality === 'static') {
     return <StaticUniverse />
   }
-
-  const overlayState = location.state as OverlayState | null
-  const scenePath = overlayState?.backgroundLocation?.pathname ?? location.pathname
-  const profile = getEffectProfileForPath(scenePath)
 
   return (
     <SceneErrorBoundary
@@ -126,6 +137,7 @@ export function SceneHost() {
       <Suspense fallback={<StaticUniverse />}>
         <RealtimeSceneLayer
           profile={profile}
+          worldScene={WorldScene}
           quality={quality}
           mobile={mobile}
           reducedMotion={reducedMotion}
