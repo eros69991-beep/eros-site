@@ -1,0 +1,10 @@
+.summerScene {
+  --summer-environment: #e5e4de;
+  --summer-ground: #d4d2c8;
+  --summer-particle: #f0eee6;
+}
+
+.heatBoundary,
+.dryParticles {
+  isolation: isolate;
+}

@@ -1,5 +1,6 @@
 import {
   Bloom,
+  ChromaticAberration,
   DepthOfField,
   EffectComposer,
   Noise,
@@ -38,6 +39,7 @@ export function PostProcessingStack({ profile, quality }: PostProcessingStackPro
         luminanceSmoothing={0.12}
         mipmapBlur
       />
+      {effects.chromaticAberration ? <ChromaticAberration offset={effects.chromaticAberration} /> : null}
       <Noise opacity={effects.noiseOpacity} />
       <Vignette offset={effects.vignetteOffset} darkness={effects.vignetteDarkness} />
       {effects.depthOfField ? (
