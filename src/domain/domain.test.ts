@@ -1,4 +1,5 @@
 import { demoObjects, formatUsd } from './objects'
+import { mediaManifest } from '../media/mediaManifest'
 import { filterObjects, getObject, getWorld, searchObjects } from './selectors'
 import { celestials, worlds } from './worlds'
 import { validateCatalog } from './validate'
@@ -19,6 +20,28 @@ describe('EROS domain', () => {
     expect(demoObjects.length).toBeGreaterThanOrEqual(8)
     expect(demoObjects.every((object) => object.prototype === true)).toBe(true)
     expect(() => validateCatalog(worlds, demoObjects)).not.toThrow()
+  })
+
+  it.each([
+    ['demo-spring-001', 'spring-object-001'],
+    ['demo-spring-002', 'spring-object-002'],
+    ['demo-summer-001', 'summer-object-001'],
+    ['demo-summer-002', 'summer-object-002'],
+    ['demo-autumn-001', 'autumn-object-001'],
+    ['demo-autumn-002', 'autumn-object-002'],
+    ['demo-winter-001', 'winter-object-001'],
+    ['demo-winter-002', 'winter-object-002'],
+  ] as const)('uses the published demonstration media for %s', (objectId, mediaKey) => {
+    const object = demoObjects.find((candidate) => candidate.id === objectId)
+    const primaryMedia = object?.media.find((media) => media.role === 'primary')
+    const media = mediaManifest[mediaKey]
+
+    expect(primaryMedia).toMatchObject({
+      src: media.sources.webp[2].src,
+      alt: media.alt,
+      width: media.width,
+      height: media.height,
+    })
   })
 
   it('formats prototype prices as whole USD amounts', () => {
