@@ -45,6 +45,30 @@ const outputNameFor = (key, width, format) => `${key}-${width}.${format}`
 const generatedOutputNames = new Set(mediaDefinitions.flatMap(({ key }) => (
   widths.flatMap((width) => Object.keys(formats).map((format) => outputNameFor(key, width, format)))
 )))
+const manifestName = 'manifest.json'
+
+const isGeneratedManifest = (manifest) => {
+  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return false
+  if (manifest.version !== 1 || manifest.generator !== 'scripts/build-demo-media.mjs') return false
+  if (JSON.stringify(manifest.widths) !== JSON.stringify(widths) || !Array.isArray(manifest.assets)) return false
+
+  const outputNames = manifest.assets.map((asset) => {
+    if (!asset || typeof asset !== 'object' || typeof asset.src !== 'string') return ''
+    return asset.src.startsWith('/media/demo/') ? asset.src.slice('/media/demo/'.length) : ''
+  })
+
+  return outputNames.length === generatedOutputNames.size
+    && new Set(outputNames).size === generatedOutputNames.size
+    && outputNames.every((name) => generatedOutputNames.has(name))
+}
+
+const hasGeneratedManifest = async (manifestPath) => {
+  try {
+    return isGeneratedManifest(JSON.parse(await readFile(manifestPath, 'utf8')))
+  } catch {
+    return false
+  }
+}
 
 const ensureSourcesExist = async () => {
   const missing = []
@@ -64,9 +88,16 @@ const ensureSourcesExist = async () => {
 const clearGeneratedOutputs = async () => {
   await mkdir(outputRoot, { recursive: true })
   const entries = await readdir(outputRoot, { withFileTypes: true })
+  const manifestEntry = entries.find((entry) => entry.name === manifestName)
+  const manifestPath = join(outputRoot, manifestName)
+
+  if (manifestEntry && (!manifestEntry.isFile() || !await hasGeneratedManifest(manifestPath))) {
+    throw new Error(`Refusing to overwrite unrelated manifest: ${manifestPath}`)
+  }
+
   for (const entry of entries) {
-    if (!entry.isFile() || entry.name === 'README.md') continue
-    if (generatedOutputNames.has(entry.name) || entry.name === 'manifest.json') {
+    if (!entry.isFile()) continue
+    if (generatedOutputNames.has(entry.name) || entry.name === manifestName) {
       await unlink(join(outputRoot, entry.name))
     }
   }
@@ -171,7 +202,7 @@ const build = async () => {
   }
 
   await Promise.all([
-    writeFile(join(outputRoot, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`),
+    writeFile(join(outputRoot, manifestName), `${JSON.stringify(manifest, null, 2)}\n`),
     mkdir(dirname(TypeScriptManifestPath), { recursive: true }).then(() => writeFile(TypeScriptManifestPath, toTypeScriptManifest(manifest))),
   ])
 

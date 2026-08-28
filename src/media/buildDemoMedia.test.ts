@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { cp, mkdtemp, mkdir, readdir, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { promisify } from 'node:util'
@@ -66,5 +66,38 @@ describe('EROS demonstration media builder', () => {
     expect(existsSync(join(outputDirectory, 'unrelated-reference.webp'))).toBe(true)
     expect(existsSync(join(outputDirectory, 'unrelated-data.json'))).toBe(true)
     expect(existsSync(join(temporaryProject, 'public', 'media', 'demo'))).toBe(false)
+  }, 180_000)
+
+  it('refuses to overwrite an unrelated manifest in an explicitly selected output directory', async () => {
+    const projectRoot = resolve(process.cwd())
+    const temporaryProject = await mkdtemp(join(projectRoot, '.tmp-demo-media-builder-'))
+    temporaryProjects.push(temporaryProject)
+    const outputDirectory = join(temporaryProject, 'isolated-output')
+    const sourceDirectory = join(temporaryProject, 'work', 'demo-media-source')
+    const unrelatedManifest = '{"owner":"another-tool"}\n'
+
+    await Promise.all([
+      mkdir(join(temporaryProject, 'scripts'), { recursive: true }),
+      mkdir(sourceDirectory, { recursive: true }),
+      mkdir(outputDirectory, { recursive: true }),
+    ])
+    await Promise.all([
+      cp(join(projectRoot, 'scripts', 'build-demo-media.mjs'), join(temporaryProject, 'scripts', 'build-demo-media.mjs')),
+      ...sourceKeys.map((key, index) => sharp({
+        create: {
+          width: 2,
+          height: 3,
+          channels: 3,
+          background: { r: index * 13, g: index * 7, b: index * 3 },
+        },
+      }).png().toFile(join(sourceDirectory, `${key}.png`))),
+      writeFile(join(outputDirectory, 'manifest.json'), unrelatedManifest),
+    ])
+
+    await expect(execFileAsync(process.execPath, ['scripts/build-demo-media.mjs', '--output-dir', outputDirectory], {
+      cwd: temporaryProject,
+    })).rejects.toMatchObject({ stderr: expect.stringContaining('Refusing to overwrite unrelated manifest') })
+
+    await expect(readFile(join(outputDirectory, 'manifest.json'), 'utf8')).resolves.toBe(unrelatedManifest)
   }, 180_000)
 })
