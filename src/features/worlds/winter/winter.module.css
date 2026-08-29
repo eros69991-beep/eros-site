@@ -1,0 +1,13 @@
+.winterScene {
+  --winter-environment: #696f73;
+  --winter-ground: #7d8386;
+  --winter-fog: #a6acae;
+  --winter-frost: #d4d7d7;
+  --winter-dust: #c6cbcb;
+}
+
+.remoteFog,
+.frostBoundary,
+.iceDust {
+  isolation: isolate;
+}
