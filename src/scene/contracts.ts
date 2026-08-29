@@ -8,7 +8,6 @@ export interface EffectProfile {
   vignetteOffset: number
   vignetteDarkness: number
   depthOfField: boolean
-  chromaticAberration?: readonly [number, number]
 }
 
 export interface WorldSceneProps {
@@ -27,7 +26,7 @@ export interface WorldSceneDescriptor {
 export const SCENE_EFFECT_PROFILES = {
   universe: { bloomIntensity: 0.32, bloomThreshold: 0.78, noiseOpacity: 0.012, vignetteOffset: 0.24, vignetteDarkness: 0.36, depthOfField: true },
   spring: { bloomIntensity: 0.28, bloomThreshold: 0.78, noiseOpacity: 0.018, vignetteOffset: 0.22, vignetteDarkness: 0.32, depthOfField: true },
-  summer: { bloomIntensity: 0.18, bloomThreshold: 0.90, noiseOpacity: 0.008, vignetteOffset: 0.12, vignetteDarkness: 0.16, depthOfField: true, chromaticAberration: [0.0007, 0.00035] },
+  summer: { bloomIntensity: 0.18, bloomThreshold: 0.90, noiseOpacity: 0.008, vignetteOffset: 0.12, vignetteDarkness: 0.16, depthOfField: true },
   autumn: { bloomIntensity: 0.22, bloomThreshold: 0.82, noiseOpacity: 0.024, vignetteOffset: 0.30, vignetteDarkness: 0.44, depthOfField: true },
   winter: { bloomIntensity: 0.16, bloomThreshold: 0.88, noiseOpacity: 0.006, vignetteOffset: 0.22, vignetteDarkness: 0.30, depthOfField: false },
   neutral: { bloomIntensity: 0.10, bloomThreshold: 0.92, noiseOpacity: 0.004, vignetteOffset: 0.16, vignetteDarkness: 0.18, depthOfField: false },
@@ -53,13 +52,11 @@ export function resolveEffectProfile(
   quality: Exclude<QualityTier, 'static'>,
 ): EffectProfile {
   const multiplier = TIER_MULTIPLIERS[quality]
-  const { chromaticAberration, ...baseProfile } = profile
 
   return {
-    ...baseProfile,
+    ...profile,
     bloomIntensity: profile.bloomIntensity * multiplier,
     noiseOpacity: profile.noiseOpacity * multiplier,
     depthOfField: quality !== 'lite' && profile.depthOfField,
-    ...(quality !== 'lite' && chromaticAberration ? { chromaticAberration } : {}),
   }
 }

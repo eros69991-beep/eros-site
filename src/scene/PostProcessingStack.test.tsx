@@ -5,7 +5,6 @@ import {
   SCENE_EFFECT_PROFILES,
   getEffectProfileForPath,
 } from './contracts'
-import { SUMMER_EFFECTS } from '../features/worlds/summer/summerAtmosphere'
 import { PostProcessingStack, RealtimeSceneLayer } from './PostProcessingStack'
 
 vi.mock('@react-three/fiber', () => ({
@@ -25,9 +24,6 @@ vi.mock('@react-three/postprocessing', () => ({
       data-intensity={String(props.intensity)}
       data-threshold={String(props.luminanceThreshold)}
     />
-  ),
-  ChromaticAberration: (props: Record<string, unknown>) => (
-    <i data-testid="chromatic-aberration" data-offset={String(props.offset)} />
   ),
   DepthOfField: () => <i data-testid="depth-of-field" />,
   Noise: (props: Record<string, unknown>) => (
@@ -78,13 +74,8 @@ describe('PostProcessingStack', () => {
     expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
   })
 
-  it('limits Summer chromatic separation to non-Lite scene boundaries', () => {
-    const high = render(<PostProcessingStack profile={SUMMER_EFFECTS} quality="high" />)
-
-    expect(screen.getByTestId('chromatic-aberration')).toHaveAttribute('data-offset', '0.0007,0.00035')
-
-    high.unmount()
-    render(<PostProcessingStack profile={SUMMER_EFFECTS} quality="lite" />)
+  it('does not mount a full-frame chromatic pass for Summer', () => {
+    render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.summer} quality="high" />)
 
     expect(screen.queryByTestId('chromatic-aberration')).not.toBeInTheDocument()
     expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
@@ -112,7 +103,7 @@ describe('PostProcessingStack', () => {
     ]).toEqual([
       { bloomIntensity: 0.32, bloomThreshold: 0.78, noiseOpacity: 0.012, vignetteOffset: 0.24, vignetteDarkness: 0.36, depthOfField: true },
       { bloomIntensity: 0.28, bloomThreshold: 0.78, noiseOpacity: 0.018, vignetteOffset: 0.22, vignetteDarkness: 0.32, depthOfField: true },
-      { bloomIntensity: 0.18, bloomThreshold: 0.90, noiseOpacity: 0.008, vignetteOffset: 0.12, vignetteDarkness: 0.16, depthOfField: true, chromaticAberration: [0.0007, 0.00035] },
+      { bloomIntensity: 0.18, bloomThreshold: 0.90, noiseOpacity: 0.008, vignetteOffset: 0.12, vignetteDarkness: 0.16, depthOfField: true },
       { bloomIntensity: 0.22, bloomThreshold: 0.82, noiseOpacity: 0.024, vignetteOffset: 0.30, vignetteDarkness: 0.44, depthOfField: true },
       { bloomIntensity: 0.16, bloomThreshold: 0.88, noiseOpacity: 0.006, vignetteOffset: 0.22, vignetteDarkness: 0.30, depthOfField: false },
       { bloomIntensity: 0.10, bloomThreshold: 0.92, noiseOpacity: 0.004, vignetteOffset: 0.16, vignetteDarkness: 0.18, depthOfField: false },

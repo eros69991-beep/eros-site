@@ -8,7 +8,6 @@ export const SUMMER_EFFECTS = {
   vignetteOffset: 0.12,
   vignetteDarkness: 0.16,
   depthOfField: true,
-  chromaticAberration: [0.0007, 0.00035],
 } as const satisfies EffectProfile
 
 export const SUMMER_PALETTE = {
