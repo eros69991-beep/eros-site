@@ -1,0 +1,13 @@
+.autumnScene {
+  --autumn-environment: #302c2a;
+  --autumn-ground: #554c47;
+  --autumn-substrate: #8d8278;
+  --autumn-warm-light: #c47d52;
+  --autumn-dust: #bbaa97;
+}
+
+.weatheredPlanes,
+.lateralDust,
+.directionalShadow {
+  isolation: isolate;
+}

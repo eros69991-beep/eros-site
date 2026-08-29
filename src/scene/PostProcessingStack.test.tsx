@@ -1,6 +1,7 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import type { WorldSceneProps } from './contracts'
+import { AUTUMN_EFFECTS } from '../features/worlds/autumn/autumnAtmosphere'
 import {
   SCENE_EFFECT_PROFILES,
   getEffectProfileForPath,
@@ -80,6 +81,22 @@ describe('PostProcessingStack', () => {
     expect(screen.queryByTestId('chromatic-aberration')).not.toBeInTheDocument()
     expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
     expect(screen.getByTestId('bloom')).toBeInTheDocument()
+  })
+
+  it('keeps Autumn tone neutral and removes depth of field only for Lite', () => {
+    const high = render(<PostProcessingStack profile={AUTUMN_EFFECTS} quality="high" />)
+
+    expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
+    expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
+    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.22)
+    expect(Number(screen.getByTestId('noise').dataset.opacity)).toBeCloseTo(0.024)
+
+    high.unmount()
+    render(<PostProcessingStack profile={AUTUMN_EFFECTS} quality="lite" />)
+
+    expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
+    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('chromatic-aberration')).not.toBeInTheDocument()
   })
 
   it('preserves thresholds and vignette tuning when scaling a tier', () => {
