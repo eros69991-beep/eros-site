@@ -34,6 +34,11 @@ export interface WinterRuntimeFrame {
   iceDustOffset: number
 }
 
+export interface WinterSceneEnvironment {
+  applyFogDensity(density: number): void
+  restore(): void
+}
+
 const WINTER_FOG_DENSITY = 0.022
 const MOTION_CYCLE_SECONDS = 180
 const MOVEMENT_WINDOW_SECONDS = 108
@@ -90,7 +95,9 @@ export function getWinterRuntimeFrame(
   }
 }
 
-export function installWinterSceneEnvironment(scene: Pick<Scene, 'background' | 'fog'>) {
+export function installWinterSceneEnvironment(
+  scene: Pick<Scene, 'background' | 'fog'>,
+): WinterSceneEnvironment {
   const previousBackground = scene.background
   const previousFog = scene.fog
   const winterBackground = new Color(WINTER_PALETTE.environment)
@@ -99,8 +106,13 @@ export function installWinterSceneEnvironment(scene: Pick<Scene, 'background' | 
   scene.background = winterBackground
   scene.fog = winterFog
 
-  return () => {
-    if (scene.background === winterBackground) scene.background = previousBackground
-    if (scene.fog === winterFog) scene.fog = previousFog
+  return {
+    applyFogDensity(density) {
+      if (scene.fog === winterFog && Number.isFinite(density)) winterFog.density = density
+    },
+    restore() {
+      if (scene.background === winterBackground) scene.background = previousBackground
+      if (scene.fog === winterFog) scene.fog = previousFog
+    },
   }
 }

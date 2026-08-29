@@ -11,6 +11,7 @@ import type { WorldSceneProps } from '../../../scene/contracts'
 import { getSceneTime } from '../../../scene/sceneClock'
 import {
   WINTER_PALETTE,
+  type WinterSceneEnvironment,
   getWinterAtmosphere,
   getWinterRuntimeFrame,
   installWinterSceneEnvironment,
@@ -30,10 +31,28 @@ function createIceDustGeometry(count: number) {
   return geometry
 }
 
-function WinterEnvironmentOwner() {
+function WinterEnvironmentOwner({ progress, quality, reducedMotion }: {
+  progress: WorldSceneProps['progress']
+  quality: WorldSceneProps['quality']
+  reducedMotion: boolean
+}) {
   const { scene } = useThree()
+  const environmentRef = useRef<WinterSceneEnvironment>(null)
 
-  useEffect(() => installWinterSceneEnvironment(scene), [scene])
+  useEffect(() => {
+    const environment = installWinterSceneEnvironment(scene)
+    environmentRef.current = environment
+    return () => {
+      environment.restore()
+      if (environmentRef.current === environment) environmentRef.current = null
+    }
+  }, [scene])
+
+  useFrame(() => {
+    const frame = getWinterRuntimeFrame(progress.current, reducedMotion, quality, getSceneTime())
+    environmentRef.current?.applyFogDensity(frame.atmosphere.remoteFogDensity)
+  })
+
   return null
 }
 
@@ -161,7 +180,7 @@ export default function WinterScene({ quality, reducedMotion, progress }: WorldS
 
   return (
     <group>
-      <WinterEnvironmentOwner />
+      <WinterEnvironmentOwner progress={progress} quality={quality} reducedMotion={reducedMotion} />
       <ambientLight color="#C7CCCD" intensity={0.22} />
       <DistantColdLight progress={progress} quality={quality} reducedMotion={reducedMotion} />
       <mesh position={[0, -3.08, -1.8]} rotation={[-Math.PI / 2, 0, 0]}>

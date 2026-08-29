@@ -4,6 +4,7 @@ import { getSpringAtmosphere } from '../spring/springAtmosphere'
 import { getSummerAtmosphere } from '../summer/summerAtmosphere'
 
 interface WinterAtmosphere {
+  remoteFogDensity: number
   iceDustSpeed: number
   particleCount: number
   stillnessInterval: number
@@ -14,12 +15,17 @@ interface WinterRuntimeFrame {
   iceDustOffset: number
 }
 
+interface WinterSceneEnvironment {
+  applyFogDensity(density: number): void
+  restore(): void
+}
+
 interface WinterSceneModule {
   WINTER_EFFECTS: Record<string, unknown>
   WINTER_PALETTE: { environment: string }
   getWinterAtmosphere(progress: number, reducedMotion: boolean, quality: 'high' | 'balanced' | 'lite'): WinterAtmosphere
   getWinterRuntimeFrame(progress: number, reducedMotion: boolean, quality: 'high' | 'balanced' | 'lite', time: number): WinterRuntimeFrame
-  installWinterSceneEnvironment(scene: import('three').Scene): () => void
+  installWinterSceneEnvironment(scene: import('three').Scene): WinterSceneEnvironment
 }
 
 async function getWinterSceneModule(): Promise<WinterSceneModule | null> {
@@ -118,12 +124,12 @@ describe('Winter atmosphere', () => {
 
     expect(winterScene).not.toBeNull()
     if (!winterScene) return
-    const restore = winterScene.installWinterSceneEnvironment(scene)
+    const environment = winterScene.installWinterSceneEnvironment(scene)
 
     expect(scene.background).toBeInstanceOf(Color)
     expect(scene.fog).toBeInstanceOf(FogExp2)
 
-    restore()
+    environment.restore()
     expect(scene.background).toBe(previousBackground)
     expect(scene.fog).toBe(previousFog)
   })
@@ -135,16 +141,44 @@ describe('Winter atmosphere', () => {
 
     expect(winterScene).not.toBeNull()
     if (!winterScene) return
-    const restore = winterScene.installWinterSceneEnvironment(scene)
+    const environment = winterScene.installWinterSceneEnvironment(scene)
     const successorBackground = new Color('#2A2E31')
     const successorFog = new FogExp2('#2A2E31', 0.018)
     scene.background = successorBackground
     scene.fog = successorFog
 
-    restore()
+    environment.restore()
 
     expect(scene.background).toBe(successorBackground)
     expect(scene.fog).toBe(successorFog)
+  })
+
+  it('updates only its owned fog from progress and keeps reduced motion at the final density', async () => {
+    const { FogExp2, Scene } = await import('three')
+    const winterScene = await getWinterSceneModule()
+    const scene = new Scene()
+
+    expect(winterScene).not.toBeNull()
+    if (!winterScene) return
+    const environment = winterScene.installWinterSceneEnvironment(scene)
+    const early = winterScene.getWinterAtmosphere(0, false, 'high')
+    const late = winterScene.getWinterAtmosphere(1, false, 'high')
+    const reducedEarly = winterScene.getWinterAtmosphere(0, true, 'high')
+    const reducedLate = winterScene.getWinterAtmosphere(1, true, 'high')
+
+    environment.applyFogDensity(early.remoteFogDensity)
+    expect((scene.fog as FogExp2).density).toBeCloseTo(early.remoteFogDensity)
+    environment.applyFogDensity(late.remoteFogDensity)
+    expect((scene.fog as FogExp2).density).toBeCloseTo(late.remoteFogDensity)
+    expect(late.remoteFogDensity).toBeGreaterThan(early.remoteFogDensity)
+    expect(reducedEarly.remoteFogDensity).toBe(reducedLate.remoteFogDensity)
+
+    const successorFog = new FogExp2('#2A2E31', 0.018)
+    scene.fog = successorFog
+    environment.applyFogDensity(reducedLate.remoteFogDensity)
+
+    expect(scene.fog).toBe(successorFog)
+    expect(successorFog.density).toBeCloseTo(0.018)
   })
 
   it('registers Winter lazily with its local postprocessing profile', async () => {
