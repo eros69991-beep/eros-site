@@ -44,13 +44,17 @@ export function getSummerBoundaryChromaticStrength(
 
 export function createSummerExposureController(renderer: { toneMappingExposure: number }) {
   const initialExposure = renderer.toneMappingExposure
+  let appliedExposure: number | null = null
 
   return {
     apply(atmosphere: SummerAtmosphere) {
       renderer.toneMappingExposure = atmosphere.exposure
+      appliedExposure = atmosphere.exposure
     },
     restore() {
-      renderer.toneMappingExposure = initialExposure
+      if (renderer.toneMappingExposure === appliedExposure) {
+        renderer.toneMappingExposure = initialExposure
+      }
     },
   }
 }
@@ -58,12 +62,14 @@ export function createSummerExposureController(renderer: { toneMappingExposure: 
 export function installSummerSceneEnvironment(scene: Pick<Scene, 'background' | 'fog'>) {
   const previousBackground = scene.background
   const previousFog = scene.fog
+  const summerBackground = new Color(SUMMER_PALETTE.environment)
+  const summerFog = new FogExp2(SUMMER_PALETTE.environment, SUMMER_FOG_DENSITY)
 
-  scene.background = new Color(SUMMER_PALETTE.environment)
-  scene.fog = new FogExp2(SUMMER_PALETTE.environment, SUMMER_FOG_DENSITY)
+  scene.background = summerBackground
+  scene.fog = summerFog
 
   return () => {
-    scene.background = previousBackground
-    scene.fog = previousFog
+    if (scene.background === summerBackground) scene.background = previousBackground
+    if (scene.fog === summerFog) scene.fog = previousFog
   }
 }

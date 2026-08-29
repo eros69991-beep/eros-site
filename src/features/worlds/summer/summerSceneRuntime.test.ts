@@ -44,6 +44,31 @@ describe('Summer scene runtime', () => {
     expect(scene.fog).toBe(previousFog)
   })
 
+  it('does not restore Summer environment over a successor scene owner', () => {
+    const scene = new Scene()
+    const restore = installSummerSceneEnvironment(scene)
+    const successorBackground = new Color('#29333A')
+    const successorFog = new FogExp2('#29333A', 0.018)
+
+    scene.background = successorBackground
+    scene.fog = successorFog
+    restore()
+
+    expect(scene.background).toBe(successorBackground)
+    expect(scene.fog).toBe(successorFog)
+  })
+
+  it('does not restore Summer exposure over a successor renderer owner', () => {
+    const renderer = { toneMappingExposure: 0.93 }
+    const exposure = createSummerExposureController(renderer)
+    exposure.apply(getSummerRuntimeFrame(0.5, false, 'high', 12).atmosphere)
+    renderer.toneMappingExposure = 1.02
+
+    exposure.restore()
+
+    expect(renderer.toneMappingExposure).toBe(1.02)
+  })
+
   it.each([
     ['high', false, 0.0007],
     ['balanced', false, 0.0005],
