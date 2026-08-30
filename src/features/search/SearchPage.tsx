@@ -1,8 +1,9 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { searchObjects } from '../../domain/selectors'
 import styles from './search.module.css'
 
 export function SearchPage() {
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const query = searchParams.get('q') ?? ''
   const results = query.trim() ? searchObjects(query) : []
@@ -13,7 +14,7 @@ export function SearchPage() {
       <label className={styles.query}>
         <span>Search the archive</span>
         <input
-          onChange={(event) => setSearchParams(event.target.value ? { q: event.target.value } : {})}
+          onChange={(event) => setSearchParams(event.target.value ? { q: event.target.value } : {}, { replace: true, state: location.state })}
           type="search"
           value={query}
         />
