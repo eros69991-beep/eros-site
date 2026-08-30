@@ -52,6 +52,12 @@ export function AppShell() {
     <WorldEntryProvider dependencies={dependencies}>
       <div className={`app-shell ${sceneStyles.appShell}`} data-world-handoff={worldHandoff ?? undefined}>
         <SceneHost />
+        <div
+          aria-hidden="true"
+          className={sceneStyles.materialVeil}
+          data-material-veil=""
+          data-world={worldHandoff ?? undefined}
+        />
         <div className={sceneStyles.semanticLayer}>
           <GlobalHeader menuButtonRef={menuButtonRef} />
           <main aria-label="EROS Studio">
