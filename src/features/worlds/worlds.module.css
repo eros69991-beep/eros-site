@@ -1,0 +1,243 @@
+.sceneFrame {
+  position: relative;
+  width: 100%;
+  overflow: clip;
+}
+
+.worldPage {
+  --world-ground: #07100c;
+  --world-foreground: #dde6df;
+  --world-accent: #7fa28c;
+  --world-surface: rgb(7 16 12 / 92%);
+  color: var(--world-foreground);
+  background: var(--world-surface);
+}
+
+.worldPage[data-world='summer'] {
+  --world-ground: #d7d0c3;
+  --world-foreground: #1a1712;
+  --world-accent: #fff8e9;
+  --world-surface: rgb(215 208 195 / 92%);
+}
+
+.worldPage[data-world='autumn'] {
+  --world-ground: #1a100c;
+  --world-foreground: #d5c1af;
+  --world-accent: #7c4937;
+  --world-surface: rgb(26 16 12 / 93%);
+}
+
+.worldPage[data-world='winter'] {
+  --world-ground: #0b0d10;
+  --world-foreground: #dce1e2;
+  --world-accent: #83909a;
+  --world-surface: rgb(11 13 16 / 91%);
+}
+
+.atmosphere,
+.editorial,
+.objects,
+.nextWorld {
+  position: relative;
+  padding-inline: clamp(1.25rem, 6vw, 7rem);
+}
+
+.atmosphere {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-block: clamp(7rem, 18vh, 12rem) clamp(2.5rem, 8vh, 7rem);
+  background: linear-gradient(180deg, transparent 0 30%, var(--world-surface) 100%);
+}
+
+.worldNumber,
+.sectionHeader > p:first-child,
+.objectNumber,
+.objectWorld,
+.nextWorld > p {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.atmosphere h1 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.25em;
+  margin: 0;
+  font-size: clamp(3.8rem, 11vw, 10rem);
+  font-weight: 390;
+  letter-spacing: -0.065em;
+  line-height: 0.82;
+}
+
+.atmosphere h1 span:last-child {
+  color: var(--world-accent);
+}
+
+.gateLine {
+  max-width: 31rem;
+  margin: 0;
+  font-family: 'Newsreader Variable', serif;
+  font-size: clamp(1.25rem, 2.1vw, 2rem);
+}
+
+.editorial,
+.objects {
+  padding-block: clamp(5rem, 12vw, 11rem);
+  background: var(--world-ground);
+}
+
+.sectionHeader {
+  max-width: 40rem;
+  margin-bottom: clamp(2.5rem, 7vw, 7rem);
+}
+
+.sectionHeader h2,
+.nextWorld h2 {
+  margin: 0.35rem 0 0;
+  font-size: clamp(2.25rem, 6vw, 6rem);
+  font-weight: 420;
+  letter-spacing: -0.05em;
+}
+
+.editorialLine {
+  max-width: 34rem;
+  margin: 1.5rem 0 0;
+  font-family: 'Newsreader Variable', serif;
+  font-size: clamp(1.4rem, 2.5vw, 2.4rem);
+  line-height: 1.15;
+}
+
+.editorialMedia {
+  width: min(76vw, 72rem);
+  margin-left: auto;
+}
+
+.media {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.objectField {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(7rem, 18vw, 17rem);
+}
+
+.objectEncounter {
+  width: min(66vw, 62rem);
+}
+
+.objectEncounter:nth-child(even) {
+  width: min(48vw, 44rem);
+  margin-left: auto;
+}
+
+.objectMediaLink,
+.objectFacts a,
+.nextWorld a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.objectMediaLink {
+  display: block;
+}
+
+.objectMediaLink:focus-visible,
+.objectFacts a:focus-visible,
+.nextWorld a:focus-visible {
+  outline: 2px solid var(--world-accent);
+  outline-offset: 5px;
+}
+
+.objectFacts {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) auto;
+  gap: 0.4rem 1.5rem;
+  margin-top: 1rem;
+}
+
+.objectFacts h3,
+.objectFacts p {
+  margin: 0;
+}
+
+.objectFacts h3 {
+  font-size: clamp(1.25rem, 2vw, 2rem);
+  font-weight: 450;
+}
+
+.objectFacts > p:nth-of-type(2) {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-variant-numeric: tabular-nums;
+}
+
+.objectWorld {
+  margin-top: 0.35rem !important;
+  color: color-mix(in srgb, var(--world-foreground) 62%, transparent);
+}
+
+.nextWorld {
+  min-height: 65svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-block: 5rem;
+  border-top: 1px solid color-mix(in srgb, var(--world-foreground) 22%, transparent);
+  background: var(--world-surface);
+}
+
+.nextWorld a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 2rem;
+  font-size: clamp(1.2rem, 2.5vw, 2.3rem);
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 44rem) {
+  .atmosphere,
+  .editorial,
+  .objects,
+  .nextWorld {
+    padding-inline: 1.25rem;
+  }
+
+  .atmosphere h1 {
+    flex-direction: column;
+    font-size: clamp(3.5rem, 17vw, 5.6rem);
+  }
+
+  .editorialMedia,
+  .objectEncounter,
+  .objectEncounter:nth-child(even) {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .objectEncounter:nth-child(even) {
+    width: 82%;
+    margin-left: auto;
+  }
+
+  .objectFacts {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worldPage *,
+  .worldPage *::before,
+  .worldPage *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

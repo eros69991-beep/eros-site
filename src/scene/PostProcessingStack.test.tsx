@@ -164,4 +164,28 @@ describe('PostProcessingStack', () => {
     expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
     expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.28 * 0.8)
   })
+
+  it('passes the document scroll ref through to the active World scene', () => {
+    const progress = { current: 0.42 }
+    let receivedProgress: WorldSceneProps['progress'] | undefined
+    function WorldSceneProbe({ progress: sceneProgress }: WorldSceneProps) {
+      receivedProgress = sceneProgress
+      return null
+    }
+
+    render(
+      <RealtimeSceneLayer
+        profile={SCENE_EFFECT_PROFILES.spring}
+        worldProgress={progress}
+        worldScene={WorldSceneProbe}
+        quality="balanced"
+        mobile={false}
+        reducedMotion={false}
+        onDegrade={() => undefined}
+        scenePath="/world/spring"
+      />,
+    )
+
+    expect(receivedProgress).toBe(progress)
+  })
 })

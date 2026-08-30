@@ -2,6 +2,7 @@ import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent, type RefOb
 import { Link, useLocation, type Location } from 'react-router-dom'
 import { worlds } from '../../domain/worlds'
 import { useSiteStore } from '../../state/siteStore'
+import { useWorldEntry } from '../transitions/useWorldEntry'
 import styles from './navigation.module.css'
 
 interface WorldGateProps {
@@ -15,6 +16,7 @@ interface OverlayState {
 export function WorldGate({ openerRef }: WorldGateProps) {
   const open = useSiteStore((state) => state.worldGateOpen)
   const setWorldGateOpen = useSiteStore((state) => state.setWorldGateOpen)
+  const { enterWorld } = useWorldEntry()
   const location = useLocation()
   const firstControlRef = useRef<HTMLButtonElement>(null)
   const lastControlRef = useRef<HTMLAnchorElement>(null)
@@ -80,9 +82,17 @@ export function WorldGate({ openerRef }: WorldGateProps) {
         </div>
         <nav aria-label="World Gate destinations" className={styles.gateNavigation}>
           {worlds.map((world) => (
-            <Link key={world.id} className={styles.gateLink} to={world.route} onClick={closeForNavigation}>
+            <button
+              key={world.id}
+              className={`${styles.gateLink} ${styles.gateWorldButton}`}
+              onClick={() => {
+                closeForNavigation()
+                enterWorld(world.id, 'world-gate')
+              }}
+              type="button"
+            >
               {world.season}
-            </Link>
+            </button>
           ))}
           <Link className={styles.gateLink} to="/archive" onClick={closeForNavigation}>ARCHIVE</Link>
           <Link className={styles.gateLink} to="/studio" onClick={closeForNavigation}>STUDIO</Link>

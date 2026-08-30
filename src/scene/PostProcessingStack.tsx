@@ -7,7 +7,7 @@ import {
   Vignette,
 } from '@react-three/postprocessing'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
 import { UniverseScene } from '../features/universe/UniverseScene'
@@ -65,9 +65,12 @@ interface RealtimeSceneLayerProps {
   quality: RealtimeQualityTier
   mobile: boolean
   reducedMotion: boolean
+  worldProgress?: { current: number }
   onDegrade(tier: QualityTier): void
   scenePath?: string
 }
+
+const DEFAULT_WORLD_PROGRESS = { current: 0 }
 
 export function RealtimeSceneLayer({
   profile,
@@ -75,12 +78,12 @@ export function RealtimeSceneLayer({
   quality,
   mobile,
   reducedMotion,
+  worldProgress = DEFAULT_WORLD_PROGRESS,
   onDegrade,
   scenePath = '/',
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
   const worldSceneQuality: RealtimeQualityTier = mobile ? 'lite' : quality
-  const [worldProgress] = useState({ current: 0 })
 
   return (
     <div className={styles.sceneLayer} aria-hidden="true">

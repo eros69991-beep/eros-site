@@ -1,11 +1,17 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, createRef } from 'react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { TestRouter } from '../../app/AppRouter'
 import { useSiteStore } from '../../state/siteStore'
+import type { WorldEntryDependencies } from '../transitions/worldEntryMachine'
+import { WorldEntryProvider, useWorldEntryStore } from '../transitions/useWorldEntry'
+import { WorldGate } from './WorldGate'
 
 afterEach(() => {
   act(() => {
     useSiteStore.setState({ bag: [], worldGateOpen: false })
+    useWorldEntryStore.getState().dispatch({ type: 'RESET' })
   })
   document.body.style.overflow = ''
 })
@@ -32,11 +38,8 @@ describe('WorldGate', () => {
 
     await user.click(screen.getByRole('button', { name: /menu/i }))
 
-    const destinations = [
-      ['SPRING', '/world/spring'],
-      ['SUMMER', '/world/summer'],
-      ['AUTUMN', '/world/autumn'],
-      ['WINTER', '/world/winter'],
+    const worldDestinations = ['SPRING', 'SUMMER', 'AUTUMN', 'WINTER'] as const
+    const routeDestinations = [
       ['ARCHIVE', '/archive'],
       ['STUDIO', '/studio'],
       ['SEARCH', '/search'],
@@ -44,9 +47,39 @@ describe('WorldGate', () => {
     ] as const
 
     const gate = screen.getByRole('dialog', { name: /world gate/i })
-    for (const [label, path] of destinations) {
+    for (const label of worldDestinations) {
+      expect(within(gate).getByRole('button', { name: label })).toBeInTheDocument()
+    }
+    for (const [label, path] of routeDestinations) {
       expect(within(gate).getByRole('link', { name: label })).toHaveAttribute('href', path)
     }
+  })
+
+  it('enters a World through the shared controller with the World Gate source', async () => {
+    const aligned: string[] = []
+    const committed: string[] = []
+    const dependencies: WorldEntryDependencies = {
+      alignTarget: async (world, source) => { aligned.push(`${world}:${source}`) },
+      preloadCriticalAssets: async () => undefined,
+      commitRoute: (world) => committed.push(world),
+      rememberWorld: () => undefined,
+    }
+    useSiteStore.setState({ worldGateOpen: true })
+    const user = userEvent.setup()
+
+    render(
+      <MemoryRouter>
+        <WorldEntryProvider dependencies={dependencies}>
+          <WorldGate openerRef={createRef<HTMLButtonElement>()} />
+        </WorldEntryProvider>
+      </MemoryRouter>,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'SUMMER' }))
+
+    await waitFor(() => expect(committed).toEqual(['summer']))
+    expect(aligned).toEqual(['summer:world-gate'])
+    expect(screen.queryByRole('dialog', { name: /world gate/i })).not.toBeInTheDocument()
   })
 
   it('shows the summed bag quantity in the header', () => {

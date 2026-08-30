@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { celestials } from '../../domain/worlds'
 import { useSiteStore } from '../../state/siteStore'
+import { useWorldEntry } from '../transitions/useWorldEntry'
 import { CELESTIAL_LABELS } from './universeConfig'
 import styles from './universe.module.css'
 
 export function SemanticCelestialControls() {
   const navigate = useNavigate()
+  const { enterWorld } = useWorldEntry()
   const selected = useSiteStore((state) => state.selectedCelestial)
   const selectCelestial = useSiteStore((state) => state.selectCelestial)
   const selectedDefinition = celestials.find((celestial) => celestial.id === selected)
@@ -36,7 +38,14 @@ export function SemanticCelestialControls() {
       <button
         className={styles.enterControl}
         disabled={!selectedDefinition}
-        onClick={() => selectedDefinition && navigate(selectedDefinition.route)}
+        onClick={() => {
+          if (!selectedDefinition) return
+          if (selectedDefinition.id === 'studio') {
+            navigate(selectedDefinition.route)
+            return
+          }
+          enterWorld(selectedDefinition.id, 'universe')
+        }}
         type="button"
       >
         {selectedLabel ? `Enter ${selectedLabel}` : 'Select a celestial body'}

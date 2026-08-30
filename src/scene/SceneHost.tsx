@@ -4,6 +4,7 @@ import type { QualityTier, WorldId } from '../domain/types'
 import { SceneFallback } from '../features/fallback/SceneFallback'
 import { StaticUniverse } from '../features/fallback/StaticUniverse'
 import { sceneRegistry } from '../features/worlds/sceneRegistry'
+import { worldSceneProgressRef } from '../features/worlds/worldSceneProgress'
 import { useSiteStore } from '../state/siteStore'
 import { SCENE_EFFECT_PROFILES } from './contracts'
 import { classifyMobilePerformanceDevice, selectInitialQuality } from './quality'
@@ -141,6 +142,7 @@ export function SceneHost() {
           quality={quality}
           mobile={mobile}
           reducedMotion={reducedMotion}
+          worldProgress={worldSceneProgressRef}
           onDegrade={updateQuality}
           scenePath={scenePath}
         />

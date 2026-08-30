@@ -24,7 +24,8 @@
 .link,
 .menuButton,
 .closeButton,
-.gateLink {
+.gateLink,
+.gateWorldButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -74,6 +75,15 @@
 
 .gateLink {
   justify-content: flex-start;
+}
+
+.gateWorldButton {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
 }
 
 @media (max-width: 44rem) {

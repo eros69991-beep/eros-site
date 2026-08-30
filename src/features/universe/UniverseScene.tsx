@@ -6,11 +6,14 @@ import { celestials } from '../../domain/worlds'
 import type { CelestialDefinition } from '../../domain/types'
 import { useSiteStore } from '../../state/siteStore'
 import { getEffectiveSceneBudget } from '../../scene/quality'
+import { getSceneTime } from '../../scene/sceneClock'
 import { ErosCore } from './ErosCore'
 import { CelestialBody } from './CelestialBody'
 import { StarField } from './StarField'
 import { getDesktopParallaxTarget, getMobileObservationAngle } from './universeInteraction'
 import { DISPLAY_PHASE_OFFSETS } from './universeConfig'
+import { getOrbitTransform } from './universeMath'
+import { registerUniverseCameraAlignment } from './universeCameraAlignment'
 
 const CAMERA_FOV = 42
 const DESKTOP_CAMERA_DISTANCE = 24
@@ -36,9 +39,28 @@ function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobil
   const { camera, gl, pointer, size } = useThree()
   const cameraRef = useRef<Camera | null>(null)
   const mobileDrag = useRef({ active: false, angle: 0, startAngle: 0, startX: 0 })
+  const entryAlignment = useRef<{
+    body: CelestialDefinition
+    resolve(): void
+  } | null>(null)
   useEffect(() => {
     cameraRef.current = camera
   }, [camera])
+
+  useEffect(() => registerUniverseCameraAlignment((world) => {
+    const body = celestials.find((candidate) => candidate.id === world)
+    if (!body || reducedMotion) return Promise.resolve()
+
+    entryAlignment.current?.resolve()
+    return new Promise<void>((resolve) => {
+      entryAlignment.current = { body, resolve }
+    })
+  }), [reducedMotion])
+
+  useEffect(() => () => {
+    entryAlignment.current?.resolve()
+    entryAlignment.current = null
+  }, [])
 
   useEffect(() => {
     if (!mobile || reducedMotion) return undefined
@@ -81,6 +103,29 @@ function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobil
   useFrame((_state, delta) => {
     const activeCamera = cameraRef.current
     if (!activeCamera) return
+    const alignment = entryAlignment.current
+    if (alignment) {
+      const transform = getOrbitTransform(
+        alignment.body,
+        getSceneTime(),
+        DISPLAY_PHASE_OFFSETS[alignment.body.id],
+      )
+      const [targetX, targetY, targetZ] = transform.position
+      const damping = Math.min(delta * 3.4, 1)
+      activeCamera.position.x = MathUtils.lerp(activeCamera.position.x, targetX * 0.48, damping)
+      activeCamera.position.y = MathUtils.lerp(activeCamera.position.y, targetY * 0.48, damping)
+      activeCamera.position.z = MathUtils.lerp(activeCamera.position.z, Math.max(14, 20 + targetZ * 0.25), damping)
+      activeCamera.lookAt(targetX, targetY, targetZ)
+
+      if (
+        Math.abs(activeCamera.position.x - targetX * 0.48) < 0.08
+        && Math.abs(activeCamera.position.y - targetY * 0.48) < 0.08
+      ) {
+        alignment.resolve()
+        entryAlignment.current = null
+      }
+      return
+    }
     const desktopTarget = getDesktopParallaxTarget(pointer, size, CAMERA_FOV, DESKTOP_CAMERA_DISTANCE)
     const targetX = mobile
       ? Math.sin(reducedMotion ? 0 : mobileDrag.current.angle) * 2.8

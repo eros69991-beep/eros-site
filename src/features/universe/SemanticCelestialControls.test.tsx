@@ -1,7 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { useSiteStore } from '../../state/siteStore'
+import type { WorldEntryDependencies } from '../transitions/worldEntryMachine'
+import { WorldEntryProvider, useWorldEntryStore } from '../transitions/useWorldEntry'
 import { SemanticCelestialControls } from './SemanticCelestialControls'
 
 function RouteIntent() {
@@ -9,12 +11,21 @@ function RouteIntent() {
   return <output aria-label="Route intent">{location.pathname}</output>
 }
 
-function renderControls() {
+function renderControls(dependencies?: WorldEntryDependencies) {
   useSiteStore.setState({ selectedCelestial: null })
+  useWorldEntryStore.getState().dispatch({ type: 'RESET' })
+  const entryDependencies = dependencies ?? {
+    alignTarget: async () => undefined,
+    preloadCriticalAssets: async () => undefined,
+    commitRoute: () => undefined,
+    rememberWorld: () => undefined,
+  }
   return render(
     <MemoryRouter initialEntries={['/']}>
-      <SemanticCelestialControls />
-      <Routes><Route path="*" element={<RouteIntent />} /></Routes>
+      <WorldEntryProvider dependencies={entryDependencies}>
+        <SemanticCelestialControls />
+        <Routes><Route path="*" element={<RouteIntent />} /></Routes>
+      </WorldEntryProvider>
     </MemoryRouter>,
   )
 }
@@ -51,13 +62,23 @@ describe('SemanticCelestialControls', () => {
     expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/')
   })
 
-  it('enters the selected celestial route with its explicit action', async () => {
+  it('enters the selected World through the shared entry controller', async () => {
+    const aligned: string[] = []
+    const committed: string[] = []
+    const dependencies: WorldEntryDependencies = {
+      alignTarget: async (world, source) => { aligned.push(`${world}:${source}`) },
+      preloadCriticalAssets: async () => undefined,
+      commitRoute: (world) => committed.push(world),
+      rememberWorld: () => undefined,
+    }
     const user = userEvent.setup()
-    renderControls()
+    renderControls(dependencies)
 
     await user.click(screen.getByRole('button', { name: 'Winter / Freeze' }))
     await user.click(screen.getByRole('button', { name: 'Enter Winter / Freeze' }))
 
-    expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/world/winter')
+    await waitFor(() => expect(committed).toEqual(['winter']))
+    expect(aligned).toEqual(['winter:universe'])
+    expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/')
   })
 })
