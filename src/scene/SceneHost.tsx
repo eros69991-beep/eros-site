@@ -9,6 +9,7 @@ import { useSiteStore } from '../state/siteStore'
 import { SCENE_EFFECT_PROFILES } from './contracts'
 import { classifyMobilePerformanceDevice, selectInitialQuality } from './quality'
 import { SceneErrorBoundary } from './SceneErrorBoundary'
+import './sceneClock'
 import { supportsWebGL } from './webgl'
 
 interface OverlayState {
@@ -26,6 +27,13 @@ const RealtimeSceneLayer = lazy(async () => {
   const module = await import('./PostProcessingStack')
   return { default: module.RealtimeSceneLayer }
 })
+
+const canExposeSceneTestApi = import.meta.env.DEV || import.meta.env.MODE === 'test'
+
+function TestSceneError({ active }: { active: boolean }) {
+  if (active) throw new Error('Test-triggered realtime scene error')
+  return null
+}
 
 function readReducedMotion() {
   return typeof window !== 'undefined'
@@ -100,6 +108,7 @@ export function SceneHost() {
   ))
   const [retryKey, setRetryKey] = useState(0)
   const [forceStatic, setForceStatic] = useState(false)
+  const [testSceneError, setTestSceneError] = useState(false)
 
   const updateQuality = useCallback((tier: QualityTier) => {
     setQuality(tier)
@@ -109,6 +118,19 @@ export function SceneHost() {
   useEffect(() => {
     setStoredQuality(quality)
   }, [quality, setStoredQuality])
+
+  useEffect(() => {
+    if (!canExposeSceneTestApi || typeof window === 'undefined') return undefined
+    const api = window.__EROS_TEST_API__
+    if (!api) return undefined
+    const triggerSceneError = () => setTestSceneError(true)
+    api.triggerSceneError = triggerSceneError
+    return () => {
+      if (window.__EROS_TEST_API__?.triggerSceneError === triggerSceneError) {
+        delete window.__EROS_TEST_API__.triggerSceneError
+      }
+    }
+  }, [])
 
   const overlayState = location.state as OverlayState | null
   const scenePath = overlayState?.backgroundLocation?.pathname ?? location.pathname
@@ -128,7 +150,10 @@ export function SceneHost() {
       resetKey={retryKey}
       fallback={(
         <SceneFallback
-          onRetry={() => setRetryKey((value) => value + 1)}
+          onRetry={() => {
+            setTestSceneError(false)
+            setRetryKey((value) => value + 1)
+          }}
           onContinueStatic={() => {
             setForceStatic(true)
             setStoredQuality('static')
@@ -137,6 +162,7 @@ export function SceneHost() {
       )}
     >
       <Suspense fallback={<StaticUniverse />}>
+        <TestSceneError active={testSceneError} />
         <RealtimeSceneLayer
           profile={profile}
           worldScene={WorldScene}
@@ -147,6 +173,10 @@ export function SceneHost() {
           onDegrade={updateQuality}
           scenePath={scenePath}
           quiet={scenePath.startsWith('/product/')}
+          onContextLost={() => {
+            setForceStatic(true)
+            setStoredQuality('static')
+          }}
         />
       </Suspense>
     </SceneErrorBoundary>

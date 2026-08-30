@@ -7,6 +7,7 @@ import { SceneErrorBoundary } from '../../scene/SceneErrorBoundary'
 import { SceneFallback } from './SceneFallback'
 import { StaticUniverse } from './StaticUniverse'
 
+
 function FaultingScene({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) throw new Error('scene render failed')
   return <p>Realtime scene ready</p>
@@ -51,6 +52,9 @@ describe('scene fallback paths', () => {
     const staticNavigation = screen.getByRole('navigation', { name: 'Static universe navigation' })
     expect(staticNavigation).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: /Spring|Summer|Autumn|Winter|Studio/ })).toHaveLength(5)
+    expect(screen.getByTestId('static-orbits')).toBeInTheDocument()
+    expect(screen.getByTestId('static-stars').querySelectorAll('i')).toHaveLength(72)
+    expect(screen.getByRole('navigation', { name: 'Global navigation' })).toBeInTheDocument()
   })
 
   it('retries a failed scene without replacing the App Shell', async () => {

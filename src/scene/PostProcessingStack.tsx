@@ -7,7 +7,8 @@ import {
   Vignette,
 } from '@react-three/postprocessing'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Suspense, useMemo } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
+import { useThree } from '@react-three/fiber'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
 import { UniverseScene } from '../features/universe/UniverseScene'
@@ -77,9 +78,21 @@ interface RealtimeSceneLayerProps {
   onDegrade(tier: QualityTier): void
   scenePath?: string
   quiet?: boolean
+  onContextLost?(): void
 }
 
 const DEFAULT_WORLD_PROGRESS = { current: 0 }
+
+function ContextLossRecovery({ onContextLost }: { onContextLost?(): void }) {
+  const gl = useThree((state) => state.gl)
+  useEffect(() => {
+    if (!onContextLost) return undefined
+    const recover = (event: Event) => { event.preventDefault(); onContextLost() }
+    gl.domElement.addEventListener('webglcontextlost', recover)
+    return () => gl.domElement.removeEventListener('webglcontextlost', recover)
+  }, [gl, onContextLost])
+  return null
+}
 
 export function RealtimeSceneLayer({
   profile,
@@ -91,6 +104,7 @@ export function RealtimeSceneLayer({
   onDegrade,
   scenePath = '/',
   quiet = false,
+  onContextLost,
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
   const worldSceneQuality: RealtimeQualityTier = mobile ? 'lite' : quality
@@ -104,6 +118,7 @@ export function RealtimeSceneLayer({
         frameloop={reducedMotion ? 'demand' : 'always'}
         gl={{ antialias: quality !== 'lite', alpha: true }}
       >
+        {onContextLost ? <ContextLossRecovery onContextLost={onContextLost} /> : null}
         <FrameQualityMonitor quality={quality} onDegrade={onDegrade} />
         <Suspense fallback={null}>
           {WorldScene ? (

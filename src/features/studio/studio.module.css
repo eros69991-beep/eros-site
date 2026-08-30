@@ -1,0 +1,17 @@
+.studio {
+  width: min(74rem, 100%);
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding: 9rem 1.5rem 4rem;
+  color: rgb(25 27 28 / 78%);
+}
+
+.intro { max-width: 40rem; border-bottom: 1px solid rgb(25 27 28 / 18%); padding-bottom: 3rem; }
+.kicker { margin: 0 0 1rem; font-size: .72rem; letter-spacing: .16em; }
+.intro h1 { margin: 0; font-size: clamp(2.5rem, 9vw, 7rem); font-weight: 400; letter-spacing: -.05em; }
+.regions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 3rem; margin-top: 4rem; }
+.regions section { min-height: 13rem; padding: 1.5rem 0; border-bottom: 1px solid rgb(25 27 28 / 14%); }
+.regions h2 { margin: 0 0 2rem; font-size: .75rem; font-weight: 500; letter-spacing: .14em; }
+.regions p { max-width: 29rem; margin: 0; font-family: var(--font-editorial, serif); font-size: clamp(1.1rem, 2vw, 1.5rem); line-height: 1.35; }
+.regions a { color: inherit; font-size: .78rem; letter-spacing: .12em; }
+@media (max-width: 44rem) { .studio { padding-top: 7rem; } .regions { grid-template-columns: 1fr; } .regions section { min-height: 0; } }
