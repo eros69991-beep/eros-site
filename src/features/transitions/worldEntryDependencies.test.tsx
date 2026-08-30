@@ -17,6 +17,7 @@ function EntryTrigger() {
 afterEach(() => {
   act(() => useWorldEntryStore.getState().dispatch({ type: 'RESET' }))
   useSiteStore.getState().setReducedVisualWorld(null)
+  vi.useRealTimers()
   vi.restoreAllMocks()
 })
 
@@ -51,6 +52,15 @@ describe('concrete World Entry dependencies', () => {
     await preloadCriticalWorldAssets('spring', { createImage: () => image, loadScene })
 
     expect(image.src).toBe('/media/demo/spring-editorial-960.webp')
+  })
+
+  it('rejects a never-resolving critical decode within the configured preload timeout', async () => {
+    const image = { decode: () => new Promise<void>(() => undefined), src: '' } as unknown as HTMLImageElement
+    await expect(preloadCriticalWorldAssets('summer', {
+      createImage: () => image,
+      loadScene: async () => ({ default: () => null }),
+      timeoutMs: 1,
+    })).rejects.toThrow('Critical assets for summer timed out.')
   })
 
   it('aligns only a Universe source while Gate uses the material handoff', async () => {

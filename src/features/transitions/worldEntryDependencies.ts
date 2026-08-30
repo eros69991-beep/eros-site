@@ -14,6 +14,28 @@ interface PreloadCriticalWorldAssetsOptions {
   createImage?: () => HTMLImageElement
   loadScene?: () => Promise<unknown>
   mobile?: boolean
+  timeoutMs?: number
+}
+
+export const CRITICAL_PRELOAD_TIMEOUT_MS = 8_000
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, world: WorldId) {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      reject(new Error(`Critical assets for ${world} timed out.`))
+    }, timeoutMs)
+
+    promise.then(
+      (value) => {
+        window.clearTimeout(timeout)
+        resolve(value)
+      },
+      (error: unknown) => {
+        window.clearTimeout(timeout)
+        reject(error)
+      },
+    )
+  })
 }
 
 function readMobileViewport() {
@@ -42,10 +64,10 @@ export async function preloadCriticalWorldAssets(
   const image = options.createImage?.() ?? new Image()
   image.src = source.src
 
-  await Promise.all([
+  await withTimeout(Promise.all([
     options.loadScene?.() ?? descriptor!.load(),
     image.decode(),
-  ])
+  ]), options.timeoutMs ?? CRITICAL_PRELOAD_TIMEOUT_MS, world)
 }
 
 interface CreateWorldEntryDependenciesOptions {

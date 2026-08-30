@@ -7,7 +7,7 @@ import {
   Vignette,
 } from '@react-three/postprocessing'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
 import { UniverseScene } from '../features/universe/UniverseScene'
@@ -95,9 +95,11 @@ export function RealtimeSceneLayer({
         gl={{ antialias: quality !== 'lite', alpha: true }}
       >
         <FrameQualityMonitor quality={quality} onDegrade={onDegrade} />
-        {WorldScene ? (
-          <WorldScene quality={worldSceneQuality} progress={worldProgress} reducedMotion={reducedMotion} />
-        ) : scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
+        <Suspense fallback={null}>
+          {WorldScene ? (
+            <WorldScene quality={worldSceneQuality} progress={worldProgress} reducedMotion={reducedMotion} />
+          ) : scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
+        </Suspense>
         <PostProcessingStack profile={profile} quality={quality} />
       </Canvas>
     </div>

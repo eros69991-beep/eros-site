@@ -1,6 +1,6 @@
-import type { ComponentProps, ReactNode } from 'react'
+import { act, lazy, type ComponentProps, type ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
-import type { WorldSceneProps } from './contracts'
+import type { WorldSceneComponent, WorldSceneProps } from './contracts'
 import { AUTUMN_EFFECTS } from '../features/worlds/autumn/autumnAtmosphere'
 import {
   SCENE_EFFECT_PROFILES,
@@ -187,5 +187,31 @@ describe('PostProcessingStack', () => {
     )
 
     expect(receivedProgress).toBe(progress)
+  })
+
+  it('keeps Canvas and EffectComposer mounted while a lazy World scene is suspended', async () => {
+    let resolveWorld!: (module: { default: WorldSceneComponent }) => void
+    const delayedWorld = new Promise<{ default: WorldSceneComponent }>((resolve) => { resolveWorld = resolve })
+    const DelayedWorld = lazy(() => delayedWorld)
+
+    render(
+      <RealtimeSceneLayer
+        profile={SCENE_EFFECT_PROFILES.summer}
+        worldScene={DelayedWorld}
+        quality="balanced"
+        mobile={false}
+        reducedMotion={false}
+        onDegrade={() => undefined}
+        scenePath="/world/summer"
+      />,
+    )
+
+    expect(screen.getAllByTestId('scene-canvas')).toHaveLength(1)
+    expect(screen.getAllByTestId('effect-composer')).toHaveLength(1)
+
+    await act(async () => {
+      resolveWorld({ default: () => null })
+      await delayedWorld
+    })
   })
 })
