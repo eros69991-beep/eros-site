@@ -1,0 +1,20 @@
+.product, .unavailable { padding: 6rem 1rem 3rem; background: rgb(255 255 255 / 92%); }
+.product { display: grid; gap: 1.5rem; max-width: 68rem; margin-inline: auto; }
+.primaryMedia, .editorialMedia, .detailMedia { max-width: 42rem; }
+.primaryMedia img, .editorialMedia img, .detailMedia img { display: block; width: 100%; height: auto; }
+.facts p, .price, .sizeSelection, .details h2, .concept h2, .worldLink { letter-spacing: .08em; text-transform: uppercase; }
+.facts h1 { margin: .25rem 0 0; font-size: clamp(2rem, 7vw, 5rem); font-weight: 400; }
+.price { margin: 0; font-variant-numeric: tabular-nums; }
+.sizeSelection { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; border: 0; }
+.sizeSelection legend { width: 100%; margin-bottom: .5rem; }
+.sizeSelection label { min-width: 3rem; min-height: 2.75rem; border: 1px solid currentColor; display: grid; place-items: center; cursor: pointer; }
+.sizeSelection input { position: absolute; opacity: 0; }
+.sizeSelection input:checked + span { text-decoration: underline; text-underline-offset: .2em; }
+.sizeSelection label:has(input:focus-visible) { outline: 2px solid currentColor; outline-offset: 2px; }
+.details ul { padding-left: 1.25rem; }
+.editorialMedia, .concept, .detailMedia { display: grid; gap: 1rem; }
+.concept p { max-width: 40rem; font-family: 'Newsreader Variable', serif; font-size: clamp(1.4rem, 3vw, 2.2rem); }
+.actions { display: grid; gap: .5rem; }
+.actions button { min-height: 44px; max-width: 18rem; border: 1px solid currentColor; background: #111; color: #fff; font: inherit; text-transform: uppercase; cursor: pointer; }
+.actions p { min-height: 1.5rem; margin: 0; }
+.worldLink { color: inherit; }

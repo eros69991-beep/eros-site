@@ -146,6 +146,7 @@ export function SceneHost() {
           worldProgress={worldSceneProgressRef}
           onDegrade={updateQuality}
           scenePath={scenePath}
+          quiet={scenePath.startsWith('/product/')}
         />
       </Suspense>
     </SceneErrorBoundary>

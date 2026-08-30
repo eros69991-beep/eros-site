@@ -59,6 +59,10 @@
   pointer-events: none;
 }
 
+.sceneLayer[data-quiet='true'] {
+  opacity: 0.42;
+}
+
 .canvasSurface {
   width: 100%;
   height: 100%;

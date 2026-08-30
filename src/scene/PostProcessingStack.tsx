@@ -68,6 +68,7 @@ interface RealtimeSceneLayerProps {
   worldProgress?: { current: number }
   onDegrade(tier: QualityTier): void
   scenePath?: string
+  quiet?: boolean
 }
 
 const DEFAULT_WORLD_PROGRESS = { current: 0 }
@@ -81,12 +82,13 @@ export function RealtimeSceneLayer({
   worldProgress = DEFAULT_WORLD_PROGRESS,
   onDegrade,
   scenePath = '/',
+  quiet = false,
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
   const worldSceneQuality: RealtimeQualityTier = mobile ? 'lite' : quality
 
   return (
-    <div className={styles.sceneLayer} aria-hidden="true">
+    <div className={styles.sceneLayer} aria-hidden="true" data-quiet={quiet || undefined}>
       <Canvas
         camera={{ fov: 42, position: [0, 0.45, mobile ? 58 : 24] }}
         className={styles.canvasSurface}
