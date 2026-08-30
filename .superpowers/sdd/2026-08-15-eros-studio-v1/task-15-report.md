@@ -18,3 +18,11 @@ Verification completed:
 - `git diff --check` passed.
 
 Browser smoke was not run because this worktree has no Playwright configuration or `e2e` suite.
+
+## Follow-up: quiet Product postprocessing
+
+Product routes now pass their quiet visual state through `RealtimeSceneLayer` into `PostProcessingStack`. The active composer and tone mapping remain mounted for all WebGL quality tiers while Product rendering halves Bloom intensity, Noise opacity, and Vignette darkness, and omits depth of field. Source World effect profiles are not mutated.
+
+- RED: the new quiet Product effects test failed before implementation because Product effects matched the normal World profile.
+- GREEN: `pnpm test -- src/scene/PostProcessingStack.test.tsx` passed: 30 files, 177 tests.
+- `pnpm lint`, `pnpm build`, and `git diff --check` passed. The build emitted only the existing Vite chunk-size advisory.

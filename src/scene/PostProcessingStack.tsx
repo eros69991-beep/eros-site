@@ -23,24 +23,32 @@ type RealtimeQualityTier = Exclude<QualityTier, 'static'>
 interface PostProcessingStackProps {
   profile: EffectProfile
   quality: RealtimeQualityTier
+  quiet?: boolean
 }
 
-export function PostProcessingStack({ profile, quality }: PostProcessingStackProps) {
+export function PostProcessingStack({ profile, quality, quiet = false }: PostProcessingStackProps) {
   const effects = resolveEffectProfile(profile, quality)
+  const quietEffects = quiet ? {
+    ...effects,
+    bloomIntensity: effects.bloomIntensity * 0.5,
+    noiseOpacity: effects.noiseOpacity * 0.5,
+    vignetteDarkness: effects.vignetteDarkness * 0.5,
+    depthOfField: false,
+  } : effects
   const multisampling = quality === 'high' ? 4 : quality === 'balanced' ? 2 : 0
 
   return (
     <EffectComposer multisampling={multisampling}>
       <ToneMapping />
       <Bloom
-        intensity={effects.bloomIntensity}
-        luminanceThreshold={effects.bloomThreshold}
+        intensity={quietEffects.bloomIntensity}
+        luminanceThreshold={quietEffects.bloomThreshold}
         luminanceSmoothing={0.12}
         mipmapBlur
       />
-      <Noise opacity={effects.noiseOpacity} />
-      <Vignette offset={effects.vignetteOffset} darkness={effects.vignetteDarkness} />
-      {effects.depthOfField ? (
+      <Noise opacity={quietEffects.noiseOpacity} />
+      <Vignette offset={quietEffects.vignetteOffset} darkness={quietEffects.vignetteDarkness} />
+      {quietEffects.depthOfField ? (
         <DepthOfField focusDistance={0.02} focalLength={0.025} bokehScale={1.5} />
       ) : null}
     </EffectComposer>
@@ -102,7 +110,7 @@ export function RealtimeSceneLayer({
             <WorldScene quality={worldSceneQuality} progress={worldProgress} reducedMotion={reducedMotion} />
           ) : scenePath === '/' ? <UniverseScene quality={quality} mobile={mobile} reducedMotion={reducedMotion} /> : null}
         </Suspense>
-        <PostProcessingStack profile={profile} quality={quality} />
+        <PostProcessingStack profile={profile} quality={quality} quiet={quiet} />
       </Canvas>
     </div>
   )

@@ -59,6 +59,45 @@ describe('PostProcessingStack', () => {
     },
   )
 
+  it.each(['high', 'balanced', 'lite'] as const)(
+    'keeps the composer and tone mapping active for quiet Product rendering at the %s tier',
+    (quality) => {
+      render(
+        <PostProcessingStack
+          profile={SCENE_EFFECT_PROFILES.winter}
+          quality={quality}
+          {...{ quiet: true }}
+        />,
+      )
+
+      expect(screen.getByTestId('effect-composer')).toBeInTheDocument()
+      expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
+    },
+  )
+
+  it('reduces Product bloom, noise, and vignette without changing the source World profile', () => {
+    const worldProfile = SCENE_EFFECT_PROFILES.winter
+    const normal = render(<PostProcessingStack profile={worldProfile} quality="high" />)
+    const normalBloom = Number(screen.getByTestId('bloom').dataset.intensity)
+    const normalNoise = Number(screen.getByTestId('noise').dataset.opacity)
+    const normalVignette = Number(screen.getByTestId('vignette').dataset.darkness)
+
+    normal.unmount()
+    render(
+      <PostProcessingStack
+        profile={worldProfile}
+        quality="high"
+        {...{ quiet: true }}
+      />,
+    )
+
+    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeLessThan(normalBloom)
+    expect(Number(screen.getByTestId('noise').dataset.opacity)).toBeLessThan(normalNoise)
+    expect(Number(screen.getByTestId('vignette').dataset.darkness)).toBeLessThan(normalVignette)
+    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
+    expect(SCENE_EFFECT_PROFILES.winter).toEqual(worldProfile)
+  })
+
   it('applies the balanced Bloom and noise multiplier', () => {
     renderStack('balanced')
 
