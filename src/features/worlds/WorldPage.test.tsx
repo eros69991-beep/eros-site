@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mediaManifest } from '../../media/mediaManifest'
@@ -40,6 +41,7 @@ describe('WorldPage', () => {
       'Next World',
     ])
     expect(within(regions[0]!).getByRole('heading', { level: 1 })).toHaveTextContent(concept)
+    expect(within(regions[0]!).getByRole('heading', { level: 1 })).toHaveAccessibleName(`${id.toUpperCase()} / ${concept}`)
 
     const objectRegion = within(regions[2]!)
     const objects = objectRegion.getAllByRole('article')
@@ -53,6 +55,17 @@ describe('WorldPage', () => {
     const nextLink = within(regions[3]!).getByRole('link', { name: new RegExp(next, 'i') })
     expect(nextLink).toHaveAttribute('href', nextRoute)
     expect(container.querySelector(`[data-world="${id}"]`)).toBeInTheDocument()
+  })
+
+  it('resets scroll before a direct Next World navigation', async () => {
+    const user = userEvent.setup()
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+    renderWorld('spring')
+
+    await user.click(screen.getByRole('link', { name: /summer/i }))
+
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'auto' })
+    expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('SUMMER / BURN')
   })
 
   it('renders responsive editorial and Object images only from the generated manifest', () => {

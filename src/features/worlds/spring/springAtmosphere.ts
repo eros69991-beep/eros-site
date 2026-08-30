@@ -41,6 +41,14 @@ export function getSpringAtmosphere(
   }
 }
 
+export function sampleSpringAtmosphere(
+  progress: { current: number },
+  reducedMotion: boolean,
+  quality: Exclude<QualityTier, 'static'>,
+) {
+  return getSpringAtmosphere(progress.current, reducedMotion, quality)
+}
+
 export function getSpringMistOffset(time: number, verticalDrift: number): number {
   const stableTime = Number.isFinite(time) ? time : 0
   const boundedDrift = Math.min(MAX_VERTICAL_DRIFT, Math.max(0, verticalDrift))

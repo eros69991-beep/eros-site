@@ -96,8 +96,9 @@ export function useWorldEntry(): WorldEntryController {
     const current = useWorldEntryStore.getState().state
     if (current.status !== 'failed') return
 
+    dependencies.activateReducedVisuals?.(current.world)
     commit(current.world, current.requestId)
-  }, [commit])
+  }, [commit, dependencies])
 
   const reset = useCallback(() => {
     dispatch({ type: 'RESET' })

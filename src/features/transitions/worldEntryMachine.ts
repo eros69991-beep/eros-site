@@ -20,6 +20,7 @@ export interface WorldEntryDependencies {
   preloadCriticalAssets(world: WorldId): Promise<void>
   commitRoute(world: WorldId): void
   rememberWorld(world: WorldId): void
+  activateReducedVisuals?(world: WorldId): void
 }
 
 export interface WorldEntryController {

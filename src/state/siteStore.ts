@@ -18,12 +18,16 @@ export interface SiteState {
   recentWorld: WorldId | null
   qualityTier: QualityTier
   worldGateOpen: boolean
+  reducedVisualWorld: WorldId | null
+  worldHandoff: WorldId | null
   bag: BagLine[]
   storageAvailable: boolean
   selectCelestial(id: CelestialId | null): void
   setRecentWorld(id: WorldId): void
   setQualityTier(tier: QualityTier): void
   setWorldGateOpen(open: boolean): void
+  setReducedVisualWorld(world: WorldId | null): void
+  setWorldHandoff(world: WorldId | null): void
   addToBag(objectId: string, size: string): void
   setBagQuantity(objectId: string, size: string, quantity: number): void
   removeFromBag(objectId: string, size: string): void
@@ -117,12 +121,16 @@ function createSiteState(storage: StorageAdapter): StateCreator<SiteState> {
       recentWorld: persisted?.recentWorld ?? null,
       qualityTier: 'balanced',
       worldGateOpen: false,
+      reducedVisualWorld: null,
+      worldHandoff: null,
       bag: persisted?.bag ?? [],
       storageAvailable,
       selectCelestial: (id) => set({ selectedCelestial: id }),
       setRecentWorld: (id) => updateAndPersist({ recentWorld: id }),
       setQualityTier: (tier) => set({ qualityTier: tier }),
       setWorldGateOpen: (open) => set({ worldGateOpen: open }),
+      setReducedVisualWorld: (world) => set({ reducedVisualWorld: world }),
+      setWorldHandoff: (world) => set({ worldHandoff: world }),
       addToBag: (objectId, size) => {
         const matchingLine = get().bag.find((line) => line.objectId === objectId && line.size === size)
         const bag = matchingLine

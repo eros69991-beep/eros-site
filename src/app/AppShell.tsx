@@ -18,6 +18,8 @@ import {
 } from '../features/transitions/worldEntryDependencies'
 import { WorldEntryProvider, useWorldEntry } from '../features/transitions/useWorldEntry'
 import { alignUniverseCameraToWorld } from '../features/universe/universeCameraAlignment'
+import { scrollToWorldTop } from '../features/transitions/scrollToWorldTop'
+import { handoffWorldGateMaterial } from '../features/transitions/worldGateMaterialHandoff'
 import { SceneHost } from '../scene/SceneHost'
 import { useSiteStore } from '../state/siteStore'
 
@@ -30,19 +32,25 @@ export function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const setRecentWorld = useSiteStore((state) => state.setRecentWorld)
+  const setReducedVisualWorld = useSiteStore((state) => state.setReducedVisualWorld)
+  const setWorldHandoff = useSiteStore((state) => state.setWorldHandoff)
+  const worldHandoff = useSiteStore((state) => state.worldHandoff)
   const dependencies = useMemo(() => createWorldEntryDependencies({
     alignUniverse: alignUniverseCameraToWorld,
+    handoffWorld: (world) => handoffWorldGateMaterial(world, { setWorldHandoff }),
     navigate: (world) => navigate(`/world/${world}`),
     preload: preloadCriticalWorldAssets,
     remember: setRecentWorld,
-  }), [navigate, setRecentWorld])
+    activateReducedVisuals: setReducedVisualWorld,
+    scrollToTop: scrollToWorldTop,
+  }), [navigate, setRecentWorld, setReducedVisualWorld, setWorldHandoff])
   const backgroundLocation = (location.state as OverlayState | null)?.backgroundLocation
   const isOverlayRoute = location.pathname === '/search' || location.pathname === '/bag'
   const background = isOverlayRoute ? backgroundLocation : undefined
 
   return (
     <WorldEntryProvider dependencies={dependencies}>
-      <div className={`app-shell ${sceneStyles.appShell}`}>
+      <div className={`app-shell ${sceneStyles.appShell}`} data-world-handoff={worldHandoff ?? undefined}>
         <SceneHost />
         <div className={sceneStyles.semanticLayer}>
           <GlobalHeader menuButtonRef={menuButtonRef} />

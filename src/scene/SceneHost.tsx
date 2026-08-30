@@ -92,6 +92,7 @@ export function SceneHost() {
   const location = useLocation()
   const reducedMotion = useReducedMotionPreference()
   const setStoredQuality = useSiteStore((state) => state.setQualityTier)
+  const reducedVisualWorld = useSiteStore((state) => state.reducedVisualWorld)
   const [webglAvailable] = useState(supportsWebGL)
   const [mobile] = useState(readMobilePerformanceDevice)
   const [quality, setQuality] = useState(() => (
@@ -118,7 +119,7 @@ export function SceneHost() {
     ? SCENE_EFFECT_PROFILES.universe
     : SCENE_EFFECT_PROFILES.neutral)
 
-  if (!webglAvailable || forceStatic || quality === 'static') {
+  if (!webglAvailable || forceStatic || quality === 'static' || (worldId !== null && reducedVisualWorld === worldId)) {
     return <StaticUniverse />
   }
 

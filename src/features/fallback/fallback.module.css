@@ -2,6 +2,16 @@
   position: relative;
   min-height: 100dvh;
   isolation: isolate;
+  transition: background-color 200ms linear;
+}
+
+.appShell[data-world-handoff='spring'] { background: #0c100e; }
+.appShell[data-world-handoff='summer'] { background: #d7d0c3; }
+.appShell[data-world-handoff='autumn'] { background: #1a100c; }
+.appShell[data-world-handoff='winter'] { background: #0b0d10; }
+
+@media (prefers-reduced-motion: reduce) {
+  .appShell { transition-duration: 0ms; }
 }
 
 .semanticLayer {

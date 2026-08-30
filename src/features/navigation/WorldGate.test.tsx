@@ -143,7 +143,7 @@ describe('WorldGate', () => {
 
     await user.click(screen.getByRole('link', { name: 'SEARCH' }))
 
-    expect(screen.getByRole('heading', { name: 'SPRING' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'SPRING / AWAKENING' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'SEARCH' })).toBeInTheDocument()
     expect(screen.getAllByRole('main')).toHaveLength(1)
   })
@@ -155,7 +155,7 @@ describe('WorldGate', () => {
     await user.click(screen.getByRole('link', { name: 'SEARCH' }))
     await user.click(screen.getByRole('link', { name: 'BAG 0' }))
 
-    expect(screen.getByRole('heading', { name: 'SPRING' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'SPRING / AWAKENING' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'BAG' })).toBeInTheDocument()
   })
 
@@ -166,7 +166,7 @@ describe('WorldGate', () => {
     await user.click(screen.getByRole('link', { name: 'BAG 0' }))
     await user.click(screen.getByRole('link', { name: 'SEARCH' }))
 
-    expect(screen.getByRole('heading', { name: 'SPRING' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'SPRING / AWAKENING' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'SEARCH' })).toBeInTheDocument()
   })
 })

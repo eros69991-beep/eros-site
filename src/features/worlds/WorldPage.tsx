@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getWorld } from '../../domain/selectors'
 import type { WorldId } from '../../domain/types'
@@ -5,6 +6,7 @@ import { worlds } from '../../domain/worlds'
 import type { DemoMediaKey } from '../../media/mediaManifest'
 import { ManifestPicture, WorldObjectField } from './WorldObjectField'
 import { WorldSceneFrame } from './WorldSceneFrame'
+import { scrollToWorldTop } from '../transitions/scrollToWorldTop'
 import styles from './worlds.module.css'
 
 const EDITORIAL_MEDIA_KEYS = {
@@ -28,6 +30,10 @@ function isWorldId(value: string | undefined): value is WorldId {
 export function WorldPage() {
   const { worldId } = useParams()
 
+  useLayoutEffect(() => {
+    scrollToWorldTop()
+  }, [worldId])
+
   if (!isWorldId(worldId)) {
     return (
       <section aria-labelledby="world-unavailable-heading">
@@ -46,7 +52,7 @@ export function WorldPage() {
       <article className={styles.worldPage} data-world={world.id}>
         <section aria-label="Atmosphere" className={styles.atmosphere}>
           <p className={styles.worldNumber}>{number} / 04</p>
-          <h1 aria-label={world.season}>{world.season}<span aria-hidden="true"> / </span><span>{world.concept}</span></h1>
+          <h1 aria-label={`${world.season} / ${world.concept}`}>{world.season}<span aria-hidden="true"> / </span><span>{world.concept}</span></h1>
           <p className={styles.gateLine}>{world.gateLine}</p>
         </section>
 

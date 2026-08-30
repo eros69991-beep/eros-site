@@ -17,9 +17,14 @@ interface PreloadCriticalWorldAssetsOptions {
 }
 
 function readMobileViewport() {
-  return typeof window !== 'undefined'
-    && typeof window.matchMedia === 'function'
-    && window.matchMedia('(max-width: 767px)').matches
+  if (typeof window === 'undefined') return false
+
+  const coarsePointer = typeof window.matchMedia === 'function'
+    && window.matchMedia('(pointer: coarse)').matches
+  const shortLandscape = Math.min(window.innerWidth, window.innerHeight) <= 480
+    && window.innerHeight <= 500
+
+  return (window.innerWidth <= 900 && coarsePointer) || shortLandscape
 }
 
 export async function preloadCriticalWorldAssets(
@@ -45,23 +50,37 @@ export async function preloadCriticalWorldAssets(
 
 interface CreateWorldEntryDependenciesOptions {
   alignUniverse(world: WorldId): Promise<void>
+  handoffWorld?(world: WorldId): Promise<void>
   navigate(world: WorldId): void
   preload(world: WorldId): Promise<void>
   remember(world: WorldId): void
+  activateReducedVisuals?(world: WorldId): void
+  scrollToTop?(): void
 }
 
 export function createWorldEntryDependencies({
   alignUniverse,
+  handoffWorld,
   navigate,
   preload,
   remember,
+  activateReducedVisuals,
+  scrollToTop,
 }: CreateWorldEntryDependenciesOptions): WorldEntryDependencies {
-  return {
+  const dependencies: WorldEntryDependencies = {
     alignTarget: (world: WorldId, source: WorldEntrySource) => (
-      source === 'universe' ? alignUniverse(world) : Promise.resolve()
+      source === 'universe' ? alignUniverse(world)
+        : source === 'world-gate' ? handoffWorld?.(world) ?? Promise.resolve()
+          : Promise.resolve()
     ),
     preloadCriticalAssets: preload,
-    commitRoute: navigate,
+    commitRoute: (world) => {
+      scrollToTop?.()
+      navigate(world)
+    },
     rememberWorld: remember,
   }
+
+  if (activateReducedVisuals) dependencies.activateReducedVisuals = activateReducedVisuals
+  return dependencies
 }

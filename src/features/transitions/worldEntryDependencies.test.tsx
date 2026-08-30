@@ -7,6 +7,7 @@ import {
   preloadCriticalWorldAssets,
 } from './worldEntryDependencies'
 import { WorldEntryProvider, useWorldEntry, useWorldEntryStore } from './useWorldEntry'
+import { useSiteStore } from '../../state/siteStore'
 
 function EntryTrigger() {
   const { enterWorld } = useWorldEntry()
@@ -15,6 +16,7 @@ function EntryTrigger() {
 
 afterEach(() => {
   act(() => useWorldEntryStore.getState().dispatch({ type: 'RESET' }))
+  useSiteStore.getState().setReducedVisualWorld(null)
   vi.restoreAllMocks()
 })
 
@@ -38,18 +40,50 @@ describe('concrete World Entry dependencies', () => {
     expect(decode).toHaveBeenCalledOnce()
   })
 
+  it('uses the 960px editorial source on a coarse-pointer landscape phone', async () => {
+    const decode = vi.fn().mockResolvedValue(undefined)
+    const image = { decode, src: '' } as unknown as HTMLImageElement
+    const loadScene = vi.fn().mockResolvedValue({ default: () => null })
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 844 })
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 390 })
+    vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query === '(pointer: coarse)' })))
+
+    await preloadCriticalWorldAssets('spring', { createImage: () => image, loadScene })
+
+    expect(image.src).toBe('/media/demo/spring-editorial-960.webp')
+  })
+
   it('aligns only a Universe source while Gate uses the material handoff', async () => {
     const alignUniverse = vi.fn().mockResolvedValue(undefined)
+    const handoffWorld = vi.fn().mockResolvedValue(undefined)
     const preload = vi.fn().mockResolvedValue(undefined)
     const navigate = vi.fn()
     const remember = vi.fn()
-    const dependencies = createWorldEntryDependencies({ alignUniverse, navigate, preload, remember })
+    const dependencies = createWorldEntryDependencies({ alignUniverse, handoffWorld, navigate, preload, remember })
 
     await dependencies.alignTarget('summer', 'world-gate')
     expect(alignUniverse).not.toHaveBeenCalled()
+    expect(handoffWorld).toHaveBeenCalledWith('summer')
 
     await dependencies.alignTarget('summer', 'universe')
     expect(alignUniverse).toHaveBeenCalledWith('summer')
+  })
+
+  it('resets document scroll before committing a World route', () => {
+    const events: string[] = []
+    const scrollToTop = () => events.push('scroll')
+    const navigate = (world: string) => events.push(`navigate:${world}`)
+    const dependencies = createWorldEntryDependencies({
+      alignUniverse: async () => undefined,
+      navigate,
+      preload: async () => undefined,
+      remember: () => undefined,
+      scrollToTop,
+    })
+
+    dependencies.commitRoute('winter')
+
+    expect(events).toEqual(['scroll', 'navigate:winter'])
   })
 
   it('turns a failed image decode into reduced-visual recovery that preserves the route choice', async () => {
@@ -65,6 +99,7 @@ describe('concrete World Entry dependencies', () => {
         mobile: false,
       }),
       remember: () => undefined,
+      activateReducedVisuals: useSiteStore.getState().setReducedVisualWorld,
     })
     const user = userEvent.setup()
 
@@ -81,5 +116,7 @@ describe('concrete World Entry dependencies', () => {
 
     await user.click(recovery)
     expect(committed).toEqual(['spring'])
+    expect(useSiteStore.getState().reducedVisualWorld).toBe('spring')
+    expect(decode).toHaveBeenCalledOnce()
   })
 })

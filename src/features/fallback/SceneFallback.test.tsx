@@ -47,7 +47,7 @@ describe('scene fallback paths', () => {
 
     render(<TestRouter initialEntries={['/world/winter']} />)
 
-    expect(screen.getByRole('heading', { name: 'WINTER' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'WINTER / FREEZE' })).toBeInTheDocument()
     const staticNavigation = screen.getByRole('navigation', { name: 'Static universe navigation' })
     expect(staticNavigation).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: /Spring|Summer|Autumn|Winter|Studio/ })).toHaveLength(5)

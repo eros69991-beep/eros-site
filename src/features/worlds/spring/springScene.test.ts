@@ -3,6 +3,7 @@ import {
   SPRING_MIST_OFFSET_LIMIT,
   getSpringAtmosphere,
   getSpringMistOffset,
+  sampleSpringAtmosphere,
 } from './springAtmosphere'
 
 describe('Spring atmosphere', () => {
@@ -53,5 +54,15 @@ describe('Spring atmosphere', () => {
 
     expect(offsets.every((offset) => Number.isFinite(offset))).toBe(true)
     expect(offsets.every((offset) => Math.abs(offset) <= SPRING_MIST_OFFSET_LIMIT)).toBe(true)
+  })
+
+  it('samples the mutable scene progress during each frame rather than only at initial render', () => {
+    const progress = { current: 0 }
+    const sealed = sampleSpringAtmosphere(progress, false, 'balanced')
+    progress.current = 1
+    const permeable = sampleSpringAtmosphere(progress, false, 'balanced')
+
+    expect(permeable.fogDensity).toBeLessThan(sealed.fogDensity)
+    expect(permeable.wetReflection).toBeGreaterThan(sealed.wetReflection)
   })
 })

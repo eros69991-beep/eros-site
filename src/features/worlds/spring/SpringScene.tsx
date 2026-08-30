@@ -1,15 +1,19 @@
 import { useFrame } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type MutableRefObject } from 'react'
 import {
   BufferAttribute,
   BufferGeometry,
   Matrix4,
+  type FogExp2,
+  type MeshPhysicalMaterial,
+  type LineBasicMaterial,
+  type PointLight,
   type Group,
   type InstancedMesh,
 } from 'three'
 import type { WorldSceneProps } from '../../../scene/contracts'
 import { getSceneTime } from '../../../scene/sceneClock'
-import { getSpringAtmosphere, getSpringMistOffset } from './springAtmosphere'
+import { getSpringAtmosphere, getSpringMistOffset, sampleSpringAtmosphere } from './springAtmosphere'
 
 interface MistTransform {
   x: number
@@ -43,10 +47,10 @@ function createCondensationGeometry(count: number) {
   return geometry
 }
 
-function MistSheets({ reducedMotion, quality, verticalDrift }: {
+function MistSheets({ reducedMotion, quality, atmosphereRef }: {
   reducedMotion: boolean
   quality: WorldSceneProps['quality']
-  verticalDrift: number
+  atmosphereRef: MutableRefObject<ReturnType<typeof getSpringAtmosphere>>
 }) {
   const meshRef = useRef<InstancedMesh>(null)
   const groupRef = useRef<Group>(null)
@@ -67,7 +71,7 @@ function MistSheets({ reducedMotion, quality, verticalDrift }: {
 
   useFrame(() => {
     if (reducedMotion || !groupRef.current) return
-    groupRef.current.position.y = getSpringMistOffset(getSceneTime(), verticalDrift)
+    groupRef.current.position.y = getSpringMistOffset(getSceneTime(), atmosphereRef.current.verticalDrift)
   })
 
   return (
@@ -80,10 +84,10 @@ function MistSheets({ reducedMotion, quality, verticalDrift }: {
   )
 }
 
-function Condensation({ particleCount, reducedMotion, verticalDrift }: {
+function Condensation({ particleCount, reducedMotion, atmosphereRef }: {
   particleCount: number
   reducedMotion: boolean
-  verticalDrift: number
+  atmosphereRef: MutableRefObject<ReturnType<typeof getSpringAtmosphere>>
 }) {
   const pointsRef = useRef<Group>(null)
   const geometry = useMemo(() => createCondensationGeometry(particleCount), [particleCount])
@@ -92,7 +96,7 @@ function Condensation({ particleCount, reducedMotion, verticalDrift }: {
 
   useFrame(() => {
     if (reducedMotion || !pointsRef.current) return
-    pointsRef.current.position.y = (getSceneTime() % 28) * verticalDrift
+    pointsRef.current.position.y = (getSceneTime() % 28) * atmosphereRef.current.verticalDrift
   })
 
   return (
@@ -111,12 +115,13 @@ function Condensation({ particleCount, reducedMotion, verticalDrift }: {
   )
 }
 
-function FractureTrace({ livingAccent, reducedMotion, verticalDrift }: {
-  livingAccent: number
+function FractureTrace({ reducedMotion, atmosphereRef, livingAccent }: {
   reducedMotion: boolean
-  verticalDrift: number
+  atmosphereRef: MutableRefObject<ReturnType<typeof getSpringAtmosphere>>
+  livingAccent: number
 }) {
   const groupRef = useRef<Group>(null)
+  const materialRef = useRef<LineBasicMaterial>(null)
   const geometry = useMemo(() => {
     const positions = new Float32Array([
       -5.6, -6.3, 0.25, -3.8, -3.8, 0.12,
@@ -134,28 +139,41 @@ function FractureTrace({ livingAccent, reducedMotion, verticalDrift }: {
 
   useFrame(() => {
     if (reducedMotion || !groupRef.current) return
-    groupRef.current.position.y = Math.sin(getSceneTime() * 0.11) * 0.08 + verticalDrift * 2
+    groupRef.current.position.y = Math.sin(getSceneTime() * 0.11) * 0.08 + atmosphereRef.current.verticalDrift * 2
+    if (materialRef.current) materialRef.current.opacity = atmosphereRef.current.livingAccent
   })
 
   return (
     <group ref={groupRef}>
       <lineSegments geometry={geometry}>
-        <lineBasicMaterial color="#8AC6A8" opacity={livingAccent} transparent />
+        <lineBasicMaterial ref={materialRef} color="#8AC6A8" opacity={livingAccent} transparent />
       </lineSegments>
     </group>
   )
 }
 
 export default function SpringScene({ quality, reducedMotion, progress }: WorldSceneProps) {
-  const atmosphere = getSpringAtmosphere(progress.current, reducedMotion, quality)
+  const initialAtmosphere = getSpringAtmosphere(progress.current, reducedMotion, quality)
+  const atmosphereRef = useRef(initialAtmosphere)
+  const fogRef = useRef<FogExp2>(null)
+  const wetFilmRef = useRef<MeshPhysicalMaterial>(null)
+  const livingLightRef = useRef<PointLight>(null)
+
+  useFrame(() => {
+    const next = sampleSpringAtmosphere(progress, reducedMotion, quality)
+    atmosphereRef.current = next
+    if (fogRef.current) fogRef.current.density = next.fogDensity
+    if (wetFilmRef.current) wetFilmRef.current.opacity = next.wetReflection
+    if (livingLightRef.current) livingLightRef.current.intensity = next.livingAccent * 5
+  })
 
   return (
     <group>
       <color attach="background" args={['#0C100E']} />
-      <fogExp2 attach="fog" args={['#0C100E', atmosphere.fogDensity]} />
+      <fogExp2 ref={fogRef} attach="fog" args={['#0C100E', initialAtmosphere.fogDensity]} />
       <ambientLight color="#C8D3CC" intensity={0.17} />
       <directionalLight color="#9EBCAD" intensity={0.42} position={[-7, 5, 7]} />
-      <pointLight color="#8AC6A8" distance={7} intensity={atmosphere.livingAccent * 5} position={[-3.8, -3.5, 2]} />
+      <pointLight ref={livingLightRef} color="#8AC6A8" distance={7} intensity={initialAtmosphere.livingAccent * 5} position={[-3.8, -3.5, 2]} />
       <mesh position={[0, -2.9, -1.8]}>
         <planeGeometry args={[34, 18]} />
         <meshStandardMaterial color="#1B2420" metalness={0.44} roughness={0.42} />
@@ -163,25 +181,26 @@ export default function SpringScene({ quality, reducedMotion, progress }: WorldS
       <mesh position={[0, -2.9, -1.72]}>
         <planeGeometry args={[34, 18]} />
         <meshPhysicalMaterial
+          ref={wetFilmRef}
           color="#C8D3CC"
           clearcoat={1}
           clearcoatRoughness={0.18}
           metalness={0.22}
-          opacity={atmosphere.wetReflection}
+          opacity={initialAtmosphere.wetReflection}
           roughness={0.18}
           transparent
         />
       </mesh>
-      <MistSheets quality={quality} reducedMotion={reducedMotion} verticalDrift={atmosphere.verticalDrift} />
+      <MistSheets quality={quality} reducedMotion={reducedMotion} atmosphereRef={atmosphereRef} />
       <Condensation
-        particleCount={atmosphere.particleCount}
+        particleCount={initialAtmosphere.particleCount}
         reducedMotion={reducedMotion}
-        verticalDrift={atmosphere.verticalDrift}
+        atmosphereRef={atmosphereRef}
       />
       <FractureTrace
-        livingAccent={atmosphere.livingAccent}
         reducedMotion={reducedMotion}
-        verticalDrift={atmosphere.verticalDrift}
+        atmosphereRef={atmosphereRef}
+        livingAccent={initialAtmosphere.livingAccent}
       />
     </group>
   )
