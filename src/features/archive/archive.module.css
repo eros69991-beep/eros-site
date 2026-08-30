@@ -1,0 +1,10 @@
+.archive { padding: 6rem 1rem 2rem; }
+.filters { display: grid; gap: 1rem; margin-block: 2rem; }
+.filterGroup { display: flex; flex-wrap: wrap; gap: .5rem 1rem; border: 0; padding: 0; }
+.filterGroup legend { width: 100%; font-weight: 700; }
+.option { display: inline-flex; gap: .35rem; }
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 2rem; }
+.object a { color: inherit; text-decoration: none; }
+.object img { display: block; width: 100%; height: auto; }
+.empty { padding-block: 3rem; }
+.worldEntry { margin: 0 1rem 1.5rem 0; }

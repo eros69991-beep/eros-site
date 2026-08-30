@@ -1,6 +1,6 @@
 import { demoObjects, formatUsd } from './objects'
 import { mediaManifest } from '../media/mediaManifest'
-import { filterObjects, getObject, getWorld, searchObjects } from './selectors'
+import { filterObjects, getObject, getWorld, parseArchiveParams, searchObjects, serializeArchiveParams } from './selectors'
 import { celestials, worlds } from './worlds'
 import { validateCatalog } from './validate'
 
@@ -89,6 +89,18 @@ describe('EROS domain', () => {
 
   it('treats empty filter groups as unrestricted', () => {
     expect(filterObjects({ world: [], type: [], material: [], color: [] })).toHaveLength(8)
+  })
+
+  it('round-trips shareable Archive filters through URL parameters', () => {
+    const filters = parseArchiveParams(new URLSearchParams('?world=winter&type=accessory&material=stainless+steel&color=black'))
+
+    expect(filters).toEqual({
+      world: ['winter'],
+      type: ['accessory'],
+      material: ['stainless steel'],
+      color: ['black'],
+    })
+    expect(parseArchiveParams(serializeArchiveParams(filters))).toEqual(filters)
   })
 
   it.each([
