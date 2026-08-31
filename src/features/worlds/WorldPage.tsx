@@ -38,7 +38,7 @@ export function WorldPage() {
     return (
       <section aria-labelledby="world-unavailable-heading">
         <h1 id="world-unavailable-heading">WORLD UNAVAILABLE</h1>
-        <Link to="/archive">VIEW ARCHIVE</Link>
+        <Link className="touch-link" to="/archive">VIEW ARCHIVE</Link>
       </section>
     )
   }
@@ -78,7 +78,7 @@ export function WorldPage() {
         <section aria-label="Next World" className={styles.nextWorld}>
           <p>{number} / 04</p>
           <h2>{world.id === 'winter' ? 'RETURN' : 'NEXT WORLD'}</h2>
-          <Link to={nextWorld.route}>{nextWorld.season} / {nextWorld.concept}</Link>
+          <Link className="touch-link" to={nextWorld.route}>{nextWorld.season} / {nextWorld.concept}</Link>
         </section>
       </article>
     </WorldSceneFrame>

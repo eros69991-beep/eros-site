@@ -17,3 +17,12 @@ Verification completed:
 Browser smoke was attempted for the requested 1440×900, 390×844, 360×800, and 844×390 viewports. It could not run because this environment has no Chrome/Chromium executable and the Playwright CLI reports that Chrome is missing. No browser artifacts were retained.
 
 Cleanup: moved `.tmp-demo-media-builder-PUavqH` to Trash.
+
+### Follow-up accessibility completion
+
+- Skip navigation now moves keyboard focus to `main#main-content`, which keeps a visible focus outline.
+- Added the shared `.touch-link` target class to route CTAs, archive/search result cards, product/world navigation, and World object links without changing inline editorial prose links.
+- Added safe-area block tokens and applied safe inline/block padding to the Global Header, Gate dialog, Archive, Search, Bag, Product, Studio, and World route shells.
+- Added focused structural and CSS-contract tests for skip focus, touch targets, and safe-area consumption.
+
+Follow-up verification: `pnpm test` passed (33 files, 204 tests); `pnpm lint`, `pnpm build`, and `git diff --check` passed. The production build retains the pre-existing Vite warning for a minified chunk over 500 kB.

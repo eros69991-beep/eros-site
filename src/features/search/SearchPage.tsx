@@ -23,12 +23,12 @@ export function SearchPage() {
       {query.trim() && results.length === 0 ? (
         <section aria-label="No search results" className={styles.empty}>
           <p>No Objects match “{query}”.</p>
-          <Link to="/archive">View Archive</Link>
+          <Link className="touch-link" to="/archive">View Archive</Link>
         </section>
       ) : null}
       {results.length > 0 ? (
         <div className={styles.results}>
-          {results.map((object) => <article key={object.id}><Link to={`/product/${object.slug}`}><p>{object.objectNumber}</p><h2>{object.name}</h2><p>{object.world}</p></Link></article>)}
+          {results.map((object) => <article key={object.id}><Link className="touch-link" to={`/product/${object.slug}`}><p>{object.objectNumber}</p><h2>{object.name}</h2><p>{object.world}</p></Link></article>)}
         </div>
       ) : null}
     </section>

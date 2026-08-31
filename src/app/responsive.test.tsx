@@ -1,8 +1,18 @@
 import { cleanup, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TestRouter } from './AppRouter'
 import './styles/tokens.css'
 import './styles/global.css'
+import globalStyles from './styles/global.css?raw'
+import tokenStyles from './styles/tokens.css?raw'
+import navigationStyles from '../features/navigation/navigation.module.css?raw'
+import archiveStyles from '../features/archive/archive.module.css?raw'
+import searchStyles from '../features/search/search.module.css?raw'
+import bagStyles from '../features/bag/bag.module.css?raw'
+import productStyles from '../features/product/product.module.css?raw'
+import studioStyles from '../features/studio/studio.module.css?raw'
+import worldStyles from '../features/worlds/worlds.module.css?raw'
 
 vi.mock('../scene/SceneHost', () => ({
   SceneHost: () => null,
@@ -54,5 +64,49 @@ describe('responsive route structure', () => {
     render(<TestRouter initialEntries={['/search']} />)
 
     expect(Number.parseFloat(getComputedStyle(screen.getByRole('searchbox')).minHeight)).toBeGreaterThanOrEqual(44)
+  })
+
+  it('moves skip navigation focus to the visible main target', async () => {
+    const user = userEvent.setup()
+    render(<TestRouter initialEntries={['/']} />)
+
+    const main = screen.getByRole('main', { name: /eros studio/i })
+    await user.click(screen.getByRole('link', { name: /skip to main content/i }))
+
+    expect(main).toHaveFocus()
+    expect(globalStyles).toMatch(/main:focus\s*\{[^}]*outline:/)
+  })
+
+  it('gives route navigation links a shared touch target without styling every prose link', () => {
+    const routeLinks = [
+      ['/studio', 'ARCHIVE / ALL OBJECTS'],
+      ['/product/prototype-spring-001', /belongs to/i],
+      ['/archive', /Mist Shell/],
+      ['/search?q=mist', /Mist Shell/],
+    ] as const
+
+    for (const [route, name] of routeLinks) {
+      const { unmount } = render(<TestRouter initialEntries={[route]} />)
+      const link = screen.getByRole('link', { name })
+      expect(link).toHaveClass('touch-link')
+      expect(Number.parseFloat(getComputedStyle(link).minWidth)).toBeGreaterThanOrEqual(44)
+      expect(Number.parseFloat(getComputedStyle(link).minHeight)).toBeGreaterThanOrEqual(44)
+      unmount()
+    }
+  })
+
+  it('uses safe-area spacing contracts in shared chrome and every route shell', () => {
+    expect(tokenStyles).toContain('--space-safe-block-start')
+    expect(tokenStyles).toContain('--space-safe-block-end')
+
+    for (const stylesheet of [navigationStyles, archiveStyles, searchStyles, bagStyles, productStyles, studioStyles, worldStyles]) {
+      expect(stylesheet).toContain('var(--space-safe-inline)')
+      expect(stylesheet).toContain('var(--space-safe-inline-end)')
+    }
+
+    expect(navigationStyles).toContain('var(--space-safe-block-start)')
+    for (const stylesheet of [archiveStyles, searchStyles, bagStyles, productStyles, studioStyles, worldStyles]) {
+      expect(stylesheet).toContain('var(--space-safe-block-end)')
+    }
   })
 })

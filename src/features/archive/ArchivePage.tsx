@@ -47,7 +47,7 @@ function ArchiveFilterGroup<T extends string>({ name, legend, values, selected, 
 function ObjectResult({ object }: { object: ObjectDefinition }) {
   return (
     <article className={styles.object}>
-      <Link to={`/product/${object.slug}`}>
+      <Link className="touch-link" to={`/product/${object.slug}`}>
         <img alt={object.media[0]!.alt} height={object.media[0]!.height} src={object.media[0]!.src} width={object.media[0]!.width} />
         <p>{object.objectNumber}</p>
         <h2>{object.name}</h2>

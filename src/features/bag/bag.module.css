@@ -1,4 +1,4 @@
-.bag { min-height: 100%; padding: 6rem 1rem 3rem; background: #fff; }
+.bag { min-height: 100%; padding: max(6rem, var(--space-safe-block-start)) var(--space-safe-inline-end) var(--space-safe-block-end) var(--space-safe-inline); background: #fff; }
 .bag > h1 { margin-top: 0; font-size: clamp(2rem, 7vw, 5rem); font-weight: 400; letter-spacing: .08em; }
 .empty { padding-block: 3rem; }
 .lines { display: grid; gap: 1.5rem; max-width: 48rem; margin: 2rem 0; padding: 0; list-style: none; }

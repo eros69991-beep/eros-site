@@ -2,7 +2,7 @@
   width: min(74rem, 100%);
   min-height: 100dvh;
   margin-inline: auto;
-  padding: 9rem 1.5rem 4rem;
+  padding: max(9rem, var(--space-safe-block-start)) var(--space-safe-inline-end) var(--space-safe-block-end) var(--space-safe-inline);
   color: rgb(25 27 28 / 78%);
 }
 

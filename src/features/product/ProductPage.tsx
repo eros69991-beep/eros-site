@@ -34,7 +34,7 @@ export function ProductPage() {
   const addToBag = useSiteStore((state) => state.addToBag)
 
   if (!object) {
-    return <section aria-labelledby="product-unavailable-heading" className={styles.unavailable}><h1 id="product-unavailable-heading">OBJECT UNAVAILABLE</h1><Link to="/archive">VIEW ARCHIVE</Link></section>
+    return <section aria-labelledby="product-unavailable-heading" className={styles.unavailable}><h1 id="product-unavailable-heading">OBJECT UNAVAILABLE</h1><Link className="touch-link" to="/archive">VIEW ARCHIVE</Link></section>
   }
 
   const world = getWorld(object.world)
@@ -90,7 +90,7 @@ export function ProductPage() {
         <button onClick={addSelectedSize} type="button">Add to Bag</button>
         <p aria-live="polite" role={validationMessage.startsWith('Select') ? 'alert' : undefined}>{validationMessage}</p>
       </div>
-      <Link className={styles.worldLink} to={world.route}>BELONGS TO — {world.season} / {world.concept}</Link>
+      <Link className={`${styles.worldLink} touch-link`} to={world.route}>BELONGS TO — {world.season} / {world.concept}</Link>
     </article>
   )
 }

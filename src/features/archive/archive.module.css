@@ -1,4 +1,4 @@
-.archive { padding: 6rem 1rem 2rem; }
+.archive { padding: max(6rem, var(--space-safe-block-start)) var(--space-safe-inline-end) var(--space-safe-block-end) var(--space-safe-inline); }
 .filters { display: grid; gap: 1rem; margin-block: 2rem; }
 .filterGroup { display: flex; flex-wrap: wrap; gap: .5rem 1rem; border: 0; padding: 0; }
 .filterGroup legend { width: 100%; font-weight: 700; }

@@ -1,4 +1,4 @@
-.product, .unavailable { padding: 6rem 1rem 3rem; background: rgb(255 255 255 / 92%); }
+.product, .unavailable { padding: max(6rem, var(--space-safe-block-start)) var(--space-safe-inline-end) var(--space-safe-block-end) var(--space-safe-inline); background: rgb(255 255 255 / 92%); }
 .product { display: grid; gap: 1.5rem; max-width: 68rem; margin-inline: auto; }
 .primaryMedia, .editorialMedia, .detailMedia { max-width: 42rem; }
 .primaryMedia img, .editorialMedia img, .detailMedia img { display: block; width: 100%; height: auto; }

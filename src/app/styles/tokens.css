@@ -27,6 +27,8 @@
   --type-display: clamp(2.4rem, 1.4rem + 5vw, 7rem);
   --space-safe-inline: max(1rem, env(safe-area-inset-left));
   --space-safe-inline-end: max(1rem, env(safe-area-inset-right));
+  --space-safe-block-start: max(1rem, env(safe-area-inset-top));
+  --space-safe-block-end: max(1rem, env(safe-area-inset-bottom));
   --world-spring: #8ac6a8;
   --world-summer: #fff8e9;
   --world-autumn: #c47d52;

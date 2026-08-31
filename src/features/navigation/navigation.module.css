@@ -1,7 +1,7 @@
 .header {
   position: relative;
   z-index: 1;
-  padding: 1rem;
+  padding: var(--space-safe-block-start) var(--space-safe-inline-end) 1rem var(--space-safe-inline);
 }
 
 .navigation,
@@ -57,7 +57,7 @@
   width: min(100% - 2rem, 40rem);
   max-height: calc(100dvh - 2rem);
   overflow: auto;
-  padding: 1.5rem;
+  padding: max(1.5rem, var(--space-safe-block-start)) max(1.5rem, var(--space-safe-inline-end)) max(1.5rem, var(--space-safe-block-end)) max(1.5rem, var(--space-safe-inline));
   color: #ffffff;
   background: #111111;
 }
@@ -88,7 +88,7 @@
 
 @media (max-width: 44rem) {
   .header {
-    padding: 0.5rem;
+    padding: var(--space-safe-block-start) var(--space-safe-inline-end) 0.5rem var(--space-safe-inline);
   }
 
   .actions {

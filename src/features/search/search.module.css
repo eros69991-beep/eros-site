@@ -1,4 +1,4 @@
-.search { min-height: 100%; padding: 6rem 1rem 2rem; background: #fff; }
+.search { min-height: 100%; padding: max(6rem, var(--space-safe-block-start)) var(--space-safe-inline-end) var(--space-safe-block-end) var(--space-safe-inline); background: #fff; }
 .query { display: grid; gap: .5rem; max-width: 32rem; margin-block: 2rem; }
 .query input { min-height: 44px; font: inherit; }
 .results { display: grid; gap: 1rem; }

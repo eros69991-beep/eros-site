@@ -55,12 +55,12 @@ function WorldObject({ mediaKey, object, world }: {
 }) {
   return (
     <article className={styles.objectEncounter}>
-      <Link aria-label={`View ${object.name}, ${object.objectNumber}`} className={styles.objectMediaLink} to={`/product/${object.slug}`}>
+      <Link aria-label={`View ${object.name}, ${object.objectNumber}`} className={`${styles.objectMediaLink} touch-link`} to={`/product/${object.slug}`}>
         <ManifestPicture mediaKey={mediaKey} sizes="(max-width: 44rem) 88vw, 62vw" />
       </Link>
       <div className={styles.objectFacts}>
         <p className={styles.objectNumber}>{object.objectNumber}</p>
-        <h3><Link to={`/product/${object.slug}`}>{object.name}</Link></h3>
+        <h3><Link className="touch-link" to={`/product/${object.slug}`}>{object.name}</Link></h3>
         <p>{formatUsd(object.price)}</p>
         <p className={styles.objectWorld}>{world.season} / {world.concept} WORLD</p>
       </div>

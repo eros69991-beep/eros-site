@@ -61,7 +61,7 @@ export function AppShell() {
           data-world={worldHandoff ?? undefined}
         />
         <div className={sceneStyles.semanticLayer}>
-          <a className="skip-link" href="#main-content">Skip to main content</a>
+          <a className="skip-link" href="#main-content" onClick={() => document.getElementById('main-content')?.focus()}>Skip to main content</a>
           <GlobalHeader menuButtonRef={menuButtonRef} />
           <main aria-label="EROS Studio" id="main-content" tabIndex={-1}>
             {background ? <BackgroundRoute location={background} /> : null}

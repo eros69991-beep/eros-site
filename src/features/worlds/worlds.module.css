@@ -39,7 +39,7 @@
 .objects,
 .nextWorld {
   position: relative;
-  padding-inline: clamp(1.25rem, 6vw, 7rem);
+  padding-inline: max(var(--space-safe-inline), clamp(1.25rem, 6vw, 7rem));
 }
 
 .atmosphere {
@@ -48,7 +48,7 @@
   flex-direction: column;
   justify-content: flex-end;
   gap: 1rem;
-  padding-block: clamp(7rem, 18vh, 12rem) clamp(2.5rem, 8vh, 7rem);
+  padding-block: max(var(--space-safe-block-start), clamp(7rem, 18vh, 12rem)) max(var(--space-safe-block-end), clamp(2.5rem, 8vh, 7rem));
   background: linear-gradient(180deg, transparent 0 30%, var(--world-surface) 100%);
 }
 
@@ -87,7 +87,7 @@
 
 .editorial,
 .objects {
-  padding-block: clamp(5rem, 12vw, 11rem);
+  padding-block: max(var(--space-safe-block-start), clamp(5rem, 12vw, 11rem)) max(var(--space-safe-block-end), clamp(5rem, 12vw, 11rem));
   background: var(--world-ground);
 }
 
@@ -189,7 +189,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-block: 5rem;
+  padding-block: max(5rem, var(--space-safe-block-start)) max(5rem, var(--space-safe-block-end));
   border-top: 1px solid color-mix(in srgb, var(--world-foreground) 22%, transparent);
   background: var(--world-surface);
 }
@@ -208,7 +208,7 @@
   .editorial,
   .objects,
   .nextWorld {
-    padding-inline: 1.25rem;
+    padding-inline: var(--space-safe-inline) var(--space-safe-inline-end);
   }
 
   .atmosphere h1 {
