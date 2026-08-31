@@ -2,12 +2,66 @@
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:where(button, [role='button']) {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+:where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  min-height: 44px;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: max(0.75rem, env(safe-area-inset-top));
+  left: var(--space-safe-inline);
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 0.75rem;
+  color: var(--ink);
+  background: var(--focus-ring);
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 160ms ease-out;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+main:focus {
+  outline: none;
 }
 
 .route-background {
-  min-height: 100%;
+  min-height: 100dvh;
 }
 
 .route-overlay {
@@ -15,4 +69,21 @@ body {
   z-index: 2;
   inset: 0;
   background: var(--route-overlay-background, #ffffff);
+}
+
+@media (max-height: 34rem) and (orientation: landscape) {
+  .skip-link {
+    top: 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

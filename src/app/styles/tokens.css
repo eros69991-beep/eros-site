@@ -1,5 +1,40 @@
+@font-face {
+  font-family: 'Instrument Sans Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 700;
+  src: url('@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Newsreader Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2') format('woff2-variations');
+}
+
 :root {
-  color: #111111;
-  background: #ffffff;
-  font-family: 'Instrument Sans Variable', sans-serif;
+  --ink: #111111;
+  --paper: #ffffff;
+  --muted-ink: rgb(17 17 17 / 68%);
+  --focus-ring: #d7fd00;
+  --font-brand: 'Instrument Sans Variable', sans-serif;
+  --font-editorial: 'Newsreader Variable', serif;
+  --control-target: 44px;
+  --type-label: clamp(0.69rem, 0.63rem + 0.25vw, 0.88rem);
+  --type-body: clamp(0.94rem, 0.88rem + 0.3vw, 1.12rem);
+  --type-display: clamp(2.4rem, 1.4rem + 5vw, 7rem);
+  --space-safe-inline: max(1rem, env(safe-area-inset-left));
+  --space-safe-inline-end: max(1rem, env(safe-area-inset-right));
+  --world-spring: #8ac6a8;
+  --world-summer: #fff8e9;
+  --world-autumn: #c47d52;
+  --world-winter: #d4d7d7;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-brand);
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
 }

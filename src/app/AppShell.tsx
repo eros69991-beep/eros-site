@@ -22,12 +22,14 @@ import { scrollToWorldTop } from '../features/transitions/scrollToWorldTop'
 import { handoffWorldGateMaterial } from '../features/transitions/worldGateMaterialHandoff'
 import { SceneHost } from '../scene/SceneHost'
 import { useSiteStore } from '../state/siteStore'
+import { useDocumentMeta } from './useDocumentMeta'
 
 interface OverlayState {
   backgroundLocation?: Location
 }
 
 export function AppShell() {
+  useDocumentMeta()
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const location = useLocation()
   const navigate = useNavigate()
@@ -59,8 +61,9 @@ export function AppShell() {
           data-world={worldHandoff ?? undefined}
         />
         <div className={sceneStyles.semanticLayer}>
+          <a className="skip-link" href="#main-content">Skip to main content</a>
           <GlobalHeader menuButtonRef={menuButtonRef} />
-          <main aria-label="EROS Studio">
+          <main aria-label="EROS Studio" id="main-content" tabIndex={-1}>
             {background ? <BackgroundRoute location={background} /> : null}
             <div className={background ? 'route-overlay' : undefined}>
               <Outlet />
