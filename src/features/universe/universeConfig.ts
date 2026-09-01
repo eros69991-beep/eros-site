@@ -1,7 +1,15 @@
 import { worlds } from '../../domain/worlds'
 import type { CelestialId } from '../../domain/types'
 
-export const CORE_POSITION: [number, number, number] = [-0.6, 0.05, 0]
+export const CORE_POSITION: [number, number, number] = [5.6, 1.45, -1.8]
+
+export const PORTAL_BODY_POSITIONS = {
+  spring: [-4.8, 1.1, 1.2],
+  summer: [-1.8, 3.35, -1.5],
+  autumn: [-5.9, -2.1, -2.8],
+  winter: [1.6, -2.9, -4.4],
+  studio: [-0.35, -4.2, -6.4],
+} as const satisfies Record<CelestialId, readonly [number, number, number]>
 
 export const CELESTIAL_LABELS: Record<CelestialId, string> = {
   spring: 'Spring / Awakening',
@@ -20,11 +28,3 @@ export const CELESTIAL_COLORS: Record<CelestialId, string> = {
 }
 
 export const STAR_FIELD_SHARE = 0.65
-
-export const DISPLAY_PHASE_OFFSETS: Record<CelestialId, number> = {
-  spring: 0,
-  summer: 1.5,
-  autumn: 2.15,
-  winter: 3,
-  studio: -5.5,
-}

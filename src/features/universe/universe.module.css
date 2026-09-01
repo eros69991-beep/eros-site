@@ -47,6 +47,11 @@
   letter-spacing: 0.13em;
 }
 
+.celestialControls {
+  position: relative;
+  z-index: 1;
+}
+
 .mobilePosition {
   display: none;
 }
