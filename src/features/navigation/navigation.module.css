@@ -24,6 +24,8 @@
 
 .actions {
   gap: 0.5rem;
+  min-width: 44px;
+  justify-content: flex-end;
 }
 
 .link,

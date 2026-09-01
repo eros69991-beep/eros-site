@@ -90,7 +90,7 @@ describe('WorldGate', () => {
       ],
     })
 
-    render(<TestRouter initialEntries={['/']} />)
+    render(<TestRouter initialEntries={['/archive']} />)
 
     expect(screen.getByRole('link', { name: 'BAG 3' })).toBeInTheDocument()
   })

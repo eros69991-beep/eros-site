@@ -1,55 +1,71 @@
-import { useNavigate } from 'react-router-dom'
-import { celestials } from '../../domain/worlds'
+import { useRef, type CSSProperties } from 'react'
 import { useSiteStore } from '../../state/siteStore'
 import { useWorldEntry } from '../transitions/useWorldEntry'
-import { CELESTIAL_LABELS } from './universeConfig'
+import { PORTAL_ORDER, getPortalBody, getSwipeDestination } from './portalModel'
 import styles from './universe.module.css'
 
 export function SemanticCelestialControls() {
-  const navigate = useNavigate()
   const { enterWorld } = useWorldEntry()
   const selected = useSiteStore((state) => state.selectedCelestial)
   const selectCelestial = useSiteStore((state) => state.selectCelestial)
-  const selectedDefinition = celestials.find((celestial) => celestial.id === selected)
-  const selectedLabel = selected ? CELESTIAL_LABELS[selected] : null
+  const pointerStartX = useRef<number | null>(null)
+  const ignoreNextClick = useRef(false)
+  const body = selected ? getPortalBody(selected) : null
+  const selectedIndex = selected ? PORTAL_ORDER.indexOf(selected) : 0
 
   return (
     <nav aria-label="Celestial destinations" className={styles.celestialControls}>
-      <p className={styles.controlEyebrow}>SELECT A WORLD</p>
-      <div className={styles.controlList}>
-        {celestials.map((celestial) => {
-          const label = CELESTIAL_LABELS[celestial.id]
-          const isSelected = selected === celestial.id
+      <div
+        className={styles.controlList}
+        onPointerDown={(event) => {
+          if (event.pointerType === 'touch') pointerStartX.current = event.clientX
+        }}
+        onPointerUp={(event) => {
+          if (event.pointerType !== 'touch' || pointerStartX.current === null) return
+          const current = selected ?? PORTAL_ORDER[0]
+          const destination = getSwipeDestination(current, event.clientX - pointerStartX.current, window.innerWidth)
+          ignoreNextClick.current = destination !== current
+          selectCelestial(destination)
+          pointerStartX.current = null
+        }}
+        onPointerCancel={() => { pointerStartX.current = null }}
+        style={{ '--portal-index': selectedIndex } as CSSProperties}
+      >
+        {PORTAL_ORDER.map((id) => {
+          const portalBody = getPortalBody(id)
+          const isSelected = selected === id
           return (
             <button
               aria-pressed={isSelected}
               className={styles.celestialControl}
-              key={celestial.id}
-              onClick={() => selectCelestial(celestial.id)}
-              onFocus={() => selectCelestial(celestial.id)}
+              key={id}
+              onClick={() => {
+                if (ignoreNextClick.current) {
+                  ignoreNextClick.current = false
+                  return
+                }
+                selectCelestial(id)
+              }}
+              onFocus={() => selectCelestial(id)}
+              onMouseEnter={() => selectCelestial(id)}
               type="button"
             >
-              <span>{label}</span>
-              <span aria-hidden="true">{isSelected ? '—' : '+'}</span>
+              {portalBody.index} / {portalBody.label}
             </button>
           )
         })}
       </div>
-      <button
-        className={styles.enterControl}
-        disabled={!selectedDefinition}
-        onClick={() => {
-          if (!selectedDefinition) return
-          if (selectedDefinition.id === 'studio') {
-            navigate(selectedDefinition.route)
-            return
-          }
-          enterWorld(selectedDefinition.id, 'universe')
-        }}
-        type="button"
-      >
-        {selectedLabel ? `Enter ${selectedLabel}` : 'Select a celestial body'}
-      </button>
+      <output aria-live="polite" className={styles.portalIdentity}>
+        {body ? `${body.index} / ${body.label}` : ''}
+      </output>
+      <output aria-label="Portal position" className={styles.mobilePosition}>
+        {body ? `${body.index}–05` : '01–05'}
+      </output>
+      {body?.world ? (
+        <button className={styles.enterControl} onClick={() => enterWorld(body.world!, 'universe')} type="button">
+          ENTER
+        </button>
+      ) : null}
     </nav>
   )
 }

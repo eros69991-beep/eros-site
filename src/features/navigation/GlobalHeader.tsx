@@ -17,14 +17,15 @@ export function GlobalHeader({ menuButtonRef }: GlobalHeaderProps) {
   const setWorldGateOpen = useSiteStore((state) => state.setWorldGateOpen)
   const backgroundLocation = (location.state as OverlayState | null)?.backgroundLocation ?? location
   const overlayState = { backgroundLocation }
+  const isHome = location.pathname === '/'
 
   return (
     <header className={styles.header} data-global-header="">
       <nav aria-label="Global navigation" className={styles.navigation}>
         <Link className={styles.link} to="/">EROS</Link>
         <div className={styles.actions}>
-          <Link className={styles.link} to="/search" state={overlayState}>SEARCH</Link>
-          <Link className={styles.link} to="/bag" state={overlayState}>BAG {bagCount}</Link>
+          {!isHome ? <Link className={styles.link} to="/search" state={overlayState}>SEARCH</Link> : null}
+          {!isHome ? <Link className={styles.link} to="/bag" state={overlayState}>BAG {bagCount}</Link> : null}
           <button
             ref={menuButtonRef}
             className={styles.menuButton}

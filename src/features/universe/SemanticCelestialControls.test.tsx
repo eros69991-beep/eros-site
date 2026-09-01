@@ -31,11 +31,17 @@ function renderControls(dependencies?: WorldEntryDependencies) {
 }
 
 describe('SemanticCelestialControls', () => {
-  it('keeps all five celestial labels keyboard reachable', async () => {
+  it('keeps all five portal bodies keyboard reachable', async () => {
     const user = userEvent.setup()
     renderControls()
 
-    for (const label of ['Spring / Awakening', 'Summer / Burn', 'Autumn / Fade', 'Winter / Freeze', 'Studio']) {
+    for (const label of [
+      '01 / SPRING / AWAKENING',
+      '02 / SUMMER / BURN',
+      '03 / AUTUMN / FADE',
+      '04 / WINTER / FREEZE',
+      '05 / STUDIO / UNKNOWN',
+    ]) {
       await user.tab()
       expect(screen.getByRole('button', { name: label })).toHaveFocus()
     }
@@ -45,7 +51,7 @@ describe('SemanticCelestialControls', () => {
     const user = userEvent.setup()
     renderControls()
 
-    const winter = screen.getByRole('button', { name: 'Winter / Freeze' })
+    const winter = screen.getByRole('button', { name: '04 / WINTER / FREEZE' })
     winter.focus()
     await user.keyboard('{Enter}')
 
@@ -56,7 +62,7 @@ describe('SemanticCelestialControls', () => {
     const user = userEvent.setup()
     renderControls()
 
-    await user.click(screen.getByRole('button', { name: 'Winter / Freeze' }))
+    await user.click(screen.getByRole('button', { name: '04 / WINTER / FREEZE' }))
 
     expect(useSiteStore.getState().selectedCelestial).toBe('winter')
     expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/')
@@ -74,11 +80,29 @@ describe('SemanticCelestialControls', () => {
     const user = userEvent.setup()
     renderControls(dependencies)
 
-    await user.click(screen.getByRole('button', { name: 'Winter / Freeze' }))
-    await user.click(screen.getByRole('button', { name: 'Enter Winter / Freeze' }))
+    await user.click(screen.getByRole('button', { name: '04 / WINTER / FREEZE' }))
+    await user.click(screen.getByRole('button', { name: 'ENTER' }))
 
     await waitFor(() => expect(committed).toEqual(['winter']))
     expect(aligned).toEqual(['winter:universe'])
     expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/')
+  })
+
+  it('selects Studio without exposing an entry action', async () => {
+    const user = userEvent.setup()
+    renderControls()
+
+    const studio = screen.getByRole('button', { name: '05 / STUDIO / UNKNOWN' })
+    expect(studio).toBeEnabled()
+    await user.click(studio)
+
+    expect(useSiteStore.getState().selectedCelestial).toBe('studio')
+    expect(screen.queryByRole('button', { name: 'ENTER' })).not.toBeInTheDocument()
+  })
+
+  it('shows the selected portal position', () => {
+    renderControls()
+
+    expect(screen.getByLabelText('Portal position')).toHaveTextContent('01–05')
   })
 })
