@@ -96,6 +96,9 @@
     #deded9;
 }
 
+.staticUniverse:has(.staticPortalCore) { background: #020405; color: #dce5e3; }
+.staticPortalCore { position: absolute; width: 45vmax; aspect-ratio: 1; right: -14vmax; top: 8%; border-radius: 48% 52% 44% 56%; background: radial-gradient(circle at 35% 35%, #526764, #0b1010 56%, #010202 73%); opacity: .92; }
+
 .appShell:has(.staticUniverse) [data-global-header] {
   color: #111111;
 }

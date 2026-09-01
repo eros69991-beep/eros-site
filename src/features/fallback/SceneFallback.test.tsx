@@ -57,6 +57,15 @@ describe('scene fallback paths', () => {
     expect(screen.getByRole('navigation', { name: 'Global navigation' })).toBeInTheDocument()
   })
 
+  it('keeps the Home static Portal decorative while semantic controls remain the entry path', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+    render(<TestRouter initialEntries={['/']} />)
+
+    expect(screen.queryByTestId('static-orbits')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Studio' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '05 / STUDIO / UNKNOWN' })).toBeInTheDocument()
+  })
+
   it('retries a failed scene without replacing the App Shell', async () => {
     const user = userEvent.setup()
     render(<RecoveryHarness />, { wrapper: MemoryRouter })

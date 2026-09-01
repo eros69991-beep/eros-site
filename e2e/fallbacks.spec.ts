@@ -15,7 +15,8 @@ test('no WebGL renders the static Universe and preserves navigation', async ({ p
   })
   await page.goto('/')
   await expect(page.getByRole('region', { name: 'Static universe' })).toBeVisible()
-  await page.getByRole('link', { name: 'Spring' }).click()
+  await page.getByRole('button', { name: 'SPRING / AWAKENING' }).click()
+  await page.getByRole('button', { name: 'Enter SPRING / AWAKENING' }).click()
   await expect(page).toHaveURL('/world/spring')
 })
 

@@ -25,7 +25,7 @@ describe('SceneHost', () => {
 
     render(<MemoryRouter initialEntries={['/world/spring']}><SceneHost /></MemoryRouter>)
 
-    expect(screen.getByRole('navigation', { name: 'Static universe navigation' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Static universe' })).toBeInTheDocument()
     expect(screen.queryByRole('status', { name: 'Realtime scene' })).not.toBeInTheDocument()
   })
 
@@ -35,7 +35,7 @@ describe('SceneHost', () => {
 
     await user.click(screen.getByRole('button', { name: 'Lose WebGL context' }))
 
-    expect(screen.getByRole('navigation', { name: 'Static universe navigation' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Static universe' })).toBeInTheDocument()
   })
 
   it('reacts to live reduced-motion preference changes', () => {

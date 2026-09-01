@@ -36,13 +36,13 @@ export function StaticUniverse({ interactive = false }: { interactive?: boolean 
         <div className={styles.staticStars} data-testid="static-stars" aria-hidden="true">
           {stars.map((star) => <i key={star.id} style={{ '--star-x': `${star.x}%`, '--star-y': `${star.y}%`, '--star-size': `${star.size}px` } as CSSProperties} />)}
         </div>
-        <div className={styles.staticOrbits} data-testid="static-orbits" aria-hidden="true">
-          <i /><i /><i /><i /><i />
-        </div>
+        {interactive ? <div className={styles.staticPortalCore} aria-hidden="true" /> : (
+          <div className={styles.staticOrbits} data-testid="static-orbits" aria-hidden="true"><i /><i /><i /><i /><i /></div>
+        )}
         <p className={styles.status}>Static celestial navigation</p>
         {interactive ? null : navigation}
       </section>
-      {interactive ? navigation : null}
+      {interactive ? null : null}
     </>
   )
 }
