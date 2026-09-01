@@ -1,0 +1,65 @@
+.home {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #000;
+  color: #e7eaeb;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.portalContent {
+  position: relative;
+  z-index: 0;
+  min-height: 100svh;
+}
+
+.introOverlay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #000;
+  pointer-events: none;
+}
+
+.introPhrase {
+  margin: 0;
+  color: #f0f3f2;
+  font-family: var(--font-editorial, serif);
+  font-size: clamp(1.1rem, 2.4vw, 2.2rem);
+  font-weight: 420;
+  letter-spacing: 0.045em;
+  line-height: 1;
+  text-align: center;
+  animation: introPhraseDeparture 3.2s cubic-bezier(0.6, 0, 0.8, 0.3) forwards;
+}
+
+@keyframes introPhraseDeparture {
+  0%, 22% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .introPhrase {
+    animation-duration: 120ms;
+  }
+}

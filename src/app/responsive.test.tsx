@@ -23,7 +23,7 @@ afterEach(() => {
 })
 
 const routes = [
-  ['/', 'EROSSTUDIO'],
+  ['/', 'EROS'],
   ['/world/spring', 'SPRING / AWAKENING'],
   ['/archive', 'ARCHIVE'],
   ['/product/prototype-spring-001', 'Mist Shell'],
