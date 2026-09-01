@@ -4,13 +4,14 @@ export type WorldEntrySource = 'universe' | 'world-gate' | 'archive'
 
 export type WorldEntryState =
   | { status: 'idle' }
-  | { status: 'targeting' | 'loading' | 'ready' | 'committing'; world: WorldId; requestId: number; source: WorldEntrySource }
+  | { status: 'targeting' | 'loading' | 'ready' | 'transitioning' | 'committing'; world: WorldId; requestId: number; source: WorldEntrySource }
   | { status: 'failed'; world: WorldId; requestId: number; source: WorldEntrySource; message: string }
 
 export type WorldEntryEvent =
   | { type: 'REQUEST'; world: WorldId; requestId: number; source: WorldEntrySource }
   | { type: 'TARGET_ALIGNED'; world: WorldId; requestId: number }
   | { type: 'ASSETS_READY'; world: WorldId; requestId: number }
+  | { type: 'HANDOFF_STARTED'; world: WorldId; requestId: number }
   | { type: 'COMMIT'; world: WorldId; requestId: number }
   | { type: 'FAIL'; world: WorldId; requestId: number; message: string }
   | { type: 'RESET' }
@@ -18,6 +19,7 @@ export type WorldEntryEvent =
 export interface WorldEntryDependencies {
   alignTarget(world: WorldId, source: WorldEntrySource): Promise<void>
   preloadCriticalAssets(world: WorldId): Promise<void>
+  playHandoff?(world: WorldId, source: WorldEntrySource): Promise<void>
   commitRoute(world: WorldId): void
   rememberWorld(world: WorldId): void
   activateReducedVisuals?(world: WorldId): void
@@ -46,8 +48,10 @@ export function worldEntryReducer(state: WorldEntryState, event: WorldEntryEvent
       return state.status === 'targeting' ? { ...state, status: 'loading' } : state
     case 'ASSETS_READY':
       return state.status === 'loading' ? { ...state, status: 'ready' } : state
+    case 'HANDOFF_STARTED':
+      return state.status === 'ready' ? { ...state, status: 'transitioning' } : state
     case 'COMMIT':
-      return state.status === 'ready' || state.status === 'failed' ? { ...state, status: 'committing' } : state
+      return state.status === 'transitioning' || state.status === 'failed' ? { ...state, status: 'committing' } : state
     case 'FAIL':
       return { ...state, status: 'failed', message: event.message }
   }

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createStore, type StateCreator } from 'zustand/vanilla'
 import type { CelestialId, QualityTier, WorldId } from '../domain/types'
 import { createBrowserStorage, createMemoryStorage, type StorageAdapter } from './storage'
+import type { HomepageMaterialHandoff } from '../features/transitions/homepageMaterialHandoff'
 
 export const BAG_STORAGE_KEY = 'eros-studio:site-state'
 
@@ -20,6 +21,7 @@ export interface SiteState {
   worldGateOpen: boolean
   reducedVisualWorld: WorldId | null
   worldHandoff: WorldId | null
+  homepageMaterialHandoff: HomepageMaterialHandoff | null
   bag: BagLine[]
   storageAvailable: boolean
   selectCelestial(id: CelestialId | null): void
@@ -28,6 +30,7 @@ export interface SiteState {
   setWorldGateOpen(open: boolean): void
   setReducedVisualWorld(world: WorldId | null): void
   setWorldHandoff(world: WorldId | null): void
+  setHomepageMaterialHandoff(handoff: HomepageMaterialHandoff | null): void
   addToBag(objectId: string, size: string): void
   setBagQuantity(objectId: string, size: string, quantity: number): void
   removeFromBag(objectId: string, size: string): void
@@ -123,6 +126,7 @@ function createSiteState(storage: StorageAdapter): StateCreator<SiteState> {
       worldGateOpen: false,
       reducedVisualWorld: null,
       worldHandoff: null,
+      homepageMaterialHandoff: null,
       bag: persisted?.bag ?? [],
       storageAvailable,
       selectCelestial: (id) => set({ selectedCelestial: id }),
@@ -131,6 +135,7 @@ function createSiteState(storage: StorageAdapter): StateCreator<SiteState> {
       setWorldGateOpen: (open) => set({ worldGateOpen: open }),
       setReducedVisualWorld: (world) => set({ reducedVisualWorld: world }),
       setWorldHandoff: (world) => set({ worldHandoff: world }),
+      setHomepageMaterialHandoff: (handoff) => set({ homepageMaterialHandoff: handoff }),
       addToBag: (objectId, size) => {
         const matchingLine = get().bag.find((line) => line.objectId === objectId && line.size === size)
         const bag = matchingLine

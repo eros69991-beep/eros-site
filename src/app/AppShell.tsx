@@ -20,6 +20,7 @@ import { WorldEntryProvider, useWorldEntry } from '../features/transitions/useWo
 import { alignUniverseCameraToWorld } from '../features/universe/universeCameraAlignment'
 import { scrollToWorldTop } from '../features/transitions/scrollToWorldTop'
 import { handoffWorldGateMaterial } from '../features/transitions/worldGateMaterialHandoff'
+import { handoffHomepageMaterial } from '../features/transitions/homepageMaterialHandoff'
 import { SceneHost } from '../scene/SceneHost'
 import { useSiteStore } from '../state/siteStore'
 import { useDocumentMeta } from './useDocumentMeta'
@@ -37,15 +38,18 @@ export function AppShell() {
   const setReducedVisualWorld = useSiteStore((state) => state.setReducedVisualWorld)
   const setWorldHandoff = useSiteStore((state) => state.setWorldHandoff)
   const worldHandoff = useSiteStore((state) => state.worldHandoff)
+  const homepageMaterialHandoff = useSiteStore((state) => state.homepageMaterialHandoff)
+  const setHomepageMaterialHandoff = useSiteStore((state) => state.setHomepageMaterialHandoff)
   const dependencies = useMemo(() => createWorldEntryDependencies({
     alignUniverse: alignUniverseCameraToWorld,
     handoffWorld: (world) => handoffWorldGateMaterial(world, { setWorldHandoff }),
+    handoffHomepage: (world) => handoffHomepageMaterial(world, { setHomepageMaterialHandoff }),
     navigate: (world) => navigate(`/world/${world}`),
     preload: preloadCriticalWorldAssets,
     remember: setRecentWorld,
     activateReducedVisuals: setReducedVisualWorld,
     scrollToTop: scrollToWorldTop,
-  }), [navigate, setRecentWorld, setReducedVisualWorld, setWorldHandoff])
+  }), [navigate, setHomepageMaterialHandoff, setRecentWorld, setReducedVisualWorld, setWorldHandoff])
   const backgroundLocation = (location.state as OverlayState | null)?.backgroundLocation
   const isOverlayRoute = location.pathname === '/search' || location.pathname === '/bag'
   const background = isOverlayRoute ? backgroundLocation : undefined
@@ -64,6 +68,7 @@ export function AppShell() {
           data-material-veil=""
           data-world={worldHandoff ?? undefined}
         />
+        {homepageMaterialHandoff ? <div aria-hidden="true" className={sceneStyles.homepageTakeover} data-homepage-takeover="" data-world={homepageMaterialHandoff.world} /> : null}
         <div className={sceneStyles.semanticLayer}>
           <a className="skip-link" href="#main-content" onClick={() => document.getElementById('main-content')?.focus()}>Skip to main content</a>
           <GlobalHeader menuButtonRef={menuButtonRef} />

@@ -73,6 +73,7 @@ export async function preloadCriticalWorldAssets(
 interface CreateWorldEntryDependenciesOptions {
   alignUniverse(world: WorldId): Promise<void>
   handoffWorld?(world: WorldId): Promise<void>
+  handoffHomepage?(world: WorldId): Promise<void>
   navigate(world: WorldId): void
   preload(world: WorldId): Promise<void>
   remember(world: WorldId): void
@@ -83,6 +84,7 @@ interface CreateWorldEntryDependenciesOptions {
 export function createWorldEntryDependencies({
   alignUniverse,
   handoffWorld,
+  handoffHomepage,
   navigate,
   preload,
   remember,
@@ -96,6 +98,9 @@ export function createWorldEntryDependencies({
           : Promise.resolve()
     ),
     preloadCriticalAssets: preload,
+    playHandoff: (world, source) => source === 'universe'
+      ? handoffHomepage?.(world) ?? Promise.resolve()
+      : Promise.resolve(),
     commitRoute: (world) => {
       scrollToTop?.()
       navigate(world)

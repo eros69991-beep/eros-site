@@ -16,6 +16,8 @@ function statusMessage(status: ReturnType<typeof useWorldEntry>['state']) {
       return `Loading ${status.world}.`
     case 'ready':
       return `${status.world} is ready.`
+    case 'transitioning':
+      return `Entering ${status.world}.`
     case 'committing':
       return `Entering ${status.world}.`
     case 'idle':
@@ -27,6 +29,10 @@ export function WorldEntryOverlay({ onReturnToUniverse }: WorldEntryOverlayProps
   const { continueStatic, reset, state } = useWorldEntry()
 
   if (state.status === 'idle') return null
+
+  if (state.status !== 'failed') {
+    return <p aria-live="polite" className="sr-only" role="status">{statusMessage(state)}</p>
+  }
 
   const worldName = worlds.find((world) => world.id === state.world)?.season ?? state.world.toUpperCase()
 

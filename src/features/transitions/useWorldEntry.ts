@@ -79,11 +79,14 @@ export function useWorldEntry(): WorldEntryController {
       }
     })
 
-    Promise.all([alignment, assets]).then(() => {
+    Promise.all([alignment, assets]).then(async () => {
       if (!isCurrent(world, requestId)) return
 
       dispatch({ type: 'TARGET_ALIGNED', world, requestId })
       dispatch({ type: 'ASSETS_READY', world, requestId })
+      dispatch({ type: 'HANDOFF_STARTED', world, requestId })
+      await (dependencies.playHandoff?.(world, source) ?? Promise.resolve())
+      if (!isCurrent(world, requestId)) return
       commit(world, requestId)
     }).catch((error: unknown) => {
       if (isCurrent(world, requestId)) {

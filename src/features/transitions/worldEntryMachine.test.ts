@@ -19,4 +19,11 @@ describe('worldEntryReducer', () => {
     expect(second).toEqual({ status: 'targeting', world: 'winter', requestId: 2, source: 'universe' })
     expect(staleReady).toEqual(second)
   })
+
+  it('holds a ready universe entry while its material handoff runs', () => {
+    expect(worldEntryReducer(
+      { status: 'ready', world: 'spring', requestId: 1, source: 'universe' },
+      { type: 'HANDOFF_STARTED', world: 'spring', requestId: 1 },
+    )).toMatchObject({ status: 'transitioning' })
+  })
 })
