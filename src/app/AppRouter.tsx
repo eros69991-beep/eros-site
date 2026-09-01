@@ -16,6 +16,7 @@ import { AppShell } from './AppShell'
 
 const routes: RouteObject[] = [
   {
+    path: '/*',
     element: <AppShell />,
     children: [
       { index: true, element: <HomePage /> },

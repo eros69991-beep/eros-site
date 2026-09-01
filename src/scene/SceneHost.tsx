@@ -142,7 +142,7 @@ export function SceneHost() {
     : SCENE_EFFECT_PROFILES.neutral)
 
   if (!webglAvailable || forceStatic || quality === 'static' || (worldId !== null && reducedVisualWorld === worldId)) {
-    return <StaticUniverse />
+    return <StaticUniverse interactive={scenePath === '/'} />
   }
 
   return (
@@ -161,7 +161,7 @@ export function SceneHost() {
         />
       )}
     >
-      <Suspense fallback={<StaticUniverse />}>
+      <Suspense fallback={<StaticUniverse interactive={scenePath === '/'} />}>
         <TestSceneError active={testSceneError} />
         <RealtimeSceneLayer
           profile={profile}

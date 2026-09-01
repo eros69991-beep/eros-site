@@ -51,11 +51,11 @@
 .staticUniverse,
 .sceneFallback {
   position: fixed;
-  z-index: 0;
   inset: 0;
 }
 
 .sceneLayer {
+  z-index: 0;
   pointer-events: none;
 }
 
@@ -69,6 +69,7 @@
 }
 
 .staticUniverse {
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
   color: #161719;
@@ -76,6 +77,10 @@
     radial-gradient(circle at 24% 34%, rgb(255 255 255 / 88%) 0 2%, transparent 16%),
     radial-gradient(circle at 72% 58%, rgb(111 117 121 / 18%) 0 1%, transparent 22%),
     #deded9;
+}
+
+.appShell:has(.staticUniverse) [data-global-header] {
+  color: #111111;
 }
 
 .staticDepth {
@@ -114,6 +119,13 @@
 .celestialNavigation {
   position: absolute;
   inset: 5rem 1rem 1rem;
+}
+
+.celestialNavigationInteractive {
+  position: fixed;
+  z-index: 3;
+  inset: 5rem 1rem 1rem;
+  pointer-events: none;
 }
 
 .celestialList {
@@ -156,6 +168,7 @@
 }
 
 .sceneFallback {
+  z-index: 3;
   display: grid;
   place-items: center;
   padding: 1rem;

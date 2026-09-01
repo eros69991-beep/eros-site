@@ -73,6 +73,7 @@ describe('site store', () => {
       { objectId: 'demo-spring-001', size: 'M', quantity: 3 },
     ])
     expect(store.getState().recentWorld).toBe('autumn')
+    expect(store.getState().selectedCelestial).toBe('autumn')
   })
 
   it('resets persisted state when its JSON is malformed', () => {

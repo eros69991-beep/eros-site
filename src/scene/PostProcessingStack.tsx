@@ -6,13 +6,13 @@ import {
   ToneMapping,
   Vignette,
 } from '@react-three/postprocessing'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Suspense, useEffect, useMemo } from 'react'
-import { useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
 import { UniverseScene } from '../features/universe/UniverseScene'
 import { createQualityMonitor, getEffectiveSceneBudget } from './quality'
+import { isSceneTimeFrozen, subscribeSceneClock } from './sceneClock'
 import {
   resolveEffectProfile,
   type EffectProfile,
@@ -94,6 +94,14 @@ function ContextLossRecovery({ onContextLost }: { onContextLost?(): void }) {
   return null
 }
 
+function SceneClockInvalidator() {
+  const invalidate = useThree((state) => state.invalidate)
+
+  useEffect(() => subscribeSceneClock(() => invalidate()), [invalidate])
+
+  return null
+}
+
 export function RealtimeSceneLayer({
   profile,
   worldScene: WorldScene,
@@ -108,6 +116,9 @@ export function RealtimeSceneLayer({
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
   const worldSceneQuality: RealtimeQualityTier = mobile ? 'lite' : quality
+  const [sceneTimeFrozen, setSceneTimeFrozen] = useState(isSceneTimeFrozen)
+
+  useEffect(() => subscribeSceneClock(() => setSceneTimeFrozen(isSceneTimeFrozen())), [])
 
   return (
     <div className={styles.sceneLayer} aria-hidden="true" data-quiet={quiet || undefined}>
@@ -115,10 +126,11 @@ export function RealtimeSceneLayer({
         camera={{ fov: 42, position: [0, 0.45, mobile ? 58 : 24] }}
         className={styles.canvasSurface}
         dpr={budget.dpr}
-        frameloop={reducedMotion ? 'demand' : 'always'}
+        frameloop={reducedMotion || sceneTimeFrozen ? 'demand' : 'always'}
         gl={{ antialias: quality !== 'lite', alpha: true }}
       >
         {onContextLost ? <ContextLossRecovery onContextLost={onContextLost} /> : null}
+        <SceneClockInvalidator />
         <FrameQualityMonitor quality={quality} onDegrade={onDegrade} />
         <Suspense fallback={null}>
           {WorldScene ? (

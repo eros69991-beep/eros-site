@@ -7,6 +7,7 @@ import type { DemoMediaKey } from '../../media/mediaManifest'
 import { ManifestPicture, WorldObjectField } from './WorldObjectField'
 import { WorldSceneFrame } from './WorldSceneFrame'
 import { scrollToWorldTop } from '../transitions/scrollToWorldTop'
+import { consumeWorldReturnContext } from './worldReturnContext'
 import styles from './worlds.module.css'
 
 const EDITORIAL_MEDIA_KEYS = {
@@ -31,6 +32,18 @@ export function WorldPage() {
   const { worldId } = useParams()
 
   useLayoutEffect(() => {
+    const returnContext = consumeWorldReturnContext(window.location.pathname)
+    if (returnContext) {
+      const target = document.querySelector<HTMLElement>(returnContext.selector)
+      if (target) {
+        window.scrollTo({ top: returnContext.scrollY, left: 0, behavior: 'auto' })
+        window.requestAnimationFrame(() => {
+          target.focus({ preventScroll: true })
+          window.scrollTo({ top: returnContext.scrollY, left: 0, behavior: 'auto' })
+        })
+        return
+      }
+    }
     scrollToWorldTop()
   }, [worldId])
 

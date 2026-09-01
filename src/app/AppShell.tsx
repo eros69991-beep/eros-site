@@ -52,7 +52,11 @@ export function AppShell() {
 
   return (
     <WorldEntryProvider dependencies={dependencies}>
-      <div className={`app-shell ${sceneStyles.appShell}`} data-world-handoff={worldHandoff ?? undefined}>
+      <div
+        className={`app-shell ${sceneStyles.appShell}`}
+        data-universe-home={location.pathname === '/' ? 'true' : undefined}
+        data-world-handoff={worldHandoff ?? undefined}
+      >
         <SceneHost />
         <div
           aria-hidden="true"

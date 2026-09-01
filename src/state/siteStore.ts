@@ -117,7 +117,7 @@ function createSiteState(storage: StorageAdapter): StateCreator<SiteState> {
     }
 
     return {
-      selectedCelestial: null,
+      selectedCelestial: persisted?.recentWorld ?? null,
       recentWorld: persisted?.recentWorld ?? null,
       qualityTier: 'balanced',
       worldGateOpen: false,

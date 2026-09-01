@@ -8,11 +8,16 @@ import {
 } from './contracts'
 import { PostProcessingStack, RealtimeSceneLayer } from './PostProcessingStack'
 
+const fiberMocks = vi.hoisted(() => ({ invalidate: vi.fn() }))
+
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children, dpr }: { children: ReactNode; dpr: number }) => (
     <div data-testid="scene-canvas" data-dpr={String(dpr)}>{children}</div>
   ),
   useFrame: () => undefined,
+  useThree: (selector: (state: { invalidate: () => void }) => unknown) => (
+    selector({ invalidate: fiberMocks.invalidate })
+  ),
 }))
 
 vi.mock('@react-three/postprocessing', () => ({

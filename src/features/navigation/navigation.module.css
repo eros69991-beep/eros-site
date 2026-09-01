@@ -1,7 +1,12 @@
 .header {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   padding: var(--space-safe-block-start) var(--space-safe-inline-end) 1rem var(--space-safe-inline);
+  color: #111111;
+}
+
+:global(.app-shell[data-universe-home='true']) .header {
+  color: #ffffff;
 }
 
 .navigation,
@@ -92,6 +97,6 @@
   }
 
   .actions {
-    gap: 0;
+    gap: 0.35rem;
   }
 }

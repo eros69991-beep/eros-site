@@ -19,7 +19,7 @@ export function GlobalHeader({ menuButtonRef }: GlobalHeaderProps) {
   const overlayState = { backgroundLocation }
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-global-header="">
       <nav aria-label="Global navigation" className={styles.navigation}>
         <Link className={styles.link} to="/">EROS</Link>
         <div className={styles.actions}>
