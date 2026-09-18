@@ -18,13 +18,14 @@ const sourceScripts = {
 export function runBlender(command, args = []) {
   const script = sourceScripts[command]
   if (!script) throw new Error(`Unsupported homepage Blender command: ${command}`)
+  const forwardedArgs = args[0] === '--' ? args.slice(1) : args
 
   return spawnSync(process.env.EROS_BLENDER_BIN || defaultBinary, [
     '--background',
     '--python',
     script,
     '--',
-    ...args,
+    ...forwardedArgs,
   ], {
     encoding: 'utf8',
   })

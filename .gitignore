@@ -10,3 +10,5 @@ coverage/
 playwright-report/
 test-results/
 *.local
+*.blend1
+__pycache__/

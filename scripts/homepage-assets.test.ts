@@ -1,10 +1,11 @@
-import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   HOMEPAGE_ASSET_IDS,
   HOMEPAGE_LODS,
+  REQUIRED_MATERIAL_SLOTS,
   validateHomepageManifest,
 } from './homepage-assets/manifest-schema.mjs'
 import { runBlender } from './homepage-assets/run-blender.mjs'
@@ -113,6 +114,63 @@ describe('project-local Blender runner', () => {
       if (originalBinary === undefined) delete process.env.EROS_BLENDER_BIN
       else process.env.EROS_BLENDER_BIN = originalBinary
       await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('removes the package-manager separator before forwarding source arguments', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'eros-blender-runner-'))
+    const binary = join(directory, 'fake-blender')
+    const originalBinary = process.env.EROS_BLENDER_BIN
+
+    await writeFile(binary, '#!/bin/sh\nprintf "%s\\n" "$@"\n')
+    await chmod(binary, 0o755)
+    process.env.EROS_BLENDER_BIN = binary
+
+    try {
+      const result = runBlender('render', ['--', '--set', 'portal'])
+      const forwarded = result.stdout.trim().split('\n')
+
+      expect(forwarded.filter((argument) => argument === '--')).toHaveLength(1)
+      expect(forwarded.slice(-2)).toEqual(['--set', 'portal'])
+    } finally {
+      if (originalBinary === undefined) delete process.env.EROS_BLENDER_BIN
+      else process.env.EROS_BLENDER_BIN = originalBinary
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+})
+
+describe('homepage Blender source scene', () => {
+  it('keeps non-rendering authoring helpers out of approval turntable duplication', async () => {
+    const renderer = await readFile('tools/blender/homepage/render_approval.py', 'utf8')
+
+    expect(renderer).toContain('if source_obj.type not in {"MESH", "CURVE"}:')
+  })
+
+  it('contains the six named source collections and dedicated approval cameras', async () => {
+    const audit = JSON.parse(await readFile('work/homepage-source-audit.json', 'utf8'))
+
+    expect(audit.collections).toEqual(expect.arrayContaining([
+      'SOURCE_CORE',
+      'SOURCE_SPRING',
+      'SOURCE_SUMMER',
+      'SOURCE_AUTUMN',
+      'SOURCE_WINTER',
+      'SOURCE_STUDIO',
+    ]))
+    expect(audit.cameras).toEqual(['CAMERA_DESKTOP', 'CAMERA_MOBILE'])
+    expect(audit.cameraRotations).toEqual({
+      CAMERA_DESKTOP: [0, 0, 0],
+      CAMERA_MOBILE: [0, 0, 0],
+    })
+    expect(audit.objects.SOURCE_CORE).toBeGreaterThan(3)
+  })
+
+  it('assigns every required stable material slot to its source asset', async () => {
+    const audit = JSON.parse(await readFile('work/homepage-source-audit.json', 'utf8'))
+
+    for (const [assetId, requiredSlots] of Object.entries(REQUIRED_MATERIAL_SLOTS)) {
+      expect(audit.materialSlots[assetId].sort()).toEqual([...requiredSlots].sort())
     }
   })
 })
