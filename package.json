@@ -12,7 +12,12 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "media:build": "node scripts/build-demo-media.mjs",
-    "budget:check": "node scripts/check-performance-budgets.mjs"
+    "budget:check": "node scripts/check-performance-budgets.mjs",
+    "homepage:source:build": "node scripts/homepage-assets/run-blender.mjs build",
+    "homepage:source:render": "node scripts/homepage-assets/run-blender.mjs render",
+    "homepage:source:export": "node scripts/homepage-assets/run-blender.mjs export",
+    "homepage:assets:build": "node scripts/homepage-assets/build.mjs",
+    "homepage:assets:validate": "node scripts/homepage-assets/validate.mjs"
   },
   "dependencies": {
     "@fontsource-variable/instrument-sans": "^5.3.0",
@@ -31,6 +36,10 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@gltf-transform/cli": "4.5.0",
+    "@gltf-transform/core": "4.5.0",
+    "@gltf-transform/extensions": "4.5.0",
+    "@gltf-transform/functions": "4.5.0",
     "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
