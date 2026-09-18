@@ -89,12 +89,12 @@ The asset manifest records URL, role, LOD, compressed bytes, triangle count, mat
 
 ## 5. EROS Core
 
-The Core remains monumental, right-weighted, elegant, and approximately `85% beauty / 15% otherness`. It is not a round planet.
+The Core remains monumental, right-weighted, elegant, and approximately `85% beauty / 15% otherness`. Its first read is a near-spherical planetary mass with a strong curved limb and terminator; its second read is an original EROS material object. It must not resemble a recognizable stock planet, a perfect sphere, or a biological body.
 
 The authored silhouette must contain controlled asymmetry at three scales:
 
 - a calm overall mass that can be read from a distance;
-- broad compression, folds, cuts, or displaced planes that break the planetary sphere;
+- broad geological compression, cuts, strata, or displaced plates that preserve the planetary mass while preventing a generic smooth sphere;
 - limited crystal incursions and liquid boundaries visible only under changing light.
 
 Required stable material slots:
@@ -145,20 +145,22 @@ All bodies share a spatial grammar but use independently authored silhouettes an
 
 Desktop preserves the approved asymmetrical Portal Layer: the Core enters from the right or upper-right, black negative space remains dominant, and the five bodies occupy distinct depths without a balanced ring.
 
-Static placement constants become authored anchor points rather than final frozen positions. Each body receives:
+Static placement constants become authored anchor points rather than final frozen positions. The Core is the shared gravitational center, positioned partly outside the right side of the viewport. The five bodies belong to one inclined miniature galactic plane rather than behaving as independent floating props. Each body receives:
 
-- a unique slow orbit or elliptical drift around its anchor;
-- a unique self-rotation period;
-- a small depth oscillation with no synchronized phase;
-- restrained selected-state emphasis without jumping position.
+- a wide elliptical orbit around the Core with a distinct radius and depth;
+- an approximately `180–360s` orbital period, with nearer bodies showing more visible displacement than distant bodies;
+- a unique slow self-rotation period;
+- restrained selected-state damping that settles the chosen body for interaction and eases it back into the common orbit afterward.
 
-No prominent orbit lines are drawn. Movement must be visible over time but slow enough that the composition still feels controlled. Reduced motion resolves every body to a stable, deliberately composed frame.
+The graphite-silver galactic dust rotates in the same direction more slowly, visually binding the bodies into one system. Bodies may pass through darkness, behind the Core, or outside the viewport; all five need not remain continuously visible. No prominent orbit lines are drawn, and motion must never resemble a carousel, screensaver, or synchronized solar-system diagram. Reduced motion resolves every body to a stable, deliberately composed frame.
 
-Mobile uses a separate camera and composition profile. One body is dominant at a time, four remain as quiet depth cues, and horizontal swipe changes the selected body over the confirmed `0.9–1.2s` settling interval. Mobile never loads desktop high LOD merely because device pixel ratio is high.
+Mobile uses a separate camera and composition profile. The approved first-frame composition places the Core partly outside the upper-right, one selected body in the lower-middle as the only dominant entrance, four bodies as quiet depth cues in the shared galactic plane, and a restrained `01–05` state row inside the bottom safe area. Horizontal swipe changes the selected body over the confirmed `0.9–1.2s` settling interval. Mobile never loads desktop high LOD merely because device pixel ratio is high.
 
 ## 8. Lighting, reflection, and postprocessing
 
 Material recognition is established before postprocessing.
+
+The approved art-direction baselines are stored in `assets-source/homepage/renders/approval/` as `homepage-v2-desktop-galactic-orbit-approved.png`, `homepage-v2-mobile-galactic-orbit-approved.png`, `homepage-v2-core-material-approved.png`, and `homepage-v2-five-world-materials-approved.png`. These are visual targets for the canonical Blender scene; they are not substitutes for the realtime GLTF homepage.
 
 - Use an original low-resolution reflection environment or procedural light cards for cold studio reflections; do not rely on an unrelated stock space HDRI.
 - Use broad area-like key and edge sources, a controlled local fill, and World-specific contamination near the selected body.

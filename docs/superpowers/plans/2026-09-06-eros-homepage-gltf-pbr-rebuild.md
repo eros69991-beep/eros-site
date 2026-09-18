@@ -20,7 +20,7 @@
 - Use original EROS geometry and textures; no recognizable stock planets, generic science-fiction assets, or single-image/video fake realtime scene.
 - Preserve and audit the existing unstaged changes in CelestialBody.tsx, SemanticCelestialControls.tsx, and universe.module.css. Do not reset, checkout, or discard them.
 - First body activation selects; desktop may activate an already selected seasonal body with a second click; visible ENTER remains available to pointer, keyboard, and touch users.
-- No visible orbit diagram. Every body has a unique slow anchor drift, rotation period, and depth phase.
+- No visible orbit diagram. The partially off-screen right-side Core is the common gravitational center; all five bodies share one inclined galactic plane with unique `180–360s` elliptical periods, radii, depths, and self-rotation phases. Selection damps the chosen body toward a stable interactive position before it eases back into the shared orbit.
 - Reduced motion resolves to an intentionally composed static scene without lowering model quality solely because motion is reduced.
 - Desktop High ceiling: 180k visible triangles, 48 draw calls, 14 material programs, one high-detail body, 2048px texture edge.
 - Desktop Balanced ceiling: 120k visible triangles, 38 draw calls, 11 material programs, one high-detail body, 2048px texture edge.
@@ -311,11 +311,13 @@ def build_winter(seed: int = 2411) -> bpy.types.Collection: ...
 def build_studio(seed: int = 2503) -> bpy.types.Collection: ...
 ~~~
 
-Use deterministic mathutils.noise displacement, broad lattice compression,
-limited booleans, remesh, and hand-authored proportional transforms. The Core
-must have a calm asymmetrical mass plus distinct metal planes, liquid boundary,
-and crystal incursions. Each body must differ at silhouette level before any
-material is assigned. Apply transforms and recalculate normals before saving.
+Use deterministic mathutils.noise displacement, broad geological compression,
+limited booleans, remesh, and hand-authored proportional transforms. The Core's
+first read must be a near-spherical planetary mass with a strong curved limb and
+terminator; its second read is an original EROS object with distinct metal strata,
+liquid boundaries, and smoked-crystal faults. It must not become a stock planet,
+perfect sphere, or biological body. Each body must differ at silhouette level
+before any material is assigned. Apply transforms and recalculate normals before saving.
 
 - [ ] **Step 4: Build the two approved compositions**
 
@@ -328,9 +330,13 @@ CAMERA_PROFILES = {
 }
 ~~~
 
-Desktop places the Core on the right/upper-right with deliberate black space;
-five bodies occupy unique apparent depths without a ring. Mobile uses a
-separate camera and makes Spring dominant while preserving quiet depth cues.
+Desktop reproduces `homepage-v2-desktop-galactic-orbit-approved.png`: the Core
+enters from the right/upper-right, deliberate black space remains dominant, and
+five bodies occupy unique apparent depths within one soft graphite-silver galactic
+plane. Mobile reproduces `homepage-v2-mobile-galactic-orbit-approved.png` with a
+separate camera: the Core enters from the upper-right, Spring dominates the
+lower-middle, four bodies remain quiet depth cues, and the bottom safe area is
+reserved for the `01–05` semantic state row.
 
 Use Cycles, AgX, 256 samples, denoising, transparent false, and a cold three-area
 studio rig. Prefer Metal GPU when available and fall back to CPU without changing
@@ -353,7 +359,7 @@ test passes.
 
 Open both PNG files at original resolution. Check:
 
-- the Core is not a planet, disc, or visible primitive stack;
+- the Core reads first as a strange near-spherical planet and second as an EROS material object, never as a stock planet, biological form, flat disc, or visible primitive stack;
 - its crop has enough surface information to justify monumental scale;
 - all five body silhouettes differ without relying on hue;
 - the desktop frame keeps strong black negative space;
@@ -452,9 +458,11 @@ pnpm test -- scripts/homepage-assets.test.ts
 
 - [ ] **Step 5: Perform the material approval gate**
 
-Open all six turntables. Reject any body that reads mainly through color, any
-Core that becomes glossy slime, any Winter wireframe, any Summer flame, or any
-Studio body that disappears against black.
+Open all six turntables and compare them with
+`homepage-v2-core-material-approved.png` and
+`homepage-v2-five-world-materials-approved.png`. Reject any body that reads
+mainly through color, any Core that becomes glossy slime, any Winter wireframe,
+any Summer flame, or any Studio body that disappears against black.
 
 STOP and show the six studies to the user. Iterate materials and medium-scale
 geometry until explicitly approved. Do not export runtime assets before approval.
@@ -907,20 +915,22 @@ git commit -m "feat: render five GLTF portal bodies"
 
 **Interfaces:**
 
-- Produces: PORTAL_MOTION_PROFILES, getPortalBodyTransform(id, time, reducedMotion), getPortalMaterialRuntime(id, time, selectionAmount, reducedMotion), and Timer-backed getSceneTime().
+- Produces: PORTAL_MOTION_PROFILES, getPortalBodyTransform(id, time, selectionAmount, reducedMotion), getPortalMaterialRuntime(id, time, selectionAmount, reducedMotion), and Timer-backed getSceneTime().
 - Consumes: approved anchors and existing development setSceneTime API.
 
 - [ ] **Step 1: Write failing deterministic runtime tests**
 
 ~~~ts
-expect(getPortalBodyTransform('spring', 137.5, false))
-  .toEqual(getPortalBodyTransform('spring', 137.5, false))
-expect(getPortalBodyTransform('spring', 0, false))
-  .not.toEqual(getPortalBodyTransform('spring', 120, false))
-expect(getPortalBodyTransform('winter', 0, true))
-  .toEqual(getPortalBodyTransform('winter', 120, true))
+expect(getPortalBodyTransform('spring', 137.5, 0, false))
+  .toEqual(getPortalBodyTransform('spring', 137.5, 0, false))
+expect(getPortalBodyTransform('spring', 0, 0, false))
+  .not.toEqual(getPortalBodyTransform('spring', 120, 0, false))
+expect(getPortalBodyTransform('winter', 0, 0, true))
+  .toEqual(getPortalBodyTransform('winter', 120, 0, true))
 expect(new Set(PORTAL_MOTION_PROFILES.map((profile) => profile.periodSeconds)).size)
   .toBe(5)
+expect(getPortalBodyTransform('spring', 120, 1, false).orbitalVelocity)
+  .toBeLessThan(getPortalBodyTransform('spring', 120, 0, false).orbitalVelocity)
 ~~~
 
 Add material assertions for Spring internal migration, Summer retained heat,
@@ -937,12 +947,16 @@ pnpm test -- src/features/universe/portalMotion.test.ts src/features/universe/ma
 
 Expected: FAIL because both modules are absent.
 
-- [ ] **Step 3: Implement unique anchor drift**
+- [ ] **Step 3: Implement the shared inclined galactic orbit**
 
-Use periods 151, 193, 239, 293, and 359 seconds for Spring through Studio.
-Maximum anchor excursions are 0.36 x, 0.18 y, and 0.24 z world units; each body
-uses a distinct phase and elliptical ratio. Add self-rotation with existing
-unique periods. Reduced motion returns exact approved anchors and rotations.
+Place the common gravitational center partly outside the viewport with the Core.
+Use periods 181, 223, 269, 313, and 359 seconds for Spring through Studio. Each
+body receives a distinct wide elliptical radius, depth, and phase in the same
+inclined plane; near bodies show more screen displacement than distant bodies.
+Selection smoothly damps orbital velocity and settles the chosen body without
+snapping, then eases it back into the common orbit. Rotate the graphite-silver
+galactic dust in the same direction at a slower rate. Add independent self-rotation.
+Reduced motion returns the exact approved static composition and rotations.
 
 - [ ] **Step 4: Implement isolated living effects**
 
