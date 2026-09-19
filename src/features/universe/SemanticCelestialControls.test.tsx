@@ -43,7 +43,7 @@ describe('SemanticCelestialControls', () => {
       '05 / STUDIO / UNKNOWN',
     ]) {
       await user.tab()
-      expect(screen.getByRole('button', { name: label })).toHaveFocus()
+      expect(screen.getByRole('link', { name: label })).toHaveFocus()
     }
   })
 
@@ -51,24 +51,14 @@ describe('SemanticCelestialControls', () => {
     const user = userEvent.setup()
     renderControls()
 
-    const winter = screen.getByRole('button', { name: '04 / WINTER / FREEZE' })
+    const winter = screen.getByRole('link', { name: '04 / WINTER / FREEZE' })
     winter.focus()
     await user.keyboard('{Enter}')
 
     expect(useSiteStore.getState().selectedCelestial).toBe('winter')
   })
 
-  it('uses the first mobile tap to select without navigation', async () => {
-    const user = userEvent.setup()
-    renderControls()
-
-    await user.click(screen.getByRole('button', { name: '04 / WINTER / FREEZE' }))
-
-    expect(useSiteStore.getState().selectedCelestial).toBe('winter')
-    expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/')
-  })
-
-  it('enters the selected World through the shared entry controller', async () => {
+  it('enters a World with one activation through the shared entry controller', async () => {
     const aligned: string[] = []
     const committed: string[] = []
     const dependencies: WorldEntryDependencies = {
@@ -80,24 +70,22 @@ describe('SemanticCelestialControls', () => {
     const user = userEvent.setup()
     renderControls(dependencies)
 
-    await user.click(screen.getByRole('button', { name: '04 / WINTER / FREEZE' }))
-    await user.click(screen.getByRole('button', { name: 'ENTER' }))
+    await user.click(screen.getByRole('link', { name: '04 / WINTER / FREEZE' }))
 
     await waitFor(() => expect(committed).toEqual(['winter']))
     expect(aligned).toEqual(['winter:universe'])
     expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/')
   })
 
-  it('selects Studio without exposing an entry action', async () => {
+  it('opens the existing Studio route directly', async () => {
     const user = userEvent.setup()
     renderControls()
 
-    const studio = screen.getByRole('button', { name: '05 / STUDIO / UNKNOWN' })
-    expect(studio).toBeEnabled()
+    const studio = screen.getByRole('link', { name: '05 / STUDIO / UNKNOWN' })
     await user.click(studio)
 
     expect(useSiteStore.getState().selectedCelestial).toBe('studio')
-    expect(screen.queryByRole('button', { name: 'ENTER' })).not.toBeInTheDocument()
+    expect(screen.getByRole('status', { name: 'Route intent' })).toHaveTextContent('/studio')
   })
 
   it('shows the selected portal position', () => {

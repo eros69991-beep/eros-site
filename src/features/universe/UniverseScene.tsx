@@ -1,43 +1,70 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { MathUtils, type Camera, type PerspectiveCamera } from 'three'
-import { useEffect, useRef } from 'react'
+import { PerspectiveCamera as DreiPerspectiveCamera } from '@react-three/drei'
+import { MathUtils, PerspectiveCamera as ThreePerspectiveCamera, type Camera } from 'three'
+import { useEffect, useMemo, useRef } from 'react'
 import { celestials } from '../../domain/worlds'
-import type { CelestialDefinition } from '../../domain/types'
 import { getEffectiveSceneBudget } from '../../scene/quality'
 import { ErosCore } from './ErosCore'
 import { CelestialBody } from './CelestialBody'
 import { StarField } from './StarField'
 import { GalacticVeil } from './GalacticVeil'
+import { GalaxyBackdrop } from './GalaxyBackdrop'
+import { HomeOrbitClockDriver } from './HomeOrbitClockDriver'
+import { HomeOrbitTraces } from './HomeOrbitTraces'
 import { registerUniverseCameraAlignment } from './universeCameraAlignment'
 import { getHomeCameraPreset, HOME_BODY_LAYOUT } from './homeComposition'
+import { homeOrbitClock } from './homeOrbitClock'
+import { HOME_ORBIT_SPECS } from './homeOrbitConfig'
+import { writeOrbitPosition } from './homeOrbitMath'
+
+function HomeCamera() {
+  const size = useThree((state) => state.size)
+  const preset = getHomeCameraPreset(size.width, size.height)
+  const rotation = useMemo(() => {
+    const cameraObject = new ThreePerspectiveCamera()
+    cameraObject.position.set(...preset.position)
+    cameraObject.lookAt(...preset.target)
+    return [cameraObject.rotation.x, cameraObject.rotation.y, cameraObject.rotation.z] as const
+  }, [preset])
+
+  return (
+    <DreiPerspectiveCamera
+      far={100}
+      fov={preset.fov}
+      makeDefault
+      near={0.1}
+      position={preset.position}
+      rotation={rotation}
+    />
+  )
+}
 
 function DampedCamera({ reducedMotion }: { reducedMotion: boolean }) {
-  const { camera, size } = useThree()
+  const camera = useThree((state) => state.camera)
   const cameraRef = useRef<Camera | null>(null)
   const entryAlignment = useRef<{
-    body: CelestialDefinition
+    target: [number, number, number]
     resolve(): void
   } | null>(null)
   useEffect(() => {
     cameraRef.current = camera
   }, [camera])
 
-  useEffect(() => {
-    const preset = getHomeCameraPreset(size.width, size.height)
-    const perspectiveCamera = camera as PerspectiveCamera
-    perspectiveCamera.fov = preset.fov
-    perspectiveCamera.position.set(...preset.position)
-    perspectiveCamera.lookAt(...preset.target)
-    perspectiveCamera.updateProjectionMatrix()
-  }, [camera, size.height, size.width])
-
   useEffect(() => registerUniverseCameraAlignment((world) => {
-    const body = celestials.find((candidate) => candidate.id === world)
-    if (!body || reducedMotion) return Promise.resolve()
+    if (reducedMotion) return Promise.resolve()
+
+    const relative = { x: 0, y: 0, z: 0 }
+    writeOrbitPosition(relative, HOME_ORBIT_SPECS[world], homeOrbitClock.getElapsed())
+    const core = HOME_BODY_LAYOUT.core.position
+    const target: [number, number, number] = [
+      relative.x + core[0],
+      relative.y + core[1],
+      relative.z + core[2],
+    ]
 
     entryAlignment.current?.resolve()
     return new Promise<void>((resolve) => {
-      entryAlignment.current = { body, resolve }
+      entryAlignment.current = { target, resolve }
     })
   }), [reducedMotion])
 
@@ -51,7 +78,7 @@ function DampedCamera({ reducedMotion }: { reducedMotion: boolean }) {
     if (!activeCamera) return
     const alignment = entryAlignment.current
     if (alignment) {
-      const [targetX, targetY, targetZ] = HOME_BODY_LAYOUT[alignment.body.id].position
+      const [targetX, targetY, targetZ] = alignment.target
       const damping = Math.min(delta * 3.4, 1)
       activeCamera.position.x = MathUtils.lerp(activeCamera.position.x, targetX * 0.48, damping)
       activeCamera.position.y = MathUtils.lerp(activeCamera.position.y, targetY * 0.48, damping)
@@ -89,9 +116,13 @@ export function UniverseScene({
       <directionalLight color="#D6E0E0" intensity={1.08} position={[-8, 6, 9]} />
       <pointLight color="#66888E" intensity={1.15} position={[-3, 1, 4]} />
       <pointLight color="#AFC2C5" distance={16} intensity={2.2} position={[9, 3, 6]} />
+      <HomeCamera />
+      <HomeOrbitClockDriver reducedMotion={reducedMotion} />
       <DampedCamera reducedMotion={reducedMotion} />
+      <GalaxyBackdrop />
       <GalacticVeil reducedMotion={reducedMotion} />
       <StarField particleCount={budget.maxParticles} reducedMotion={reducedMotion} />
+      <HomeOrbitTraces />
       <ErosCore mobile={mobile} quality={quality} reducedMotion={reducedMotion} />
       {celestials.map((body) => (
         <CelestialBody

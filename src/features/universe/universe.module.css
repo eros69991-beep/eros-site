@@ -32,30 +32,20 @@
 .celestialControls {
   position: fixed;
   z-index: 3;
-  left: clamp(1rem, 4vw, 4.5rem);
-  bottom: clamp(1.5rem, 5vh, 4rem);
-  width: auto;
-}
-
-.portalIdentity,
-.mobilePosition {
-  display: block;
+  inset: 0;
+  pointer-events: none;
 }
 
 .portalIdentity {
-  min-height: 1.3em;
+  position: fixed;
+  left: clamp(1.5rem, 2.5vw, 2.6rem);
+  bottom: clamp(3.35rem, 6vh, 4.5rem);
   margin: 0;
   color: #e4e9e8;
   font-size: 0.68rem;
   letter-spacing: 0.13em;
-}
-
-.mobilePosition {
-  display: none;
-}
-
-.swipeCapture {
-  display: none;
+  opacity: 0;
+  transition: opacity 260ms ease;
 }
 
 .controlEyebrow {
@@ -66,17 +56,18 @@
 }
 
 .controlList {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+  position: fixed;
+  z-index: 2;
+  bottom: clamp(1rem, 2.4vh, 1.8rem);
+  left: 50%;
+  display: flex;
+  gap: clamp(0.15rem, 0.8vw, 0.7rem);
+  transform: translateX(-50%);
+  pointer-events: auto;
 }
 
 .celestialControl,
-.enterControl {
-  width: 100%;
+.orbitToggle {
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -86,27 +77,36 @@
 }
 
 .celestialControl {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.56rem 0.05rem;
-  border-bottom: 1px solid rgb(189 201 207 / 16%);
-  color: #c5ccce;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: rgb(197 204 206 / 26%);
+  font-size: 0.62rem;
+  letter-spacing: 0.13em;
+  text-decoration: none;
+  transition: color 260ms ease;
 }
 
-.celestialControl[aria-pressed='true'] {
+.celestialControl[aria-current='true'],
+.celestialControl:hover,
+.celestialControl:focus-visible {
   color: #f0f4f3;
 }
 
 .celestialControl:focus-visible,
-.enterControl:focus-visible {
+.orbitToggle:focus-visible {
   outline: 1px solid #dce8e6;
   outline-offset: 3px;
 }
 
-.enterControl {
+.celestialControls:focus-within .portalIdentity,
+.celestialControls:hover .portalIdentity {
+  opacity: 1;
+}
+
+.mobilePosition {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -115,9 +115,16 @@
   white-space: nowrap;
 }
 
-.enterControl:disabled {
-  color: #657074;
-  cursor: default;
+.orbitToggle {
+  position: fixed;
+  right: clamp(1rem, 2.5vw, 2.6rem);
+  bottom: clamp(1.3rem, 2.7vh, 2rem);
+  min-width: 44px;
+  min-height: 44px;
+  color: rgb(228 233 232 / 42%);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  pointer-events: auto;
 }
 
 @media (max-width: 600px) {
@@ -136,46 +143,26 @@
   }
 
   .celestialControls {
-    right: 1.3rem;
-    left: 1.3rem;
-    bottom: 2rem;
-    width: auto;
-    height: 2rem;
-  }
-
-  .controlList {
-    touch-action: pan-y;
+    inset: 0;
   }
 
   .portalIdentity {
     display: none;
   }
 
-  .mobilePosition {
-    display: flex;
-    position: relative;
-    z-index: 1;
-    justify-content: center;
-    gap: clamp(1.15rem, 7vw, 1.8rem);
-    margin: 0;
-    color: rgb(174 184 187 / 30%);
-    font-size: 0.62rem;
-    letter-spacing: 0.13em;
+  .controlList {
+    bottom: 1.15rem;
+    gap: clamp(0.1rem, 1vw, 0.3rem);
   }
 
-  .mobilePosition span {
-    transition: color 450ms ease;
+  .celestialControl {
+    min-width: 44px;
+    min-height: 44px;
   }
 
-  .mobilePosition span[data-active] {
-    color: #e2e7e6;
-  }
-
-  .swipeCapture {
-    display: block;
-    position: absolute;
-    z-index: 2;
-    inset: -1.1rem 0 -0.7rem;
-    touch-action: pan-y;
+  .orbitToggle {
+    right: 0.5rem;
+    bottom: 4.3rem;
+    opacity: 0.72;
   }
 }

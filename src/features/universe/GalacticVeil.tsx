@@ -2,6 +2,7 @@ import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import { AdditiveBlending, type ShaderMaterial } from 'three'
 import { getSceneTime } from '../../scene/sceneClock'
+import { GALAXY_LAYERS, getGalaxyLayerSeed, type GalaxyLayer } from './galaxyLayers'
 
 const vertexShader = `
   varying vec2 vUv;
@@ -13,6 +14,10 @@ const vertexShader = `
 
 const fragmentShader = `
   uniform float uTime;
+  uniform float uOpacity;
+  uniform float uSeed;
+  uniform float uWarmth;
+  uniform float uDrift;
   varying vec2 vUv;
 
   float hash21(vec2 p) {
@@ -41,20 +46,37 @@ const fragmentShader = `
   }
 
   void main() {
-    float center = 1.0 - abs(vUv.y * 2.0 - 1.0);
-    float falloff = pow(max(center, 0.0), 2.6);
-    float edgeFade = smoothstep(0.0, 0.13, vUv.x) * smoothstep(0.0, 0.13, 1.0 - vUv.x);
-    float cloud = fbm(vUv * vec2(13.0, 8.0) + vec2(uTime * 0.00012, 0.0));
-    float filament = fbm(vUv * vec2(34.0, 18.0) - vec2(uTime * 0.00008, 0.0));
-    float alpha = edgeFade * falloff * (0.018 + cloud * 0.075 + filament * 0.028);
-    vec3 color = mix(vec3(0.14, 0.145, 0.15), vec3(0.42, 0.40, 0.38), cloud);
+    vec2 centered = vUv * 2.0 - 1.0;
+    float warpedY = centered.y + (fbm(vec2(centered.x * 2.1 + uSeed, uSeed)) - 0.5) * 0.42;
+    float center = exp(-pow(abs(warpedY) * 2.15, 1.38));
+    float halo = exp(-pow(abs(centered.y) * 1.05, 1.65));
+    float edgeFade = smoothstep(0.0, 0.1, vUv.x) * smoothstep(0.0, 0.1, 1.0 - vUv.x);
+    edgeFade *= smoothstep(0.0, 0.12, vUv.y) * smoothstep(0.0, 0.12, 1.0 - vUv.y);
+    vec2 drift = vec2(uTime * uDrift, -uTime * uDrift * 0.21);
+    float cloud = fbm(vUv * vec2(10.0, 7.0) + drift + uSeed);
+    float filament = fbm(vUv * vec2(31.0, 18.0) - drift * 0.7 + uSeed * 0.13);
+    float knots = smoothstep(0.67, 0.9, fbm(vUv * vec2(7.0, 15.0) + uSeed * 0.27));
+    float darkLane = smoothstep(0.43, 0.62, fbm(vUv * vec2(18.0, 5.0) - uSeed * 0.09));
+    float structure = center * (0.12 + cloud * 0.74 + filament * 0.22 + knots * 0.35);
+    structure *= mix(1.0, 0.34, darkLane * center);
+    float alpha = edgeFade * uOpacity * (structure + halo * cloud * 0.08);
+    vec3 cold = vec3(0.24, 0.27, 0.30);
+    vec3 warm = vec3(0.48, 0.43, 0.37);
+    vec3 color = mix(cold, warm, clamp(uWarmth + cloud * 0.16, 0.0, 1.0));
+    color *= 0.62 + filament * 0.72 + knots * 0.45;
     gl_FragColor = vec4(color, alpha);
   }
 `
 
-export function GalacticVeil({ reducedMotion }: { reducedMotion: boolean }) {
+function VeilLayer({ layer, reducedMotion }: { layer: GalaxyLayer; reducedMotion: boolean }) {
   const materialRef = useRef<ShaderMaterial>(null)
-  const uniforms = useMemo(() => ({ uTime: { value: 0 } }), [])
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0 },
+    uOpacity: { value: layer.opacity },
+    uSeed: { value: getGalaxyLayerSeed(layer.id) },
+    uWarmth: { value: layer.warmth },
+    uDrift: { value: layer.drift },
+  }), [layer])
 
   useFrame(() => {
     const liveMaterial = materialRef.current
@@ -64,8 +86,8 @@ export function GalacticVeil({ reducedMotion }: { reducedMotion: boolean }) {
   })
 
   return (
-    <mesh position={[-0.8, -0.2, -8]} rotation={[0, 0, 0.4]} scale={[1, 1, 1]}>
-      <planeGeometry args={[42, 6]} />
+    <mesh position={layer.position} renderOrder={layer.id === 'near' ? 2 : -2} rotation={[0, 0, layer.rotation]}>
+      <planeGeometry args={[layer.width, layer.height]} />
       <shaderMaterial
         ref={materialRef}
         blending={AdditiveBlending}
@@ -77,4 +99,10 @@ export function GalacticVeil({ reducedMotion }: { reducedMotion: boolean }) {
       />
     </mesh>
   )
+}
+
+export function GalacticVeil({ reducedMotion }: { reducedMotion: boolean }) {
+  return GALAXY_LAYERS.map((layer) => (
+    <VeilLayer key={layer.id} layer={layer} reducedMotion={reducedMotion} />
+  ))
 }

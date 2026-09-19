@@ -76,6 +76,20 @@
   pointer-events: none;
 }
 
+.appShell[data-universe-home='true'] .sceneLayer {
+  pointer-events: auto;
+}
+
+.appShell[data-universe-home='true'] .semanticLayer {
+  pointer-events: none;
+}
+
+.appShell[data-universe-home='true'] [data-global-header],
+.appShell[data-universe-home='true'] .semanticLayer a,
+.appShell[data-universe-home='true'] .semanticLayer button {
+  pointer-events: auto;
+}
+
 .sceneLayer[data-quiet='true'] {
   opacity: 0.42;
 }

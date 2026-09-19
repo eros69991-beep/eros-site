@@ -31,6 +31,8 @@ const fragmentShader = `
   uniform float uMetalness;
   uniform float uEmission;
   uniform float uTransmission;
+  uniform float uCrackStrength;
+  uniform float uRimStrength;
   uniform float uSelected;
   uniform float uTime;
   varying vec3 vObjectPosition;
@@ -73,13 +75,11 @@ const fragmentShader = `
     float macro = fbm(p * uMacroScale + vec3(0.0, uTime * 0.00008, 0.0));
     float detail = fbm(p * uDetailScale);
     float contour = 1.0 - abs(fbm(p * uSeamScale + macro * 0.42) * 2.0 - 1.0);
-    float branch = 1.0 - abs(fbm(p * uSeamScale * 2.7 - macro * 0.31) * 2.0 - 1.0);
-    float seam = smoothstep(uSeamWidth, min(0.999, uSeamWidth + 0.018), contour);
-    seam = max(seam, smoothstep(0.998, 0.9998, branch) * 0.12);
+    float seam = smoothstep(uSeamWidth, min(0.9998, uSeamWidth + 0.009), contour);
 
     float mineral = smoothstep(0.22, 0.82, macro + (detail - 0.5) * 0.16);
     vec3 baseColor = mix(uLowColor, uHighColor, mineral);
-    vec3 materialColor = mix(baseColor, uSeamColor, seam);
+    vec3 materialColor = mix(baseColor, uSeamColor, seam * uCrackStrength);
     materialColor *= 0.84 + detail * 0.28;
 
     vec3 normal = normalize(vViewNormal);
@@ -96,10 +96,10 @@ const fragmentShader = `
     specular *= mix(0.015, 0.45, uMetalness) * (0.2 + seam * 1.2);
 
     vec3 color = materialColor * diffuse;
-    color += uRimColor * rim * (0.065 + uTransmission * 1.15);
+    color += uRimColor * rim * (0.075 + uTransmission * 1.15) * uRimStrength;
     color += vec3(specular);
-    color += uSeamColor * seam * uEmission;
-    color *= mix(0.56, 1.0, uSelected);
+    color += uSeamColor * seam * uEmission * uCrackStrength;
+    color *= mix(0.84, 1.0, uSelected);
     gl_FragColor = vec4(color, 1.0);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -130,6 +130,8 @@ export function PortalPlanetMaterial({
     uMetalness: { value: profile.metalness },
     uEmission: { value: profile.emission },
     uTransmission: { value: profile.transmission },
+    uCrackStrength: { value: profile.crackStrength },
+    uRimStrength: { value: profile.rimStrength },
     uSelected: { value: selected ? 1 : 0 },
     uTime: { value: 0 },
   }), [profile, selected])

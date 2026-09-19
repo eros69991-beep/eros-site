@@ -63,7 +63,7 @@ describe('scene fallback paths', () => {
 
     expect(screen.queryByTestId('static-orbits')).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Studio' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '05 / STUDIO / UNKNOWN' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '05 / STUDIO / UNKNOWN' })).toHaveAttribute('href', '/studio')
   })
 
   it('retries a failed scene without replacing the App Shell', async () => {
