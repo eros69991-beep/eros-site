@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { MathUtils, type Camera } from 'three'
+import { MathUtils, type Camera, type PerspectiveCamera } from 'three'
 import { useEffect, useRef } from 'react'
 import { celestials } from '../../domain/worlds'
 import type { CelestialDefinition } from '../../domain/types'
@@ -8,20 +8,12 @@ import { ErosCore } from './ErosCore'
 import { CelestialBody } from './CelestialBody'
 import { StarField } from './StarField'
 import { GalacticVeil } from './GalacticVeil'
-import { getDesktopParallaxTarget, getMobileObservationAngle } from './universeInteraction'
-import { PORTAL_BODY_POSITIONS } from './universeConfig'
 import { registerUniverseCameraAlignment } from './universeCameraAlignment'
+import { getHomeCameraPreset, HOME_BODY_LAYOUT } from './homeComposition'
 
-const CAMERA_FOV = 42
-const DESKTOP_CAMERA_DISTANCE = 24
-const MOBILE_CAMERA_DISTANCE = 26
-const COMPOSITION_FOCUS: [number, number, number] = [-1.7, 0.1, 0]
-const MOBILE_COMPOSITION_FOCUS: [number, number, number] = [0, -0.8, 0]
-
-function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobile: boolean }) {
-  const { camera, gl, pointer, size } = useThree()
+function DampedCamera({ reducedMotion }: { reducedMotion: boolean }) {
+  const { camera, size } = useThree()
   const cameraRef = useRef<Camera | null>(null)
-  const mobileDrag = useRef({ active: false, angle: 0, startAngle: 0, startX: 0 })
   const entryAlignment = useRef<{
     body: CelestialDefinition
     resolve(): void
@@ -29,6 +21,15 @@ function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobil
   useEffect(() => {
     cameraRef.current = camera
   }, [camera])
+
+  useEffect(() => {
+    const preset = getHomeCameraPreset(size.width, size.height)
+    const perspectiveCamera = camera as PerspectiveCamera
+    perspectiveCamera.fov = preset.fov
+    perspectiveCamera.position.set(...preset.position)
+    perspectiveCamera.lookAt(...preset.target)
+    perspectiveCamera.updateProjectionMatrix()
+  }, [camera, size.height, size.width])
 
   useEffect(() => registerUniverseCameraAlignment((world) => {
     const body = celestials.find((candidate) => candidate.id === world)
@@ -45,50 +46,12 @@ function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobil
     entryAlignment.current = null
   }, [])
 
-  useEffect(() => {
-    if (!mobile || reducedMotion) return undefined
-    const surface = gl.domElement
-    const onPointerDown = (event: PointerEvent) => {
-      if (event.pointerType !== 'touch') return
-      mobileDrag.current = {
-        active: true,
-        angle: mobileDrag.current.angle,
-        startAngle: mobileDrag.current.angle,
-        startX: event.clientX,
-      }
-      surface.setPointerCapture?.(event.pointerId)
-    }
-    const onPointerMove = (event: PointerEvent) => {
-      if (!mobileDrag.current.active || event.pointerType !== 'touch') return
-      mobileDrag.current.angle = getMobileObservationAngle(
-        mobileDrag.current.startAngle,
-        mobileDrag.current.startX,
-        event.clientX,
-        size.width,
-      )
-    }
-    const onPointerUp = (event: PointerEvent) => {
-      if (event.pointerType === 'touch') mobileDrag.current.active = false
-    }
-
-    surface.addEventListener('pointerdown', onPointerDown)
-    surface.addEventListener('pointermove', onPointerMove)
-    surface.addEventListener('pointerup', onPointerUp)
-    surface.addEventListener('pointercancel', onPointerUp)
-    return () => {
-      surface.removeEventListener('pointerdown', onPointerDown)
-      surface.removeEventListener('pointermove', onPointerMove)
-      surface.removeEventListener('pointerup', onPointerUp)
-      surface.removeEventListener('pointercancel', onPointerUp)
-    }
-  }, [gl, mobile, reducedMotion, size.width])
-
   useFrame((_state, delta) => {
     const activeCamera = cameraRef.current
     if (!activeCamera) return
     const alignment = entryAlignment.current
     if (alignment) {
-      const [targetX, targetY, targetZ] = PORTAL_BODY_POSITIONS[alignment.body.id]
+      const [targetX, targetY, targetZ] = HOME_BODY_LAYOUT[alignment.body.id].position
       const damping = Math.min(delta * 3.4, 1)
       activeCamera.position.x = MathUtils.lerp(activeCamera.position.x, targetX * 0.48, damping)
       activeCamera.position.y = MathUtils.lerp(activeCamera.position.y, targetY * 0.48, damping)
@@ -104,16 +67,6 @@ function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobil
       }
       return
     }
-    const desktopTarget = getDesktopParallaxTarget(pointer, size, CAMERA_FOV, DESKTOP_CAMERA_DISTANCE)
-    const targetX = mobile
-      ? Math.sin(reducedMotion ? 0 : mobileDrag.current.angle) * 2.8
-      : desktopTarget.x
-    const targetY = mobile ? 0 : desktopTarget.y
-    const damping = reducedMotion ? 0 : Math.min(delta * 2.2, 1)
-    activeCamera.position.x = MathUtils.lerp(activeCamera.position.x, targetX, damping)
-    activeCamera.position.y = MathUtils.lerp(activeCamera.position.y, 0.45 + targetY, damping)
-    activeCamera.position.z = mobile ? MOBILE_CAMERA_DISTANCE : DESKTOP_CAMERA_DISTANCE
-    activeCamera.lookAt(...(mobile ? MOBILE_COMPOSITION_FOCUS : COMPOSITION_FOCUS))
   })
   return null
 }
@@ -136,7 +89,7 @@ export function UniverseScene({
       <directionalLight color="#D6E0E0" intensity={1.08} position={[-8, 6, 9]} />
       <pointLight color="#66888E" intensity={1.15} position={[-3, 1, 4]} />
       <pointLight color="#AFC2C5" distance={16} intensity={2.2} position={[9, 3, 6]} />
-      <DampedCamera mobile={mobile} reducedMotion={reducedMotion} />
+      <DampedCamera reducedMotion={reducedMotion} />
       <GalacticVeil reducedMotion={reducedMotion} />
       <StarField particleCount={budget.maxParticles} reducedMotion={reducedMotion} />
       <ErosCore mobile={mobile} quality={quality} reducedMotion={reducedMotion} />

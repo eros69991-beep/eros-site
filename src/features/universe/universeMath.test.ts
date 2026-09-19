@@ -20,7 +20,7 @@ describe('universe motion', () => {
   it('concentrates stars into the shared inclined galactic band', () => {
     const stars = createSeededStars(500, 1701)
     const meanBandDistance = stars.reduce(
-      (total, star) => total + Math.abs(star.position[1] + star.position[0] * 0.42),
+      (total, star) => total + Math.abs(star.position[1] - star.position[0] * 0.42),
       0,
     ) / stars.length
 

@@ -43,6 +43,7 @@ export function HomePage() {
       <HomeIntro active={introActive} />
       <div className={styles.portalContent} data-intro-active={introActive || undefined}>
         <SemanticCelestialControls />
+        <p className={styles.homeLine}>Nothing stays expected.</p>
       </div>
     </section>
   )

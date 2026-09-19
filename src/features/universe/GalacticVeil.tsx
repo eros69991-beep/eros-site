@@ -64,7 +64,7 @@ export function GalacticVeil({ reducedMotion }: { reducedMotion: boolean }) {
   })
 
   return (
-    <mesh position={[-0.8, -0.2, -8]} rotation={[0, 0, -0.4]} scale={[1, 1, 1]}>
+    <mesh position={[-0.8, -0.2, -8]} rotation={[0, 0, 0.4]} scale={[1, 1, 1]}>
       <planeGeometry args={[42, 6]} />
       <shaderMaterial
         ref={materialRef}

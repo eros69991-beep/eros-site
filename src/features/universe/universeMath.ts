@@ -45,7 +45,7 @@ export function createSeededStars(count: number, seed: number): SeededStar[] {
   return Array.from({ length: count }, () => {
     const x = (random() - 0.5) * 42
     const gaussian = (random() + random() + random() + random() + random() + random()) - 3
-    const y = -x * 0.42 + gaussian * 1.65
+    const y = x * 0.42 + gaussian * 1.65
     const z = -9 - random() * 28
     return {
       position: [x, y, z],

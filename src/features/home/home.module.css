@@ -23,6 +23,26 @@
   min-height: 100svh;
 }
 
+.homeLine {
+  position: fixed;
+  z-index: 2;
+  left: clamp(1.5rem, 2.5vw, 2.6rem);
+  bottom: clamp(1.15rem, 2.4vh, 2rem);
+  margin: 0;
+  color: rgb(231 234 235 / 88%);
+  font-family: var(--font-editorial, serif);
+  font-size: clamp(0.86rem, 1.2vw, 1.2rem);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .homeLine {
+    bottom: 4.9rem;
+    font-size: 0.8rem;
+  }
+}
+
 .introOverlay {
   position: absolute;
   z-index: 1;
