@@ -16,4 +16,14 @@ describe('universe motion', () => {
     expect(first).toEqual(second)
     expect(new Set(first.map((star) => star.twinkleOffset)).size).toBeGreaterThan(40)
   })
+
+  it('concentrates stars into the shared inclined galactic band', () => {
+    const stars = createSeededStars(500, 1701)
+    const meanBandDistance = stars.reduce(
+      (total, star) => total + Math.abs(star.position[1] + star.position[0] * 0.42),
+      0,
+    ) / stars.length
+
+    expect(meanBandDistance).toBeLessThan(3.6)
+  })
 })

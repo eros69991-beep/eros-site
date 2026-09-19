@@ -7,6 +7,7 @@ import { getEffectiveSceneBudget } from '../../scene/quality'
 import { ErosCore } from './ErosCore'
 import { CelestialBody } from './CelestialBody'
 import { StarField } from './StarField'
+import { GalacticVeil } from './GalacticVeil'
 import { getDesktopParallaxTarget, getMobileObservationAngle } from './universeInteraction'
 import { PORTAL_BODY_POSITIONS } from './universeConfig'
 import { registerUniverseCameraAlignment } from './universeCameraAlignment'
@@ -14,8 +15,8 @@ import { registerUniverseCameraAlignment } from './universeCameraAlignment'
 const CAMERA_FOV = 42
 const DESKTOP_CAMERA_DISTANCE = 24
 const MOBILE_CAMERA_DISTANCE = 26
-const COMPOSITION_FOCUS: [number, number, number] = [-2.5, 0.25, 0]
-const MOBILE_COMPOSITION_FOCUS: [number, number, number] = [-2.5, -3, 0]
+const COMPOSITION_FOCUS: [number, number, number] = [-1.7, 0.1, 0]
+const MOBILE_COMPOSITION_FOCUS: [number, number, number] = [0, -0.8, 0]
 
 function DampedCamera({ reducedMotion, mobile }: { reducedMotion: boolean; mobile: boolean }) {
   const { camera, gl, pointer, size } = useThree()
@@ -136,9 +137,18 @@ export function UniverseScene({
       <pointLight color="#66888E" intensity={1.15} position={[-3, 1, 4]} />
       <pointLight color="#AFC2C5" distance={16} intensity={2.2} position={[9, 3, 6]} />
       <DampedCamera mobile={mobile} reducedMotion={reducedMotion} />
+      <GalacticVeil reducedMotion={reducedMotion} />
       <StarField particleCount={budget.maxParticles} reducedMotion={reducedMotion} />
-      <ErosCore reducedMotion={reducedMotion} />
-      {celestials.map((body) => <CelestialBody body={body} key={body.id} mobile={mobile} reducedMotion={reducedMotion} />)}
+      <ErosCore mobile={mobile} quality={quality} reducedMotion={reducedMotion} />
+      {celestials.map((body) => (
+        <CelestialBody
+          body={body}
+          key={body.id}
+          mobile={mobile}
+          quality={quality}
+          reducedMotion={reducedMotion}
+        />
+      ))}
     </>
   )
 }

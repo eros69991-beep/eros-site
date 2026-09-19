@@ -5,9 +5,9 @@ import { useSiteStore } from '../state/siteStore'
 
 vi.mock('./webgl', () => ({ supportsWebGL: () => true }))
 vi.mock('./PostProcessingStack', () => ({
-  RealtimeSceneLayer: ({ reducedMotion, onContextLost }: { reducedMotion: boolean, onContextLost(): void }) => (
+  RealtimeSceneLayer: ({ mobile, reducedMotion, onContextLost }: { mobile: boolean, reducedMotion: boolean, onContextLost(): void }) => (
     <>
-      <output aria-label="Realtime scene" data-reduced-motion={String(reducedMotion)}>realtime</output>
+      <output aria-label="Realtime scene" data-mobile={String(mobile)} data-reduced-motion={String(reducedMotion)}>realtime</output>
       <button type="button" onClick={onContextLost}>Lose WebGL context</button>
     </>
   ),
@@ -57,6 +57,15 @@ describe('SceneHost', () => {
 
     act(() => listener?.({ matches: true } as MediaQueryListEvent))
     expect(screen.getByRole('status', { name: 'Realtime scene' })).toHaveAttribute('data-reduced-motion', 'true')
+    vi.unstubAllGlobals()
+  })
+
+  it('uses the mobile composition for a narrow viewport on a desktop browser', () => {
+    vi.stubGlobal('innerWidth', 390)
+
+    render(<MemoryRouter><SceneHost /></MemoryRouter>)
+
+    expect(screen.getByRole('status', { name: 'Realtime scene' })).toHaveAttribute('data-mobile', 'true')
     vi.unstubAllGlobals()
   })
 

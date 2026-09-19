@@ -47,6 +47,10 @@ function readCoarsePointer() {
     && window.matchMedia('(pointer: coarse)').matches
 }
 
+function readCompactViewport() {
+  return typeof window !== 'undefined' && window.innerWidth <= 600
+}
+
 function readMobilePerformanceDevice() {
   if (typeof navigator === 'undefined') return false
   const browserNavigator = navigator as NavigatorWithPerformanceSignals
@@ -91,6 +95,19 @@ function useReducedMotionPreference() {
   return reducedMotion
 }
 
+function useCompactViewport() {
+  const [compact, setCompact] = useState(readCompactViewport)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const update = () => setCompact(readCompactViewport())
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  return compact
+}
+
 function getWorldIdFromPath(pathname: string): WorldId | null {
   const match = /^\/world\/(spring|summer|autumn|winter)(?:\/|$)/.exec(pathname)
   return match?.[1] as WorldId | undefined ?? null
@@ -99,12 +116,14 @@ function getWorldIdFromPath(pathname: string): WorldId | null {
 export function SceneHost() {
   const location = useLocation()
   const reducedMotion = useReducedMotionPreference()
+  const compactViewport = useCompactViewport()
   const setStoredQuality = useSiteStore((state) => state.setQualityTier)
   const reducedVisualWorld = useSiteStore((state) => state.reducedVisualWorld)
   const [webglAvailable] = useState(supportsWebGL)
-  const [mobile] = useState(readMobilePerformanceDevice)
+  const [performanceMobile] = useState(readMobilePerformanceDevice)
+  const mobile = performanceMobile || compactViewport
   const [quality, setQuality] = useState(() => (
-    getInitialQuality(webglAvailable, reducedMotion, mobile)
+    getInitialQuality(webglAvailable, reducedMotion, performanceMobile)
   ))
   const [retryKey, setRetryKey] = useState(0)
   const [forceStatic, setForceStatic] = useState(false)

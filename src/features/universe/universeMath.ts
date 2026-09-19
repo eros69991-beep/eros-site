@@ -43,11 +43,12 @@ function xorshift(seed: number) {
 export function createSeededStars(count: number, seed: number): SeededStar[] {
   const random = xorshift(seed)
   return Array.from({ length: count }, () => {
-    const radius = 14 + random() * 35
-    const theta = random() * Math.PI * 2
-    const y = (random() - 0.5) * 26
+    const x = (random() - 0.5) * 42
+    const gaussian = (random() + random() + random() + random() + random() + random()) - 3
+    const y = -x * 0.42 + gaussian * 1.65
+    const z = -9 - random() * 28
     return {
-      position: [Math.cos(theta) * radius, y, Math.sin(theta) * radius - 12],
+      position: [x, y, z],
       size: 0.45 + random() * 1.2,
       luminance: 0.38 + random() * 0.5,
       twinklePeriod: 8 + random() * 20,

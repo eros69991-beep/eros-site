@@ -103,6 +103,6 @@ describe('SemanticCelestialControls', () => {
   it('shows the selected portal position', () => {
     renderControls()
 
-    expect(screen.getByLabelText('Portal position')).toHaveTextContent('01–05')
+    expect(screen.getByLabelText('Portal position')).toHaveTextContent('0102030405')
   })
 })

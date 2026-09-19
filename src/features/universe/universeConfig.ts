@@ -1,7 +1,8 @@
 import { worlds } from '../../domain/worlds'
 import type { CelestialId } from '../../domain/types'
 
-export const CORE_POSITION: [number, number, number] = [5.6, 1.45, -1.8]
+export const CORE_POSITION: [number, number, number] = [7.15, 1.65, -1.8]
+export const CORE_MOBILE_POSITION: [number, number, number] = [4.8, 4.15, -1.8]
 
 export const PORTAL_BODY_POSITIONS = {
   spring: [-4.8, 1.1, 1.2],

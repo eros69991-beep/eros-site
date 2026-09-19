@@ -174,3 +174,17 @@ describe('homepage Blender source scene', () => {
     }
   })
 })
+
+describe('homepage runtime export', () => {
+  it('exports every authored asset at low, medium, and high detail', async () => {
+    const audit = JSON.parse(await readFile('work/homepage-runtime-audit.json', 'utf8'))
+
+    for (const assetId of assetIds) {
+      expect(Object.keys(audit.assets[assetId]).sort()).toEqual([...lods].sort())
+      for (const lod of lods) {
+        expect(audit.assets[assetId][lod].triangles).toBeGreaterThan(0)
+        expect(audit.assets[assetId][lod].path).toMatch(new RegExp(`${assetId}-${lod}\\.glb$`))
+      }
+    }
+  })
+})

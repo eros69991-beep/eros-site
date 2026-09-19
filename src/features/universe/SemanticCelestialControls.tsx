@@ -10,30 +10,19 @@ export function SemanticCelestialControls() {
   const selectCelestial = useSiteStore((state) => state.selectCelestial)
   const pointerStartX = useRef<number | null>(null)
   const ignoreNextClick = useRef(false)
-  const body = selected ? getPortalBody(selected) : null
-  const selectedIndex = selected ? PORTAL_ORDER.indexOf(selected) : 0
+  const selectedId = selected ?? 'spring'
+  const body = getPortalBody(selectedId)
+  const selectedIndex = PORTAL_ORDER.indexOf(selectedId)
 
   return (
     <nav aria-label="Celestial destinations" className={styles.celestialControls}>
       <div
         className={styles.controlList}
-        onPointerDown={(event) => {
-          if (event.pointerType === 'touch') pointerStartX.current = event.clientX
-        }}
-        onPointerUp={(event) => {
-          if (event.pointerType !== 'touch' || pointerStartX.current === null) return
-          const current = selected ?? PORTAL_ORDER[0]
-          const destination = getSwipeDestination(current, event.clientX - pointerStartX.current, window.innerWidth)
-          ignoreNextClick.current = destination !== current
-          selectCelestial(destination)
-          pointerStartX.current = null
-        }}
-        onPointerCancel={() => { pointerStartX.current = null }}
         style={{ '--portal-index': selectedIndex } as CSSProperties}
       >
         {PORTAL_ORDER.map((id) => {
           const portalBody = getPortalBody(id)
-          const isSelected = selected === id
+          const isSelected = selectedId === id
           return (
             <button
               aria-pressed={isSelected}
@@ -55,11 +44,29 @@ export function SemanticCelestialControls() {
           )
         })}
       </div>
+      <div
+        aria-hidden="true"
+        className={styles.swipeCapture}
+        onPointerDown={(event) => {
+          if (event.pointerType === 'touch') pointerStartX.current = event.clientX
+        }}
+        onPointerUp={(event) => {
+          if (event.pointerType !== 'touch' || pointerStartX.current === null) return
+          const current = selected ?? PORTAL_ORDER[0]
+          const destination = getSwipeDestination(current, event.clientX - pointerStartX.current, window.innerWidth)
+          ignoreNextClick.current = destination !== current
+          selectCelestial(destination)
+          pointerStartX.current = null
+        }}
+        onPointerCancel={() => { pointerStartX.current = null }}
+      />
       <output aria-live="polite" className={styles.portalIdentity}>
-        {body ? `${body.index} / ${body.label}` : ''}
+        {`${body.index} / ${body.label}`}
       </output>
       <output aria-label="Portal position" className={styles.mobilePosition}>
-        {body ? `${body.index}–05` : '01–05'}
+        {PORTAL_ORDER.map((id) => (
+          <span data-active={id === selectedId || undefined} key={id}>{getPortalBody(id).index}</span>
+        ))}
       </output>
       {body?.world ? (
         <button className={styles.enterControl} onClick={() => enterWorld(body.world!, 'universe')} type="button">
