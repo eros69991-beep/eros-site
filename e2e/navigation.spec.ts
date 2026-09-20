@@ -10,17 +10,16 @@ test.beforeEach(async ({ page }) => {
 })
 
 const worlds = [
-  { control: 'Spring / Awakening', heading: 'SPRING / AWAKENING', route: '/world/spring' },
-  { control: 'Summer / Burn', heading: 'SUMMER / BURN', route: '/world/summer' },
-  { control: 'Autumn / Fade', heading: 'AUTUMN / FADE', route: '/world/autumn' },
-  { control: 'Winter / Freeze', heading: 'WINTER / FREEZE', route: '/world/winter' },
+  { control: '01 / SPRING / AWAKENING', heading: 'SPRING / AWAKENING', route: '/world/spring' },
+  { control: '02 / SUMMER / BURN', heading: 'SUMMER / BURN', route: '/world/summer' },
+  { control: '03 / AUTUMN / FADE', heading: 'AUTUMN / FADE', route: '/world/autumn' },
+  { control: '04 / WINTER / FREEZE', heading: 'WINTER / FREEZE', route: '/world/winter' },
 ]
 
 for (const world of worlds) {
-  test(`Home selects and enters ${world.heading}`, async ({ page }) => {
+  test(`Home enters ${world.heading} with one link activation`, async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: world.control }).click()
-    await page.getByRole('button', { name: `Enter ${world.control}` }).click()
+    await page.getByRole('link', { name: world.control }).click()
     await expect(page).toHaveURL(world.route)
     await expect(page.getByRole('heading', { level: 1, name: world.heading })).toBeVisible()
   })

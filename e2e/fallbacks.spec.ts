@@ -3,8 +3,7 @@ import { expect, test } from '@playwright/test'
 test('reduced motion retains complete semantic World navigation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
-  await page.getByRole('button', { name: 'AUTUMN / FADE' }).click()
-  await page.getByRole('button', { name: 'Enter AUTUMN / FADE' }).click()
+  await page.getByRole('link', { name: '03 / AUTUMN / FADE' }).click()
   await expect(page).toHaveURL('/world/autumn')
   await expect(page.getByRole('heading', { name: 'AUTUMN / FADE' })).toBeVisible()
 })
@@ -15,8 +14,7 @@ test('no WebGL renders the static Universe and preserves navigation', async ({ p
   })
   await page.goto('/')
   await expect(page.getByRole('region', { name: 'Static universe' })).toBeVisible()
-  await page.getByRole('button', { name: 'SPRING / AWAKENING' }).click()
-  await page.getByRole('button', { name: 'Enter SPRING / AWAKENING' }).click()
+  await page.getByRole('link', { name: '01 / SPRING / AWAKENING' }).click()
   await expect(page).toHaveURL('/world/spring')
 })
 
@@ -34,4 +32,5 @@ test('production preview does not expose development scene controls @production'
   await page.goto('/')
   await expect.poll(() => page.evaluate(() => window.__EROS_TEST_API__?.triggerSceneError === undefined)).toBe(true)
   await expect.poll(() => page.evaluate(() => window.__EROS_TEST_API__?.setSceneTime === undefined)).toBe(true)
+  await expect.poll(() => page.evaluate(() => window.__EROS_HOME_TEST_API__ === undefined)).toBe(true)
 })

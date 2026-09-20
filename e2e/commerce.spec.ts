@@ -36,8 +36,7 @@ test('Menu opens Archive, applies a World filter, and reaches a Product', async 
 })
 
 test('Search Back restores the query and result surface', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('link', { name: 'SEARCH' }).click()
+  await page.goto('/search')
   await page.getByRole('searchbox', { name: 'Search the archive' }).fill('mist')
   await page.getByRole('link', { name: 'Mist Shell' }).click()
   await expect(page).toHaveURL('/product/prototype-spring-001')
@@ -55,7 +54,7 @@ test('Search overlay resolves without a nested route warning', async ({ page }) 
     }
   })
 
-  await page.goto('/')
+  await page.goto('/world/spring')
   await page.getByRole('link', { name: 'SEARCH' }).click()
   await expect(page.getByRole('searchbox', { name: 'Search the archive' })).toBeVisible()
 
@@ -64,8 +63,7 @@ test('Search overlay resolves without a nested route warning', async ({ page }) 
 
 test('refresh retains Bag contents and the most recently entered World', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: 'WINTER / FREEZE' }).click()
-  await page.getByRole('button', { name: 'Enter WINTER / FREEZE' }).click()
+  await page.getByRole('link', { name: '04 / WINTER / FREEZE' }).click()
   await expect(page).toHaveURL('/world/winter')
   await page.getByRole('link', { name: /View Still Field, PROTOTYPE 007/i }).click()
   await page.getByRole('radio', { name: 'M' }).check()
@@ -76,5 +74,5 @@ test('refresh retains Bag contents and the most recently entered World', async (
   await page.getByRole('link', { name: /BAG 1/i }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Still Field' })).toBeVisible()
   await page.getByRole('link', { name: 'EROS' }).click()
-  await expect(page.getByRole('button', { name: /^Winter \/ Freeze$/i })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('link', { name: '04 / WINTER / FREEZE' })).toHaveAttribute('aria-current', 'true')
 })
