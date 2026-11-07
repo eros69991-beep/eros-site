@@ -92,11 +92,14 @@ export function createWorldEntryDependencies({
   scrollToTop,
 }: CreateWorldEntryDependenciesOptions): WorldEntryDependencies {
   const dependencies: WorldEntryDependencies = {
-    alignTarget: (world: WorldId, source: WorldEntrySource) => (
-      source === 'universe' ? alignUniverse(world)
-        : source === 'world-gate' ? handoffWorld?.(world) ?? Promise.resolve()
-          : Promise.resolve()
-    ),
+    alignTarget: (world: WorldId, source: WorldEntrySource) => {
+      if (source === 'universe') {
+        // 镜头照常转向被点的星球，但不等它对准：过渡色块立刻开始铺开，两者同时进行
+        void alignUniverse(world)
+        return Promise.resolve()
+      }
+      return source === 'world-gate' ? handoffWorld?.(world) ?? Promise.resolve() : Promise.resolve()
+    },
     preloadCriticalAssets: preload,
     playHandoff: (world, source) => source === 'universe'
       ? handoffHomepage?.(world) ?? Promise.resolve()

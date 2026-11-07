@@ -79,6 +79,19 @@ describe('concrete World Entry dependencies', () => {
     expect(alignUniverse).toHaveBeenCalledWith('summer')
   })
 
+  it('starts the Universe camera move without waiting for it to settle', async () => {
+    const alignUniverse = vi.fn(() => new Promise<void>(() => undefined))
+    const dependencies = createWorldEntryDependencies({
+      alignUniverse,
+      navigate: vi.fn(),
+      preload: vi.fn().mockResolvedValue(undefined),
+      remember: vi.fn(),
+    })
+
+    await expect(dependencies.alignTarget('autumn', 'universe')).resolves.toBeUndefined()
+    expect(alignUniverse).toHaveBeenCalledWith('autumn')
+  })
+
   it('resets document scroll before committing a World route', () => {
     const events: string[] = []
     const scrollToTop = () => events.push('scroll')

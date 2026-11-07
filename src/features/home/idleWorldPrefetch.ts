@@ -3,7 +3,7 @@ import { preloadCriticalWorldAssets } from '../transitions/worldEntryDependencie
 import { sceneRegistry } from '../worlds/sceneRegistry'
 
 /** 首页加载后等多久再开始预取（让首页星球先烘焙完，不和它抢资源）。 */
-export const IDLE_PREFETCH_DELAY_MS = 3_000
+export const IDLE_PREFETCH_DELAY_MS = 1_500
 
 interface IdlePrefetchOptions {
   preload?: (world: WorldId) => Promise<unknown>
