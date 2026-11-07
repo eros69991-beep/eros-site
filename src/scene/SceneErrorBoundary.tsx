@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react'
+import { isStaleChunkError, reloadOnceForStaleBuild } from '../app/staleBuildRecovery'
 
 interface SceneErrorBoundaryProps {
   children: ReactNode
@@ -18,6 +19,11 @@ export class SceneErrorBoundary extends Component<
 
   static getDerivedStateFromError(error: Error): SceneErrorBoundaryState {
     return { error }
+  }
+
+  componentDidCatch(error: Error) {
+    // 季节场景的代码文件是旧版本留下的地址：刷新一次即可，不用让访客看到错误框
+    if (isStaleChunkError(error)) reloadOnceForStaleBuild()
   }
 
   componentDidUpdate(previousProps: SceneErrorBoundaryProps) {
