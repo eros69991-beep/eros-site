@@ -5,6 +5,7 @@ describe('homepage asset LOD selection', () => {
     expect(selectHomepageLod({ core: true, mobile: false, quality: 'high', selected: true })).toBe('high')
     expect(selectHomepageLod({ core: false, mobile: false, quality: 'high', selected: false })).toBe('low')
     expect(selectHomepageLod({ core: false, mobile: false, quality: 'balanced', selected: true })).toBe('medium')
+    expect(selectHomepageLod({ core: false, mobile: false, quality: 'balanced', selected: false, foreground: true })).toBe('medium')
     expect(selectHomepageLod({ core: true, mobile: true, quality: 'high', selected: true })).toBe('low')
   })
 })

@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { PerspectiveCamera as DreiPerspectiveCamera } from '@react-three/drei'
+import { Environment, Lightformer, PerspectiveCamera as DreiPerspectiveCamera } from '@react-three/drei'
 import { MathUtils, PerspectiveCamera as ThreePerspectiveCamera, type Camera } from 'three'
 import { useEffect, useMemo, useRef } from 'react'
 import { celestials } from '../../domain/worlds'
@@ -112,10 +112,16 @@ export function UniverseScene({
   return (
     <>
       <color attach="background" args={['#020405']} />
-      <ambientLight color="#A7BAC0" intensity={0.42} />
-      <directionalLight color="#D6E0E0" intensity={1.08} position={[-8, 6, 9]} />
-      <pointLight color="#66888E" intensity={1.15} position={[-3, 1, 4]} />
-      <pointLight color="#AFC2C5" distance={16} intensity={2.2} position={[9, 3, 6]} />
+      <ambientLight color="#7A898C" intensity={0.18} />
+      <directionalLight color="#E4ECE9" intensity={1.85} position={[-8, 7, 10]} />
+      <directionalLight color="#83979D" intensity={0.72} position={[7, -2, 5]} />
+      <pointLight color="#7A9A9A" distance={18} intensity={0.9} position={[-3, 1, 5]} />
+      <pointLight color="#D3D9D4" distance={22} intensity={1.6} position={[10, 4, 7]} />
+      <Environment background={false} frames={1} resolution={quality === 'high' ? 256 : 128}>
+        <Lightformer color="#DCE8E4" form="rect" intensity={3.2} position={[-5, 4, 2]} rotation={[0, Math.PI / 2, 0]} scale={[5, 5, 1]} />
+        <Lightformer color="#98AEB5" form="rect" intensity={2.1} position={[5, -1, 1]} rotation={[0, -Math.PI / 2, 0]} scale={[4, 8, 1]} />
+        <Lightformer color="#FFF1D7" form="ring" intensity={1.6} position={[0, 5, -3]} scale={3} />
+      </Environment>
       <HomeCamera />
       <HomeOrbitClockDriver reducedMotion={reducedMotion} />
       <DampedCamera reducedMotion={reducedMotion} />

@@ -4,7 +4,7 @@ import type { Group } from 'three'
 import { getSceneTime } from '../../scene/sceneClock'
 import { selectHomepageLod } from './assets/homepageAssetSelection'
 import { useHomepageGeometry } from './assets/useHomepageGeometry'
-import { PortalPlanetMaterial } from './materials/PortalPlanetMaterial'
+import { PortalPbrMaterial } from './materials/PortalPbrMaterial'
 import { HOME_BODY_LAYOUT } from './homeComposition'
 
 export function ErosCore({
@@ -31,7 +31,7 @@ export function ErosCore({
   return (
     <group ref={groupRef} position={layout.position} rotation={[0.08, -0.35, 0.12]} scale={layout.scale}>
       <mesh geometry={geometry} scale={[1, 1.015, 0.99]}>
-        <PortalPlanetMaterial id="core" reducedMotion={reducedMotion} selected />
+        <PortalPbrMaterial id="core" reducedMotion={reducedMotion} selected />
       </mesh>
     </group>
   )

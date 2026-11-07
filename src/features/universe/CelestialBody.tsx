@@ -7,7 +7,7 @@ import { useSiteStore } from '../../state/siteStore'
 import { useWorldEntry } from '../transitions/useWorldEntry'
 import { selectHomepageLod } from './assets/homepageAssetSelection'
 import { useHomepageGeometry } from './assets/useHomepageGeometry'
-import { PortalPlanetMaterial } from './materials/PortalPlanetMaterial'
+import { PortalPbrMaterial } from './materials/PortalPbrMaterial'
 import { getPortalBody } from './portalModel'
 import { HOME_BODY_LAYOUT } from './homeComposition'
 import { homeOrbitClock } from './homeOrbitClock'
@@ -28,7 +28,13 @@ export function CelestialBody({ body, mobile, quality, reducedMotion }: Celestia
   const { enterWorld } = useWorldEntry()
   const navigate = useNavigate()
   const isSelected = (selected ?? 'spring') === body.id
-  const lod = selectHomepageLod({ core: false, mobile, quality, selected: isSelected })
+  const lod = selectHomepageLod({
+    core: false,
+    foreground: body.id === 'winter',
+    mobile,
+    quality,
+    selected: isSelected,
+  })
   const geometry = useHomepageGeometry(body.id, lod)
   const layout = HOME_BODY_LAYOUT[body.id]
   const orbitPosition = useMemo(() => new Vector3(), [])
@@ -72,7 +78,7 @@ export function CelestialBody({ body, mobile, quality, reducedMotion }: Celestia
       }}
     >
       <mesh geometry={geometry} rotation={[body.phase * 0.08, 0, body.phase * 0.035]}>
-        <PortalPlanetMaterial id={body.id} reducedMotion={reducedMotion} selected={isSelected} />
+        <PortalPbrMaterial id={body.id} reducedMotion={reducedMotion} selected={isSelected} />
       </mesh>
     </group>
   )
