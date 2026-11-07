@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SemanticCelestialControls } from '../universe/SemanticCelestialControls'
 import { HomeIntro } from './HomeIntro'
+import { startIdleWorldPrefetch } from './idleWorldPrefetch'
 import {
   getHomepageIntroDuration,
   markHomepageIntroSeen,
@@ -24,6 +25,9 @@ export function HomePage() {
     const storage = getBrowserSessionStorage()
     return !storage || !readHomepageIntroSeen(storage)
   })
+
+  // 首页空闲时预取各季节页的场景代码和主图，点击星球时不用再等下载
+  useEffect(() => startIdleWorldPrefetch(), [])
 
   useEffect(() => {
     if (!introActive || typeof window === 'undefined') return

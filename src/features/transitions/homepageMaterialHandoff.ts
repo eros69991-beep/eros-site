@@ -1,6 +1,6 @@
 import type { WorldId } from '../../domain/types'
 
-export const HOMEPAGE_HANDOFF_MS = 900
+export const HOMEPAGE_HANDOFF_MS = 600
 
 export interface HomepageMaterialHandoff {
   world: WorldId

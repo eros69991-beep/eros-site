@@ -19,10 +19,10 @@
   pointer-events: none;
 }
 
-.homepageTakeover[data-world='spring'] { background: radial-gradient(circle at 26% 72%, #a7cdb8 0 2%, transparent 28%), #08100d; clip-path: circle(0 at 26% 72%); animation: spring-growth 900ms cubic-bezier(.22,.72,.18,1) forwards; }
-.homepageTakeover[data-world='summer'] { background: linear-gradient(105deg, #160d08 0 42%, #f5eee2 58% 100%); clip-path: inset(0 100% 0 0); animation: summer-burn 900ms cubic-bezier(.16,.84,.24,1) forwards; }
-.homepageTakeover[data-world='autumn'] { background: radial-gradient(circle at 70% 30%, #9b5942, #241a16 48%, #080808 72%); clip-path: circle(0 at 70% 30%); animation: autumn-oxidation 900ms cubic-bezier(.32,.02,.18,1) forwards; }
-.homepageTakeover[data-world='winter'] { background: linear-gradient(135deg, #e8efec, #6f7a78 45%, #0b0e10 70%); clip-path: polygon(48% 48%,52% 48%,52% 52%,48% 52%); animation: winter-seal 900ms cubic-bezier(.25,.1,.25,1) forwards; }
+.homepageTakeover[data-world='spring'] { background: radial-gradient(circle at 26% 72%, #a7cdb8 0 2%, transparent 28%), #08100d; clip-path: circle(0 at 26% 72%); animation: spring-growth 600ms cubic-bezier(.22,.72,.18,1) forwards; }
+.homepageTakeover[data-world='summer'] { background: linear-gradient(105deg, #160d08 0 42%, #f5eee2 58% 100%); clip-path: inset(0 100% 0 0); animation: summer-burn 600ms cubic-bezier(.16,.84,.24,1) forwards; }
+.homepageTakeover[data-world='autumn'] { background: radial-gradient(circle at 70% 30%, #9b5942, #241a16 48%, #080808 72%); clip-path: circle(0 at 70% 30%); animation: autumn-oxidation 600ms cubic-bezier(.32,.02,.18,1) forwards; }
+.homepageTakeover[data-world='winter'] { background: linear-gradient(135deg, #e8efec, #6f7a78 45%, #0b0e10 70%); clip-path: polygon(48% 48%,52% 48%,52% 52%,48% 52%); animation: winter-seal 600ms cubic-bezier(.25,.1,.25,1) forwards; }
 @keyframes spring-growth { to { clip-path: circle(145% at 26% 72%); } }
 @keyframes summer-burn { to { clip-path: inset(0 0 0 0); } }
 @keyframes autumn-oxidation { to { clip-path: circle(145% at 70% 30%); } }
