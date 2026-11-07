@@ -48,7 +48,9 @@ textarea {
 .skip-link {
   position: fixed;
   z-index: 100;
-  top: max(0.75rem, env(safe-area-inset-top));
+  /* 平时整个藏在屏幕上沿之外；以前用 top + translateY(-160%)，
+     在有刘海的 iPhone 上 top 很大，链接会露出来（桌面上也会露出一条黄绿细线） */
+  top: 0;
   left: var(--space-safe-inline);
   display: inline-flex;
   align-items: center;
@@ -56,12 +58,12 @@ textarea {
   color: var(--ink);
   background: var(--focus-ring);
   text-decoration: none;
-  transform: translateY(-160%);
+  transform: translateY(-110%);
   transition: transform 160ms ease-out;
 }
 
 .skip-link:focus-visible {
-  transform: translateY(0);
+  transform: translateY(max(0.75rem, env(safe-area-inset-top)));
 }
 
 main:focus {
@@ -106,8 +108,8 @@ html:has(.app-shell[data-route-world='winter']) body { background: #0b0d10; }
 }
 
 @media (max-height: 34rem) and (orientation: landscape) {
-  .skip-link {
-    top: 0.25rem;
+  .skip-link:focus-visible {
+    transform: translateY(0.25rem);
   }
 }
 
