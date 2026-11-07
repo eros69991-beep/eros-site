@@ -17,7 +17,7 @@ const vertexShader = `
     float twinkle = sin((uTime / aTwinklePeriod) * 6.283185 + aTwinkleOffset) * aTwinkleAmplitude;
     vLuminance = aLuminance + twinkle;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = aSize * (38.0 / -mvPosition.z);
+    gl_PointSize = aSize * (22.0 / -mvPosition.z);
     gl_Position = projectionMatrix * mvPosition;
   }
 `

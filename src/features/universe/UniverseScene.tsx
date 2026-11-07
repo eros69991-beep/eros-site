@@ -112,15 +112,15 @@ export function UniverseScene({
   return (
     <>
       <color attach="background" args={['#020405']} />
-      <ambientLight color="#7A898C" intensity={0.18} />
-      <directionalLight color="#E4ECE9" intensity={1.85} position={[-8, 7, 10]} />
-      <directionalLight color="#83979D" intensity={0.72} position={[7, -2, 5]} />
-      <pointLight color="#7A9A9A" distance={18} intensity={0.9} position={[-3, 1, 5]} />
-      <pointLight color="#D3D9D4" distance={22} intensity={1.6} position={[10, 4, 7]} />
+      {/* 主光来自右上方银河亮端（Core 的方向），星球左侧留出明暗交界；冷色背光勾边。 */}
+      <ambientLight color="#5F6E73" intensity={0.05} />
+      <directionalLight color="#F4EEE2" intensity={3.4} position={[12, 6, -2]} />
+      <directionalLight color="#8FA9B4" intensity={0.22} position={[-10, -3, 8]} />
+      <directionalLight color="#A9C6D2" intensity={0.5} position={[-4, 3, -14]} />
       <Environment background={false} frames={1} resolution={quality === 'high' ? 256 : 128}>
-        <Lightformer color="#DCE8E4" form="rect" intensity={3.2} position={[-5, 4, 2]} rotation={[0, Math.PI / 2, 0]} scale={[5, 5, 1]} />
-        <Lightformer color="#98AEB5" form="rect" intensity={2.1} position={[5, -1, 1]} rotation={[0, -Math.PI / 2, 0]} scale={[4, 8, 1]} />
-        <Lightformer color="#FFF1D7" form="ring" intensity={1.6} position={[0, 5, -3]} scale={3} />
+        <Lightformer color="#F1ECE2" form="rect" intensity={1.7} position={[6, 3, 1]} rotation={[0, -Math.PI / 2, 0]} scale={[5, 6, 1]} />
+        <Lightformer color="#7F98A2" form="rect" intensity={0.15} position={[-6, -1, 2]} rotation={[0, Math.PI / 2, 0]} scale={[4, 6, 1]} />
+        <Lightformer color="#B9D2DC" form="ring" intensity={1.1} position={[-2, 3, -6]} scale={3} />
       </Environment>
       <HomeCamera />
       <HomeOrbitClockDriver reducedMotion={reducedMotion} />

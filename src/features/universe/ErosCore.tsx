@@ -2,9 +2,8 @@ import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
 import { getSceneTime } from '../../scene/sceneClock'
-import { selectHomepageLod } from './assets/homepageAssetSelection'
-import { useHomepageGeometry } from './assets/useHomepageGeometry'
-import { PortalPbrMaterial } from './materials/PortalPbrMaterial'
+import { getPlanetSphere } from './materials/planetGeometry'
+import { ProceduralPlanetMaterial } from './materials/ProceduralPlanetMaterial'
 import { HOME_BODY_LAYOUT } from './homeComposition'
 
 export function ErosCore({
@@ -17,8 +16,8 @@ export function ErosCore({
   reducedMotion: boolean
 }) {
   const groupRef = useRef<Group>(null)
-  const lod = selectHomepageLod({ core: true, mobile, quality, selected: true })
-  const geometry = useHomepageGeometry('core', lod)
+  void quality
+  const geometry = getPlanetSphere()
   const layout = HOME_BODY_LAYOUT.core
 
   useFrame(() => {
@@ -31,7 +30,7 @@ export function ErosCore({
   return (
     <group ref={groupRef} position={layout.position} rotation={[0.08, -0.35, 0.12]} scale={layout.scale}>
       <mesh geometry={geometry} scale={[1, 1.015, 0.99]}>
-        <PortalPbrMaterial id="core" reducedMotion={reducedMotion} selected />
+        <ProceduralPlanetMaterial id="core" mobile={mobile} reducedMotion={reducedMotion} selected />
       </mesh>
     </group>
   )

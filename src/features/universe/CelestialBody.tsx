@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import type { CelestialDefinition } from '../../domain/types'
 import { useSiteStore } from '../../state/siteStore'
 import { useWorldEntry } from '../transitions/useWorldEntry'
-import { selectHomepageLod } from './assets/homepageAssetSelection'
-import { useHomepageGeometry } from './assets/useHomepageGeometry'
-import { PortalPbrMaterial } from './materials/PortalPbrMaterial'
+import { getPlanetSphere } from './materials/planetGeometry'
+import { ProceduralPlanetMaterial } from './materials/ProceduralPlanetMaterial'
 import { getPortalBody } from './portalModel'
 import { HOME_BODY_LAYOUT } from './homeComposition'
 import { homeOrbitClock } from './homeOrbitClock'
@@ -21,21 +20,14 @@ interface CelestialBodyProps {
   reducedMotion: boolean
 }
 
-export function CelestialBody({ body, mobile, quality, reducedMotion }: CelestialBodyProps) {
+export function CelestialBody({ body, mobile, reducedMotion }: CelestialBodyProps) {
   const groupRef = useRef<Group>(null)
   const selected = useSiteStore((state) => state.selectedCelestial)
   const selectCelestial = useSiteStore((state) => state.selectCelestial)
   const { enterWorld } = useWorldEntry()
   const navigate = useNavigate()
   const isSelected = (selected ?? 'spring') === body.id
-  const lod = selectHomepageLod({
-    core: false,
-    foreground: body.id === 'winter',
-    mobile,
-    quality,
-    selected: isSelected,
-  })
-  const geometry = useHomepageGeometry(body.id, lod)
+  const geometry = getPlanetSphere()
   const layout = HOME_BODY_LAYOUT[body.id]
   const orbitPosition = useMemo(() => new Vector3(), [])
   const corePosition = HOME_BODY_LAYOUT.core.position
@@ -78,7 +70,7 @@ export function CelestialBody({ body, mobile, quality, reducedMotion }: Celestia
       }}
     >
       <mesh geometry={geometry} rotation={[body.phase * 0.08, 0, body.phase * 0.035]}>
-        <PortalPbrMaterial id={body.id} reducedMotion={reducedMotion} selected={isSelected} />
+        <ProceduralPlanetMaterial id={body.id} mobile={mobile} reducedMotion={reducedMotion} selected={isSelected} />
       </mesh>
     </group>
   )
