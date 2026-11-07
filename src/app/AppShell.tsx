@@ -25,6 +25,9 @@ import { SceneHost } from '../scene/SceneHost'
 import { useSiteStore } from '../state/siteStore'
 import { useDocumentMeta } from './useDocumentMeta'
 
+// 比关键资源预加载的超时更长，正常进入流程不会触发。
+const WORLD_HANDOFF_SAFETY_MS = 12_000
+
 const ROUTE_WORLDS = new Set(['spring', 'summer', 'autumn', 'winter'])
 
 // 当前路由所在的季节，用来给页面铺底色和设置顶部导航颜色。
@@ -99,10 +102,30 @@ function WorldEntryLayer() {
   const location = useLocation()
   const navigate = useNavigate()
   const { reset, state } = useWorldEntry()
+  const worldHandoff = useSiteStore((store) => store.worldHandoff)
+  const setWorldHandoff = useSiteStore((store) => store.setWorldHandoff)
 
   useEffect(() => {
     if (state.status === 'committing' && location.pathname === `/world/${state.world}`) reset()
   }, [location.pathname, reset, state])
+
+  // 从菜单进入季节时，材质过渡层一直保持到季节页渲染出来的下一帧才撤掉，
+  // 中间不会再露出原来的页面。
+  useEffect(() => {
+    if (!worldHandoff) return undefined
+    if (location.pathname === `/world/${worldHandoff}`) {
+      const frame = window.requestAnimationFrame(() => setWorldHandoff(null))
+      return () => window.cancelAnimationFrame(frame)
+    }
+    // 进入失败：撤掉过渡层，让失败提示和原页面可见。
+    if (state.status === 'failed') {
+      setWorldHandoff(null)
+      return undefined
+    }
+    // 兜底：无论什么原因一直没切到这个季节，几秒后也撤掉，不让它永远盖在页面上。
+    const timeout = window.setTimeout(() => setWorldHandoff(null), WORLD_HANDOFF_SAFETY_MS)
+    return () => window.clearTimeout(timeout)
+  }, [location.pathname, setWorldHandoff, state.status, worldHandoff])
 
   return <WorldEntryOverlay onReturnToUniverse={() => navigate('/')} />
 }

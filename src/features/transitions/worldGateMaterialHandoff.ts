@@ -24,5 +24,6 @@ export async function handoffWorldGateMaterial(
 ) {
   setWorldHandoff(world)
   await wait(reducedMotion ? 0 : WORLD_GATE_HANDOFF_MS)
-  setWorldHandoff(null)
+  // 不在这里撤掉材质层：路由还没切到季节页，撤掉会让原页面（例如白色 Archive）
+  // 闪回一下。由 AppShell 在季节页渲染出来、或进入失败/取消后再撤掉。
 }

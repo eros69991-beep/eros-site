@@ -1,5 +1,5 @@
 import { act, render } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useSiteStore } from '../state/siteStore'
 import { TestRouter } from './AppRouter'
 
@@ -42,5 +42,42 @@ describe('AppShell route ground', () => {
   it('ignores unknown world ids', () => {
     const { container } = render(<TestRouter initialEntries={['/world/mars']} />)
     expect(container.querySelector('.app-shell')).not.toHaveAttribute('data-route-world')
+  })
+})
+
+describe('AppShell world-gate material veil lifetime', () => {
+  it('keeps the veil over the current page until the target world route is shown', () => {
+    vi.useFakeTimers()
+    try {
+      act(() => useSiteStore.getState().setWorldHandoff('autumn'))
+      const { container } = render(<TestRouter initialEntries={['/archive']} />)
+
+      act(() => { vi.advanceTimersByTime(1_000) })
+      expect(container.querySelector('[data-material-veil]')).toHaveAttribute('data-world', 'autumn')
+      expect(useSiteStore.getState().worldHandoff).toBe('autumn')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('clears the veil on the frame after the target world renders', async () => {
+    act(() => useSiteStore.getState().setWorldHandoff('autumn'))
+    render(<TestRouter initialEntries={['/world/autumn']} />)
+
+    await act(async () => { await new Promise((resolve) => requestAnimationFrame(() => resolve(null))) })
+    expect(useSiteStore.getState().worldHandoff).toBeNull()
+  })
+
+  it('never leaves the veil up indefinitely when the world is not reached', () => {
+    vi.useFakeTimers()
+    try {
+      act(() => useSiteStore.getState().setWorldHandoff('spring'))
+      render(<TestRouter initialEntries={['/archive']} />)
+
+      act(() => { vi.advanceTimersByTime(12_000) })
+      expect(useSiteStore.getState().worldHandoff).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
