@@ -4,6 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EROS STUDIO</title>
+    <script>
+      // 启动诊断：页面没能渲染出来时（白屏），把错误显示在页面上，方便在手机上截图排查。
+      // 正常启动时不会显示任何东西。
+      (function () {
+        var errors = []
+        function show() {
+          var root = document.getElementById('root')
+          if (root && root.childElementCount > 0) return
+          var box = document.getElementById('boot-error') || document.createElement('pre')
+          box.id = 'boot-error'
+          box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;max-height:60vh;overflow:auto;margin:0;padding:12px;font:12px/1.45 ui-monospace,Menlo,monospace;background:#111;color:#f2f2f2;white-space:pre-wrap;word-break:break-word;z-index:2147483647'
+          box.textContent = 'EROS could not start\n\n' + errors.join('\n\n') + '\n\n' + navigator.userAgent
+          if (!box.parentNode) document.body.appendChild(box)
+        }
+        window.addEventListener('error', function (event) {
+          var target = event.target
+          if (target && target !== window && (target.src || target.href)) errors.push('Failed to load ' + (target.src || target.href))
+          else errors.push((event.message || 'Error') + (event.filename ? ' @ ' + event.filename.split('/').pop() + ':' + event.lineno + ':' + event.colno : ''))
+          show()
+        }, true)
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event.reason
+          errors.push('Unhandled rejection: ' + ((reason && (reason.stack || reason.message)) || String(reason)))
+          show()
+        })
+        setTimeout(function () {
+          var root = document.getElementById('root')
+          if (root && root.childElementCount > 0) return
+          if (!errors.length) errors.push('The app did not start within 12 seconds and reported no error.')
+          show()
+        }, 12000)
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
