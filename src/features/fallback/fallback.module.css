@@ -59,6 +59,30 @@
   .materialVeil[data-world] { animation: none; opacity: 0.62; }
 }
 
+/*
+  从 Archive、Studio、商品页等浅色、无场景的页面进入季节：
+  过渡层升到页面内容之上（语义层是 z-index 2），并且完全不透明，
+  看到的是原页面被季节色整页盖住，而不是两者叠在一起。
+*/
+.materialVeil[data-cover='true'][data-world] {
+  z-index: 3;
+  animation: material-cover 200ms linear both;
+}
+
+.materialVeil[data-cover='true'][data-world='spring'] { background-color: #0c100e; }
+.materialVeil[data-cover='true'][data-world='summer'] { background-color: #d7d0c3; }
+.materialVeil[data-cover='true'][data-world='autumn'] { background-color: #1a100c; }
+.materialVeil[data-cover='true'][data-world='winter'] { background-color: #0b0d10; }
+
+@keyframes material-cover {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .materialVeil[data-cover='true'][data-world] { animation: none; opacity: 1; }
+}
+
 .semanticLayer {
   position: relative;
   z-index: 2;

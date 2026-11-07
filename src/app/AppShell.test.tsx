@@ -81,3 +81,19 @@ describe('AppShell world-gate material veil lifetime', () => {
     }
   })
 })
+
+describe('AppShell world-gate veil cover mode', () => {
+  it('covers scene-less pages completely so the season colour never mixes with their content', () => {
+    act(() => useSiteStore.getState().setWorldHandoff('spring'))
+    const { container } = render(<TestRouter initialEntries={['/archive']} />)
+    const veil = container.querySelector('[data-material-veil]')
+    expect(veil).toHaveAttribute('data-cover', 'true')
+    expect(getComputedStyle(veil!).zIndex).toBe('3')
+  })
+
+  it.each(['/', '/world/autumn'])('keeps the original under-content veil on %s', (path) => {
+    act(() => useSiteStore.getState().setWorldHandoff('winter'))
+    const { container } = render(<TestRouter initialEntries={[path]} />)
+    expect(container.querySelector('[data-material-veil]')).not.toHaveAttribute('data-cover')
+  })
+})

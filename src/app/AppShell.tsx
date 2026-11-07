@@ -79,6 +79,9 @@ export function AppShell() {
           className={sceneStyles.materialVeil}
           data-material-veil=""
           data-world={worldHandoff ?? undefined}
+          // 从没有 3D 场景的页面（Archive 等）进入季节：过渡层盖住整页且不透明，
+          // 避免季节色和原页面的文字、控件叠在一起。季节页之间切换保持原来的半透明效果。
+          data-cover={location.pathname !== '/' && !routeWorld(location.pathname) ? 'true' : undefined}
         />
         {homepageMaterialHandoff ? <div aria-hidden="true" className={sceneStyles.homepageTakeover} data-homepage-takeover="" data-world={homepageMaterialHandoff.world} /> : null}
         <div className={sceneStyles.semanticLayer}>
