@@ -38,6 +38,7 @@ describe('ArchivePage', () => {
     const { alignTarget } = renderArchive('/archive?world=spring&type=accessory&material=resin')
     const user = userEvent.setup()
 
+    expect(screen.getByText('Filters (3)').closest('details')).toHaveAttribute('open')
     expect(screen.getByRole('checkbox', { name: 'Spring' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Accessory' })).toBeChecked()
     expect(screen.getByRole('checkbox', { name: 'Resin' })).toBeChecked()
@@ -52,6 +53,11 @@ describe('ArchivePage', () => {
   it('updates filters in the URL and can reset them to show the whole archive', async () => {
     renderArchive()
     const user = userEvent.setup()
+
+    const panel = screen.getByText('Filters').closest('details')!
+    expect(panel).not.toHaveAttribute('open')
+    await user.click(screen.getByText('Filters'))
+    expect(panel).toHaveAttribute('open')
 
     await user.click(screen.getByRole('checkbox', { name: 'Winter' }))
     await user.click(screen.getByRole('checkbox', { name: 'Accessory' }))

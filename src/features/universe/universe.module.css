@@ -147,7 +147,19 @@
   }
 
   .portalIdentity {
-    display: none;
+    left: 50%;
+    bottom: 3.35rem;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .celestialControls:hover .portalIdentity,
+  .celestialControls:focus-within .portalIdentity {
+    opacity: 0;
+  }
+
+  .celestialControls .portalIdentity[data-selected='true'] {
+    opacity: 1;
   }
 
   .controlList {

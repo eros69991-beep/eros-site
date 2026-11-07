@@ -75,7 +75,11 @@ export function SemanticCelestialControls() {
           )
         })}
       </div>
-      <output aria-live="polite" className={styles.portalIdentity}>
+      <output
+        aria-live="polite"
+        className={styles.portalIdentity}
+        data-selected={selected ? 'true' : undefined}
+      >
         {`${body.index} / ${body.label}`}
       </output>
       <output aria-label="Portal position" className={styles.mobilePosition}>

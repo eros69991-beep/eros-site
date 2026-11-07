@@ -93,4 +93,17 @@ describe('SemanticCelestialControls', () => {
 
     expect(screen.getByLabelText('Portal position')).toHaveTextContent('0102030405')
   })
+
+  it('marks the portal name as selected only while a body is selected', async () => {
+    const user = userEvent.setup()
+    renderControls()
+    const identity = screen.getByText('01 / SPRING / AWAKENING', { selector: 'output' })
+    expect(identity).not.toHaveAttribute('data-selected')
+
+    await user.hover(screen.getByRole('link', { name: '03 / AUTUMN / FADE' }))
+    expect(screen.getByText('03 / AUTUMN / FADE', { selector: 'output' })).toHaveAttribute('data-selected', 'true')
+
+    await user.unhover(screen.getByRole('link', { name: '03 / AUTUMN / FADE' }))
+    expect(screen.getByText('01 / SPRING / AWAKENING', { selector: 'output' })).not.toHaveAttribute('data-selected')
+  })
 })

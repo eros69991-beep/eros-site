@@ -1,10 +1,112 @@
-.archive { padding: max(6rem, var(--space-safe-block-start)) var(--space-safe-inline-end) var(--space-safe-block-end) var(--space-safe-inline); }
-.filters { display: grid; gap: 1rem; margin-block: 2rem; }
-.filterGroup { display: flex; flex-wrap: wrap; gap: .5rem 1rem; border: 0; padding: 0; }
-.filterGroup legend { width: 100%; font-weight: 700; }
-.option { display: inline-flex; gap: .35rem; }
-.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 2rem; }
-.object a { color: inherit; text-decoration: none; }
-.object img { display: block; width: 100%; height: auto; }
-.empty { padding-block: 3rem; }
-.worldEntry { margin: 0 1rem 1.5rem 0; }
+.archive {
+  max-width: 88rem;
+  margin-inline: auto;
+  padding: max(6rem, var(--space-safe-block-start)) var(--space-safe-inline-end) max(4rem, var(--space-safe-block-end)) var(--space-safe-inline);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: var(--type-display);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: .85;
+}
+
+.count,
+.filterSummary,
+.filterGroup legend,
+.option span,
+.reset,
+.worldEntry,
+.objectMeta,
+.objectPrice {
+  font-size: var(--type-label);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.count { margin: 0; color: var(--muted-ink); font-variant-numeric: tabular-nums; }
+
+.filterPanel { border-bottom: 1px solid rgb(17 17 17 / 18%); }
+
+.filterSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.filterSummary::-webkit-details-marker { display: none; }
+.filterSummary::after { content: '+'; font-size: 1rem; letter-spacing: 0; }
+.filterPanel[open] .filterSummary::after { content: '−'; }
+.filterSummary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.filters { display: grid; gap: 1.5rem; padding-block: .5rem 1.75rem; }
+
+.filterGroup { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; border: 0; }
+.filterGroup legend { width: 100%; margin-bottom: .6rem; padding: 0; color: var(--muted-ink); }
+
+.option { position: relative; cursor: pointer; }
+.option input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 .85rem;
+  border: 1px solid rgb(17 17 17 / 28%);
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.option:hover span { border-color: var(--ink); }
+.option input:checked + span { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.option input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.reset,
+.worldEntry {
+  justify-self: start;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  cursor: pointer;
+}
+.reset:disabled { opacity: .35; cursor: default; }
+.worldEntry { margin: 1.5rem .75rem 0 0; background: var(--ink); color: var(--paper); }
+.reset:focus-visible,
+.worldEntry:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 2.5rem 1.5rem;
+  margin-top: 2rem;
+}
+
+.object a { display: grid; gap: .4rem; color: inherit; text-decoration: none; }
+.object img { display: block; width: 100%; height: auto; margin-bottom: .4rem; background: #f2f2f0; }
+.object h2 { margin: 0; font-family: var(--font-editorial); font-size: clamp(1.25rem, 1rem + 1vw, 1.6rem); font-weight: 400; line-height: 1.1; }
+.object a:hover h2 { text-decoration: underline; text-underline-offset: .15em; text-decoration-thickness: 1px; }
+.objectMeta { display: flex; justify-content: space-between; gap: 1rem; margin: 0; color: var(--muted-ink); }
+.objectPrice { margin: 0; font-variant-numeric: tabular-nums; }
+
+.empty { padding-block: 4rem; color: var(--muted-ink); }
+.empty p { margin: 0; font-family: var(--font-editorial); font-size: 1.4rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .option span { transition: none; }
+}

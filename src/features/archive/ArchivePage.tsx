@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { demoObjects, formatUsd } from '../../domain/objects'
 import { filterObjects, parseArchiveParams, serializeArchiveParams, type ObjectFilters } from '../../domain/selectors'
@@ -37,7 +38,7 @@ function ArchiveFilterGroup<T extends string>({ name, legend, values, selected, 
             type="checkbox"
             value={value}
           />
-          {label(value)}
+          <span>{label(value)}</span>
         </label>
       ))}
     </fieldset>
@@ -48,11 +49,10 @@ function ObjectResult({ object }: { object: ObjectDefinition }) {
   return (
     <article className={styles.object}>
       <Link className="touch-link" to={`/product/${object.slug}`}>
-        <img alt={object.media[0]!.alt} height={object.media[0]!.height} src={object.media[0]!.src} width={object.media[0]!.width} />
-        <p>{object.objectNumber}</p>
+        <img alt={object.media[0]!.alt} height={object.media[0]!.height} loading="lazy" src={object.media[0]!.src} width={object.media[0]!.width} />
+        <p className={styles.objectMeta}><span>{object.objectNumber}</span><span>{object.world}</span></p>
         <h2>{object.name}</h2>
-        <p>{object.world}</p>
-        <p>{formatUsd(object.price)}</p>
+        <p className={styles.objectPrice}>{formatUsd(object.price)}</p>
       </Link>
     </article>
   )
@@ -63,6 +63,8 @@ export function ArchivePage() {
   const filters = parseArchiveParams(searchParams)
   const results = filterObjects(filters)
   const { enterWorld } = useWorldEntry()
+  const activeCount = filters.world.length + filters.type.length + filters.material.length + filters.color.length
+  const [filtersOpen, setFiltersOpen] = useState(activeCount > 0)
 
   function toggleFilter(value: string, group: keyof ObjectFilters) {
     const values = filters[group] as string[]
@@ -72,17 +74,20 @@ export function ArchivePage() {
 
   return (
     <section aria-labelledby="archive-heading" className={styles.archive}>
-      <header>
+      <header className={styles.header}>
         <h1 id="archive-heading">ARCHIVE</h1>
-        <p aria-label="Archive result count" aria-live="polite" role="status">{results.length} {results.length === 1 ? 'result' : 'results'}</p>
+        <p aria-label="Archive result count" aria-live="polite" className={styles.count} role="status">{results.length} {results.length === 1 ? 'result' : 'results'}</p>
       </header>
+      <details className={styles.filterPanel} onToggle={(event) => setFiltersOpen(event.currentTarget.open)} open={filtersOpen}>
+        <summary className={styles.filterSummary}>Filters{activeCount > 0 ? ` (${activeCount})` : ''}</summary>
       <form aria-label="Archive filters" className={styles.filters}>
         <ArchiveFilterGroup name="world" legend="World" onToggle={toggleFilter} selected={filters.world} values={worlds.map((world) => world.id)} />
         <ArchiveFilterGroup name="type" legend="Type" onToggle={toggleFilter} selected={filters.type} values={types} />
         <ArchiveFilterGroup name="material" legend="Material" onToggle={toggleFilter} selected={filters.material} values={materials} />
         <ArchiveFilterGroup name="color" legend="Color" onToggle={toggleFilter} selected={filters.color} values={colors} />
-        <button onClick={() => setSearchParams(new URLSearchParams())} type="button">Reset filters</button>
+        <button className={styles.reset} disabled={activeCount === 0} onClick={() => setSearchParams(new URLSearchParams())} type="button">Reset filters</button>
       </form>
+      </details>
       {filters.world.map((worldId) => {
         const world = worlds.find((candidate) => candidate.id === worldId)!
         return <button className={styles.worldEntry} key={worldId} onClick={() => enterWorld(worldId as WorldId, 'archive')} type="button">Enter {label(world.season.toLowerCase())} / {label(world.concept.toLowerCase())}</button>
