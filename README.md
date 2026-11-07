@@ -1,6 +1,8 @@
 # EROS Studio V1
 
-EROS Studio V1 is a local, frontend-only fashion-universe prototype. It combines semantic React editorial and commerce routes with R3F/Three.js atmosphere.
+EROS Studio V1 is a frontend-only fashion-universe prototype. It combines semantic React editorial and commerce routes with R3F/Three.js atmosphere.
+
+**Live demo:** [eros-site-nine.vercel.app](https://eros-site-nine.vercel.app)
 
 ## Prerequisites
 
@@ -41,6 +43,6 @@ High, Balanced, and Lite tiers cap DPR, draw calls, particles, and expensive pas
 
 ## Prototype limits
 
-The Bag persists locally in the browser. This V1 has no checkout, payment collection, inventory, orders, accounts, CMS, analytics, or backend. It is not deployed publicly.
+The Bag persists locally in the browser. This V1 has no checkout, payment collection, inventory, orders, accounts, CMS, analytics, or backend. It is deployed as a static site on Vercel.
 
 See [the QA checklist](docs/qa/eros-v1-checklist.md) for the repeatable browser coverage and recorded QA evidence.
