@@ -17,13 +17,14 @@ export interface HomeCameraPreset {
  * Authored at the handoff's reference moment. The hierarchy is intentional:
  * Winter is the close foreground anchor, while the Core is the smallest and
  * most distant object at the bright end of the galactic diagonal.
+ * 构图 B（2026-11）：冬季缩小到整颗都在画面内，Studio 放大，其余不变。
  */
 export const HOME_BODY_LAYOUT: Record<HomeBodyId, HomeBodyLayout> = {
-  winter: { position: [-6.2, -3.1, 2.6], scale: 3.7 },
+  winter: { position: [-6.6, -2.3, 1.4], scale: 2.7 },
   spring: { position: [-1.2, 2.25, -0.4], scale: 1.25 },
   summer: { position: [2.2, -2, 0.4], scale: 1.05 },
   autumn: { position: [7.5, 0.7, -1.5], scale: 1.65 },
-  studio: { position: [-3.5, 5.8, -4.2], scale: 0.72 },
+  studio: { position: [-4.2, 5.0, -3.4], scale: 1.0 },
   core: { position: [4.8, 4.1, -7.5], scale: 0.44 },
 }
 
