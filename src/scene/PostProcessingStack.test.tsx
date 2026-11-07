@@ -259,3 +259,26 @@ describe('PostProcessingStack', () => {
     })
   })
 })
+
+describe('PostProcessingStack depth-of-field switches', () => {
+  it('rebuilds the composer when depth of field turns off, so a world frame cannot linger behind Archive', () => {
+    const { rerender } = render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.autumn} quality="high" />)
+    const worldComposer = screen.getByTestId('effect-composer')
+    expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
+
+    rerender(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.neutral} quality="high" />)
+
+    const archiveComposer = screen.getByTestId('effect-composer')
+    expect(archiveComposer).not.toBe(worldComposer)
+    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
+  })
+
+  it('keeps the same composer when moving between profiles that both use depth of field', () => {
+    const { rerender } = render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.autumn} quality="high" />)
+    const autumnComposer = screen.getByTestId('effect-composer')
+
+    rerender(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.spring} quality="high" />)
+
+    expect(screen.getByTestId('effect-composer')).toBe(autumnComposer)
+  })
+})

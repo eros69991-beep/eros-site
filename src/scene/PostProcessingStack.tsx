@@ -38,8 +38,11 @@ export function PostProcessingStack({ profile, quality, quiet = false }: PostPro
   } : effects
   const multisampling = quality === 'high' ? 4 : quality === 'balanced' ? 2 : 0
 
+  // 景深（DepthOfField）在季节页开、在 Archive 等页面关。直接把它从同一个 composer 里
+  // 拿掉时，postprocessing 不会重建效果管线，画布会一直残留上一个场景的最后一帧
+  // （例如从秋季页打开 Archive，整页被深棕色盖住）。用 key 让 composer 在景深开关变化时重建。
   return (
-    <EffectComposer multisampling={multisampling}>
+    <EffectComposer key={quietEffects.depthOfField ? 'with-depth-of-field' : 'without-depth-of-field'} multisampling={multisampling}>
       <ToneMapping />
       <Bloom
         intensity={quietEffects.bloomIntensity}
