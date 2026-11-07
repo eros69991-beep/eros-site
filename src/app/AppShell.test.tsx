@@ -103,15 +103,14 @@ describe('AppShell homepage takeover lifetime', () => {
     act(() => useSiteStore.getState().setHomepageMaterialHandoff(null))
   })
 
-  it('stays fully opaque until the world has rendered two frames, then fades out and clears', async () => {
+  it('stays fully opaque until the world renders smoothly, then fades out and clears', async () => {
     act(() => useSiteStore.getState().setHomepageMaterialHandoff({ world: 'spring', source: 'universe' }))
     const { container } = render(<TestRouter initialEntries={['/world/spring']} />)
     const takeover = () => container.querySelector('[data-homepage-takeover]')
     const nextFrame = () => act(async () => { await new Promise((resolve) => requestAnimationFrame(() => resolve(null))) })
 
     expect(takeover()).not.toHaveAttribute('data-leaving')
-    await nextFrame()
-    await nextFrame()
+    for (let frame = 0; frame < 8 && !takeover()?.hasAttribute('data-leaving'); frame += 1) await nextFrame()
     expect(takeover()).toHaveAttribute('data-leaving', 'true')
 
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 300)) })

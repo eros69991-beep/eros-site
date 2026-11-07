@@ -106,10 +106,12 @@ export function AppShell() {
 
 /** 过渡层撤掉前淡出的时长（与 CSS 一致）。 */
 const HOMEPAGE_TAKEOVER_FADE_MS = 260
+/** 季节页一直卡顿时，过渡层最多再盖这么久就开始淡出。 */
+const TAKEOVER_SETTLE_MAX_MS = 1200
 
 /**
- * 首页点击星球后的整屏过渡层。季节页渲染后再等两帧（新场景首帧编译着色器的卡顿发生在这两帧里），
- * 然后淡出并移除。进入失败或一直没切到该季节时也会撤掉。
+ * 首页点击星球后的整屏过渡层。季节页渲染后，等新场景编译着色器造成的卡顿过去、
+ * 连续几帧流畅了，再淡出并移除。进入失败或一直没切到该季节时也会撤掉。
  */
 function HomepageTakeover({ world }: { world: WorldId }) {
   const location = useLocation()
@@ -119,14 +121,22 @@ function HomepageTakeover({ world }: { world: WorldId }) {
 
   useEffect(() => {
     if (location.pathname === `/world/${world}`) {
-      let second = 0
-      const first = window.requestAnimationFrame(() => {
-        second = window.requestAnimationFrame(() => setLeaving(true))
-      })
-      return () => {
-        window.cancelAnimationFrame(first)
-        window.cancelAnimationFrame(second)
+      // 等画面稳定（连续 4 帧都在 34ms 以内）再淡出；最多等 TAKEOVER_SETTLE_MAX_MS
+      let frame = 0
+      let previous = performance.now()
+      let smoothFrames = 0
+      const startedAt = previous
+      const tick = (now: number) => {
+        smoothFrames = now - previous < 34 ? smoothFrames + 1 : 0
+        previous = now
+        if (smoothFrames >= 4 || now - startedAt > TAKEOVER_SETTLE_MAX_MS) {
+          setLeaving(true)
+          return
+        }
+        frame = window.requestAnimationFrame(tick)
       }
+      frame = window.requestAnimationFrame(tick)
+      return () => window.cancelAnimationFrame(frame)
     }
     if (status === 'failed') {
       setHomepageMaterialHandoff(null)
