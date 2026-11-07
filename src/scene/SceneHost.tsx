@@ -192,6 +192,9 @@ export function SceneHost() {
           onDegrade={updateQuality}
           scenePath={scenePath}
           quiet={scenePath.startsWith('/product/')}
+          // 没有场景的页面在路由切换的同一次渲染里就隐藏画布，
+          // 避免画布还没重画时，上一个季节的最后一帧压在新页面上。
+          idle={!descriptor && scenePath !== '/'}
           onContextLost={() => {
             setForceStatic(true)
             setStoredQuality('static')

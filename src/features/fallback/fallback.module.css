@@ -94,6 +94,11 @@
   opacity: 0.42;
 }
 
+/* 没有 3D 场景的页面（Archive、Studio、商品页等）：立即隐藏画布，不等它重画 */
+.sceneLayer[data-scene-idle='true'] {
+  visibility: hidden;
+}
+
 .canvasSurface {
   width: 100%;
   height: 100%;

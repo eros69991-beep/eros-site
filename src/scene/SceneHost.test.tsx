@@ -5,9 +5,9 @@ import { useSiteStore } from '../state/siteStore'
 
 vi.mock('./webgl', () => ({ supportsWebGL: () => true }))
 vi.mock('./PostProcessingStack', () => ({
-  RealtimeSceneLayer: ({ mobile, reducedMotion, onContextLost }: { mobile: boolean, reducedMotion: boolean, onContextLost(): void }) => (
+  RealtimeSceneLayer: ({ mobile, reducedMotion, idle, onContextLost }: { mobile: boolean, reducedMotion: boolean, idle?: boolean, onContextLost(): void }) => (
     <>
-      <output aria-label="Realtime scene" data-mobile={String(mobile)} data-reduced-motion={String(reducedMotion)}>realtime</output>
+      <output aria-label="Realtime scene" data-mobile={String(mobile)} data-reduced-motion={String(reducedMotion)} data-idle={String(Boolean(idle))}>realtime</output>
       <button type="button" onClick={onContextLost}>Lose WebGL context</button>
     </>
   ),
@@ -76,5 +76,25 @@ describe('SceneHost', () => {
     expect(window.__EROS_TEST_API__?.triggerSceneError).toEqual(expect.any(Function))
     act(() => window.__EROS_TEST_API__?.triggerSceneError?.())
     expect(screen.getByRole('button', { name: 'Retry realtime scene' })).toBeInTheDocument()
+  })
+
+  it.each([
+    ['/', 'false'],
+    ['/world/autumn', 'false'],
+    ['/archive', 'true'],
+    ['/studio', 'true'],
+    ['/product/dew-spine', 'true'],
+  ])('marks the scene idle on %s only when the route has no realtime scene', (path, idle) => {
+    render(<MemoryRouter initialEntries={[path]}><SceneHost /></MemoryRouter>)
+    expect(screen.getByRole('status', { name: 'Realtime scene' })).toHaveAttribute('data-idle', idle)
+  })
+
+  it('keeps the world scene active under a Search overlay opened from a world', () => {
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/search', state: { backgroundLocation: { pathname: '/world/spring' } } }]}>
+        <SceneHost />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('status', { name: 'Realtime scene' })).toHaveAttribute('data-idle', 'false')
   })
 })

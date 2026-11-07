@@ -81,6 +81,8 @@ interface RealtimeSceneLayerProps {
   onDegrade(tier: QualityTier): void
   scenePath?: string
   quiet?: boolean
+  /** 当前页面没有 3D 场景（Archive、Studio 等）。 */
+  idle?: boolean
   onContextLost?(): void
 }
 
@@ -115,6 +117,7 @@ export function RealtimeSceneLayer({
   onDegrade,
   scenePath = '/',
   quiet = false,
+  idle = false,
   onContextLost,
 }: RealtimeSceneLayerProps) {
   const budget = getEffectiveSceneBudget(quality, mobile)
@@ -124,7 +127,7 @@ export function RealtimeSceneLayer({
   useEffect(() => subscribeSceneClock(() => setSceneTimeFrozen(isSceneTimeFrozen())), [])
 
   return (
-    <div className={styles.sceneLayer} aria-hidden="true" data-quiet={quiet || undefined}>
+    <div className={styles.sceneLayer} aria-hidden="true" data-quiet={quiet || undefined} data-scene-idle={idle || undefined}>
       <Canvas
         camera={{ fov: 42, position: [0, 0.45, mobile ? 58 : 24] }}
         className={styles.canvasSurface}
