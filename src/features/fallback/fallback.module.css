@@ -27,7 +27,9 @@
 @keyframes summer-burn { to { clip-path: inset(0 0 0 0); } }
 @keyframes autumn-oxidation { to { clip-path: circle(145% at 70% 30%); } }
 @keyframes winter-seal { to { clip-path: polygon(0 0,100% 0,100% 100%,0 100%); } }
-@media (prefers-reduced-motion: reduce) { .homepageTakeover { animation-duration: 0ms !important; } }
+/* 季节页渲染完成后淡出（时长与 AppShell 里的 HOMEPAGE_TAKEOVER_FADE_MS 一致） */
+.homepageTakeover[data-leaving='true'] { opacity: 0; transition: opacity 260ms ease; }
+@media (prefers-reduced-motion: reduce) { .homepageTakeover { animation-duration: 0ms !important; transition: none !important; } }
 
 .materialVeil[data-world] {
   animation: material-handoff 200ms linear both;

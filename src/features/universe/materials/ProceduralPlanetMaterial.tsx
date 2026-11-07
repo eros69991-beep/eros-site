@@ -57,6 +57,21 @@ function createRuntimeMaterial(id: PortalPbrId, baked: BakedPlanet) {
   return { material, uniforms }
 }
 
+/**
+ * 运行时材质和烘焙贴图一样缓存起来，不随首页卸载而释放：
+ * 从季节页回到首页时着色器程序还在，不用重新编译（否则回首页的第一帧会卡 100ms 以上）。
+ */
+const runtimeCache = new WeakMap<BakedPlanet, ReturnType<typeof createRuntimeMaterial>>()
+
+function getRuntimeMaterial(id: PortalPbrId, baked: BakedPlanet) {
+  let runtime = runtimeCache.get(baked)
+  if (!runtime) {
+    runtime = createRuntimeMaterial(id, baked)
+    runtimeCache.set(baked, runtime)
+  }
+  return runtime
+}
+
 function updateRuntimeMaterial(
   runtime: ReturnType<typeof createRuntimeMaterial>,
   camera: Camera,
@@ -88,10 +103,7 @@ export function ProceduralPlanetMaterial({
 
   useEffect(() => requestPlanetBake(gl, id, width, setBaked, activeVariant), [activeVariant, gl, id, width])
 
-  const runtime = useMemo(() => (baked ? createRuntimeMaterial(id, baked) : null), [baked, id])
-  // 贴图在 bake 缓存里复用，这里只释放材质本身
-  useEffect(() => () => runtime?.material.dispose(), [runtime])
-
+  const runtime = useMemo(() => (baked ? getRuntimeMaterial(id, baked) : null), [baked, id])
   useFrame(({ camera, clock }) => {
     pumpPlanetBakes(gl, clock.elapsedTime)
     if (!runtime) return

@@ -1,5 +1,5 @@
 import { useThree } from '@react-three/fiber'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   LinearFilter,
   Mesh,
@@ -148,6 +148,22 @@ function bakeGalaxyTexture(renderer: WebGLRenderer, width: number, height: numbe
 }
 
 /**
+ * 每个渲染器只保留一张银河贴图：从季节页回到首页时直接复用，不再重新生成（生成一次约 100ms）。
+ * 视口尺寸变化时才重新生成，并释放旧的那张。
+ */
+const galaxyCache = new WeakMap<WebGLRenderer, { key: string; target: WebGLRenderTarget }>()
+
+function getGalaxyTexture(renderer: WebGLRenderer, width: number, height: number, aspect: number) {
+  const key = `${width}x${height}`
+  const cached = galaxyCache.get(renderer)
+  if (cached?.key === key) return cached.target
+  cached?.target.dispose()
+  const target = bakeGalaxyTexture(renderer, width, height, aspect)
+  galaxyCache.set(renderer, { key, target })
+  return target
+}
+
+/**
  * 程序化银河背景：开场时在 GPU 上生成一次贴图（尺寸随视口），之后每帧只是贴一张图，几乎不占性能。
  */
 export function GalaxyBackdrop() {
@@ -167,10 +183,8 @@ export function GalaxyBackdrop() {
   const target = useMemo(() => {
     const aspect = dimensions[0] / dimensions[1]
     const width = Math.min(MAX_BAKE_WIDTH, Math.ceil(size.width * Math.max(viewportDpr, 1.5) * 1.25))
-    return bakeGalaxyTexture(gl, width, Math.ceil(width / aspect), aspect)
+    return getGalaxyTexture(gl, width, Math.ceil(width / aspect), aspect)
   }, [dimensions, gl, size.width, viewportDpr])
-
-  useEffect(() => () => target.dispose(), [target])
 
   return (
     <mesh position={[0, 0, BACKDROP_Z]} renderOrder={-10}>

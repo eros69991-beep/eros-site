@@ -1,13 +1,16 @@
-import {
-  Bloom,
-  DepthOfField,
-  EffectComposer,
-  Noise,
-  ToneMapping,
-  Vignette,
-} from '@react-three/postprocessing'
+import { EffectComposer } from '@react-three/postprocessing'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import {
+  BlendFunction,
+  BloomEffect,
+  DepthOfFieldEffect,
+  MaskFunction,
+  NoiseEffect,
+  ToneMappingEffect,
+  VignetteEffect,
+} from 'postprocessing'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import type { Camera } from 'three'
 import type { QualityTier } from '../domain/types'
 import styles from '../features/fallback/fallback.module.css'
 import { UniverseScene } from '../features/universe/UniverseScene'
@@ -27,6 +30,41 @@ interface PostProcessingStackProps {
   quiet?: boolean
 }
 
+interface StableEffects {
+  toneMapping: ToneMappingEffect
+  bloom: BloomEffect
+  noise: NoiseEffect
+  vignette: VignetteEffect
+  depthOfField: DepthOfFieldEffect
+}
+
+function createStableEffects(camera: Camera): StableEffects {
+  const depthOfField = new DepthOfFieldEffect(camera, { focusDistance: 0.02, focalLength: 0.025, bokehScale: 1.5 })
+  // 与 @react-three/postprocessing 的 <DepthOfField> 一致（maskPass 不在类型声明里）
+  ;(depthOfField as unknown as { maskPass: { maskFunction: MaskFunction } }).maskPass.maskFunction = MaskFunction.MULTIPLY_RGB_SET_ALPHA
+  return {
+    toneMapping: new ToneMappingEffect(),
+    bloom: new BloomEffect({ blendFunction: BlendFunction.ADD, mipmapBlur: true, luminanceSmoothing: 0.12 }),
+    noise: new NoiseEffect({ blendFunction: BlendFunction.COLOR_DODGE }),
+    vignette: new VignetteEffect(),
+    depthOfField,
+  }
+}
+
+function applyEffectSettings(effects: StableEffects, settings: ReturnType<typeof resolveEffectProfile>) {
+  effects.bloom.intensity = settings.bloomIntensity
+  effects.bloom.luminanceMaterial.threshold = settings.bloomThreshold
+  effects.noise.blendMode.opacity.value = settings.noiseOpacity
+  effects.vignette.offset = settings.vignetteOffset
+  effects.vignette.darkness = settings.vignetteDarkness
+  const dofBlend = settings.depthOfField ? BlendFunction.NORMAL : BlendFunction.SKIP
+  if (effects.depthOfField.blendMode.blendFunction !== dofBlend) effects.depthOfField.blendMode.blendFunction = dofBlend
+}
+
+function disposeStableEffects(effects: StableEffects) {
+  for (const effect of Object.values(effects)) effect.dispose()
+}
+
 export function PostProcessingStack({ profile, quality, quiet = false }: PostProcessingStackProps) {
   const effects = resolveEffectProfile(profile, quality)
   const quietEffects = quiet ? {
@@ -37,26 +75,31 @@ export function PostProcessingStack({ profile, quality, quiet = false }: PostPro
     depthOfField: false,
   } : effects
   const multisampling = quality === 'high' ? 4 : quality === 'balanced' ? 2 : 0
+  const camera = useThree((state) => state.camera)
+  const invalidate = useThree((state) => state.invalidate)
 
-  // 景深（DepthOfField）在季节页开、在 Archive 等页面关。直接把它从同一个 composer 里
-  // 拿掉时，postprocessing 不会重建效果管线，画布会一直残留上一个场景的最后一帧
-  // （例如从秋季页打开 Archive，整页被深棕色盖住）。用 key 让 composer 在景深开关变化时重建。
-  return (
-    <EffectComposer key={quietEffects.depthOfField ? 'with-depth-of-field' : 'without-depth-of-field'} multisampling={multisampling}>
-      <ToneMapping />
-      <Bloom
-        intensity={quietEffects.bloomIntensity}
-        luminanceThreshold={quietEffects.bloomThreshold}
-        luminanceSmoothing={0.12}
-        mipmapBlur
-      />
-      <Noise opacity={quietEffects.noiseOpacity} />
-      <Vignette offset={quietEffects.vignetteOffset} darkness={quietEffects.vignetteDarkness} />
-      {quietEffects.depthOfField ? (
-        <DepthOfField focusDistance={0.02} focalLength={0.025} bokehScale={1.5} />
-      ) : null}
-    </EffectComposer>
-  )
+  // 效果实例在整个画布生命周期里只创建一次，页面切换时只改参数。
+  // 以前每次切页都会按新参数重建 Bloom/Vignette/景深，重新编译约 9 个着色器，进入季节页时卡 100–200ms。
+  // 景深也一直挂着，不需要时用 SKIP 混合关掉；不再把它从管线里拿掉（拿掉会残留上一帧画面）。
+  const stable = useMemo(() => createStableEffects(camera), [camera])
+  useEffect(() => () => disposeStableEffects(stable), [stable])
+
+  const { bloomIntensity, bloomThreshold, noiseOpacity, vignetteOffset, vignetteDarkness, depthOfField } = quietEffects
+  useLayoutEffect(() => {
+    applyEffectSettings(stable, { bloomIntensity, bloomThreshold, noiseOpacity, vignetteOffset, vignetteDarkness, depthOfField })
+    invalidate()
+  }, [bloomIntensity, bloomThreshold, depthOfField, invalidate, noiseOpacity, stable, vignetteDarkness, vignetteOffset])
+
+  // children 保持同一个引用，EffectComposer 才不会每次渲染都拆掉重建效果通道
+  const children = useMemo(() => [
+    <primitive key="tone-mapping" object={stable.toneMapping} />,
+    <primitive key="bloom" object={stable.bloom} />,
+    <primitive key="noise" object={stable.noise} />,
+    <primitive key="vignette" object={stable.vignette} />,
+    <primitive key="depth-of-field" object={stable.depthOfField} />,
+  ], [stable])
+
+  return <EffectComposer multisampling={multisampling}>{children}</EffectComposer>
 }
 
 function FrameQualityMonitor({

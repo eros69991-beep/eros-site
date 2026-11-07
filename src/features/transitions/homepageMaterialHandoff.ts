@@ -26,5 +26,6 @@ export async function handoffHomepageMaterial(world: WorldId, {
 }: Options) {
   setHomepageMaterialHandoff({ world, source: 'universe' })
   await wait(reducedMotion ? 0 : HOMEPAGE_HANDOFF_MS)
-  setHomepageMaterialHandoff(null)
+  // 不在这里撤掉过渡层：季节页挂载后的头两帧要编译新场景的着色器（各卡约 100ms），
+  // 由 AppShell 等这两帧过去再淡出，卡顿发生在静止的过渡层下面，看不出来。
 }

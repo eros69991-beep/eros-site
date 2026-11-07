@@ -97,3 +97,41 @@ describe('AppShell world-gate veil cover mode', () => {
     expect(container.querySelector('[data-material-veil]')).not.toHaveAttribute('data-cover')
   })
 })
+
+describe('AppShell homepage takeover lifetime', () => {
+  afterEach(() => {
+    act(() => useSiteStore.getState().setHomepageMaterialHandoff(null))
+  })
+
+  it('stays fully opaque until the world has rendered two frames, then fades out and clears', async () => {
+    act(() => useSiteStore.getState().setHomepageMaterialHandoff({ world: 'spring', source: 'universe' }))
+    const { container } = render(<TestRouter initialEntries={['/world/spring']} />)
+    const takeover = () => container.querySelector('[data-homepage-takeover]')
+    const nextFrame = () => act(async () => { await new Promise((resolve) => requestAnimationFrame(() => resolve(null))) })
+
+    expect(takeover()).not.toHaveAttribute('data-leaving')
+    await nextFrame()
+    await nextFrame()
+    expect(takeover()).toHaveAttribute('data-leaving', 'true')
+
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 300)) })
+    expect(useSiteStore.getState().homepageMaterialHandoff).toBeNull()
+    expect(takeover()).toBeNull()
+  })
+
+  it('keeps covering the homepage while the world is still loading', () => {
+    vi.useFakeTimers()
+    try {
+      act(() => useSiteStore.getState().setHomepageMaterialHandoff({ world: 'autumn', source: 'universe' }))
+      const { container } = render(<TestRouter initialEntries={['/']} />)
+
+      act(() => { vi.advanceTimersByTime(2_000) })
+      expect(container.querySelector('[data-homepage-takeover]')).not.toHaveAttribute('data-leaving')
+
+      act(() => { vi.advanceTimersByTime(12_000) })
+      expect(useSiteStore.getState().homepageMaterialHandoff).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})

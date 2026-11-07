@@ -1,4 +1,4 @@
-import { act, lazy, type ComponentProps, type ReactNode } from 'react'
+import { act, Children, lazy, type ComponentProps, type ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import type { WorldSceneComponent, WorldSceneProps } from './contracts'
 import { AUTUMN_EFFECTS } from '../features/worlds/autumn/autumnAtmosphere'
@@ -8,42 +8,89 @@ import {
 } from './contracts'
 import { PostProcessingStack, RealtimeSceneLayer } from './PostProcessingStack'
 
-const fiberMocks = vi.hoisted(() => ({ invalidate: vi.fn() }))
+const fiberMocks = vi.hoisted(() => ({ invalidate: vi.fn(), camera: {} }))
 
 vi.mock('@react-three/fiber', () => ({
   Canvas: ({ children, dpr }: { children: ReactNode; dpr: number }) => (
     <div data-testid="scene-canvas" data-dpr={String(dpr)}>{children}</div>
   ),
   useFrame: () => undefined,
-  useThree: (selector: (state: { invalidate: () => void }) => unknown) => (
-    selector({ invalidate: fiberMocks.invalidate })
+  useThree: (selector: (state: { invalidate: () => void; camera: object }) => unknown) => (
+    selector({ invalidate: fiberMocks.invalidate, camera: fiberMocks.camera })
   ),
 }))
 
 vi.mock('@react-three/postprocessing', () => ({
+  // 效果实例以 <primitive> 传入；测试里不渲染它们，只记录数量
   EffectComposer: ({ children }: { children: ReactNode }) => (
-    <div data-testid="effect-composer">{children}</div>
-  ),
-  Bloom: (props: Record<string, unknown>) => (
-    <i
-      data-testid="bloom"
-      data-intensity={String(props.intensity)}
-      data-threshold={String(props.luminanceThreshold)}
-    />
-  ),
-  DepthOfField: () => <i data-testid="depth-of-field" />,
-  Noise: (props: Record<string, unknown>) => (
-    <i data-testid="noise" data-opacity={String(props.opacity)} />
-  ),
-  ToneMapping: () => <i data-testid="tone-mapping" />,
-  Vignette: (props: Record<string, unknown>) => (
-    <i
-      data-testid="vignette"
-      data-offset={String(props.offset)}
-      data-darkness={String(props.darkness)}
-    />
+    <div data-testid="effect-composer" data-effect-count={String(Children.count(children))} />
   ),
 }))
+
+type FakeEffect = {
+  kind: string
+  blendMode: { blendFunction: number; opacity: { value: number } }
+  intensity?: number
+  luminanceMaterial?: { threshold: number }
+  offset?: number
+  darkness?: number
+  dispose: () => void
+}
+
+const effectMocks = vi.hoisted(() => ({ created: [] as FakeEffect[] }))
+
+vi.mock('postprocessing', () => {
+  const BlendFunction = { ADD: 0, COLOR_DODGE: 5, NORMAL: 23, SKIP: 9 }
+  class FakeEffectBase {
+    blendMode: { blendFunction: number; opacity: { value: number } }
+    dispose = vi.fn()
+    constructor(public kind: string, options: { blendFunction?: number } = {}) {
+      this.blendMode = { blendFunction: options.blendFunction ?? BlendFunction.NORMAL, opacity: { value: 1 } }
+      effectMocks.created.push(this as unknown as FakeEffect)
+    }
+  }
+  return {
+    BlendFunction,
+    MaskFunction: { MULTIPLY_RGB_SET_ALPHA: 3 },
+    BloomEffect: class extends FakeEffectBase {
+      intensity = 0
+      luminanceMaterial = { threshold: 0 }
+      constructor(options: { blendFunction?: number }) { super('bloom', options) }
+    },
+    DepthOfFieldEffect: class extends FakeEffectBase {
+      maskPass = { maskFunction: 0 }
+      constructor(_camera: unknown, options: { blendFunction?: number }) { super('depth-of-field', options) }
+    },
+    NoiseEffect: class extends FakeEffectBase {
+      constructor(options: { blendFunction?: number }) { super('noise', options) }
+    },
+    ToneMappingEffect: class extends FakeEffectBase {
+      constructor() { super('tone-mapping') }
+    },
+    VignetteEffect: class extends FakeEffectBase {
+      offset = 0
+      darkness = 0
+      constructor() { super('vignette') }
+    },
+  }
+})
+
+const SKIP = 9
+
+function effect(kind: string) {
+  const found = [...effectMocks.created].reverse().find((candidate) => candidate.kind === kind)
+  if (!found) throw new Error(`No ${kind} effect was created`)
+  return found
+}
+
+const bloom = () => effect('bloom')
+const noiseOpacity = () => effect('noise').blendMode.opacity.value
+const vignette = () => effect('vignette')
+const depthOfFieldEnabled = () => effect('depth-of-field').blendMode.blendFunction !== SKIP
+
+beforeEach(() => {
+  effectMocks.created.length = 0
+})
 
 vi.mock('../features/universe/UniverseScene', () => ({
   UniverseScene: () => null,
@@ -75,17 +122,17 @@ describe('PostProcessingStack', () => {
         />,
       )
 
-      expect(screen.getByTestId('effect-composer')).toBeInTheDocument()
-      expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
+      expect(screen.getByTestId('effect-composer')).toHaveAttribute('data-effect-count', '5')
+      expect(effect('tone-mapping')).toBeDefined()
     },
   )
 
   it('reduces Product bloom, noise, and vignette without changing the source World profile', () => {
     const worldProfile = SCENE_EFFECT_PROFILES.winter
     const normal = render(<PostProcessingStack profile={worldProfile} quality="high" />)
-    const normalBloom = Number(screen.getByTestId('bloom').dataset.intensity)
-    const normalNoise = Number(screen.getByTestId('noise').dataset.opacity)
-    const normalVignette = Number(screen.getByTestId('vignette').dataset.darkness)
+    const normalBloom = bloom().intensity!
+    const normalNoise = noiseOpacity()
+    const normalVignette = vignette().darkness!
 
     normal.unmount()
     render(
@@ -96,59 +143,57 @@ describe('PostProcessingStack', () => {
       />,
     )
 
-    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeLessThan(normalBloom)
-    expect(Number(screen.getByTestId('noise').dataset.opacity)).toBeLessThan(normalNoise)
-    expect(Number(screen.getByTestId('vignette').dataset.darkness)).toBeLessThan(normalVignette)
-    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
+    expect(bloom().intensity).toBeLessThan(normalBloom)
+    expect(noiseOpacity()).toBeLessThan(normalNoise)
+    expect(vignette().darkness).toBeLessThan(normalVignette)
+    expect(depthOfFieldEnabled()).toBe(false)
     expect(SCENE_EFFECT_PROFILES.winter).toEqual(worldProfile)
   })
 
   it('applies the balanced Bloom and noise multiplier', () => {
     renderStack('balanced')
 
-    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.32 * 0.8)
-    expect(Number(screen.getByTestId('noise').dataset.opacity)).toBeCloseTo(0.012 * 0.8)
+    expect(bloom().intensity).toBeCloseTo(0.32 * 0.8)
+    expect(noiseOpacity()).toBeCloseTo(0.012 * 0.8)
   })
 
   it('keeps restrained Bloom and tone mapping in Lite while omitting depth of field', () => {
     renderStack('lite')
 
-    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.32 * 0.55)
-    expect(Number(screen.getByTestId('noise').dataset.opacity)).toBeCloseTo(0.012 * 0.55)
-    expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
-    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
+    expect(bloom().intensity).toBeCloseTo(0.32 * 0.55)
+    expect(noiseOpacity()).toBeCloseTo(0.012 * 0.55)
+    expect(effect('tone-mapping')).toBeDefined()
+    expect(depthOfFieldEnabled()).toBe(false)
   })
 
   it('does not mount a full-frame chromatic pass for Summer', () => {
     render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.summer} quality="high" />)
 
-    expect(screen.queryByTestId('chromatic-aberration')).not.toBeInTheDocument()
-    expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
-    expect(screen.getByTestId('bloom')).toBeInTheDocument()
+    expect(effectMocks.created.map((created) => created.kind).sort()).toEqual(
+      ['bloom', 'depth-of-field', 'noise', 'tone-mapping', 'vignette'],
+    )
   })
 
   it('keeps Autumn tone neutral and removes depth of field only for Lite', () => {
     const high = render(<PostProcessingStack profile={AUTUMN_EFFECTS} quality="high" />)
 
-    expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
-    expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
-    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.22)
-    expect(Number(screen.getByTestId('noise').dataset.opacity)).toBeCloseTo(0.024)
+    expect(depthOfFieldEnabled()).toBe(true)
+    expect(bloom().intensity).toBeCloseTo(0.22)
+    expect(noiseOpacity()).toBeCloseTo(0.024)
 
     high.unmount()
     render(<PostProcessingStack profile={AUTUMN_EFFECTS} quality="lite" />)
 
-    expect(screen.getByTestId('tone-mapping')).toBeInTheDocument()
-    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('chromatic-aberration')).not.toBeInTheDocument()
+    expect(effect('tone-mapping')).toBeDefined()
+    expect(depthOfFieldEnabled()).toBe(false)
   })
 
   it('preserves thresholds and vignette tuning when scaling a tier', () => {
     renderStack('lite')
 
-    expect(screen.getByTestId('bloom')).toHaveAttribute('data-threshold', '0.78')
-    expect(screen.getByTestId('vignette')).toHaveAttribute('data-offset', '0.24')
-    expect(screen.getByTestId('vignette')).toHaveAttribute('data-darkness', '0.36')
+    expect(bloom().luminanceMaterial!.threshold).toBe(0.78)
+    expect(vignette().offset).toBe(0.24)
+    expect(vignette().darkness).toBe(0.36)
   })
 
   it('maps every route family to its approved full-tier baseline', () => {
@@ -205,8 +250,8 @@ describe('PostProcessingStack', () => {
     )
 
     expect(screen.getByTestId('spring-scene')).toHaveAttribute('data-quality', 'lite')
-    expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
-    expect(Number(screen.getByTestId('bloom').dataset.intensity)).toBeCloseTo(0.28 * 0.8)
+    expect(depthOfFieldEnabled()).toBe(true)
+    expect(bloom().intensity).toBeCloseTo(0.28 * 0.8)
   })
 
   it('passes the document scroll ref through to the active World scene', () => {
@@ -260,25 +305,30 @@ describe('PostProcessingStack', () => {
   })
 })
 
-describe('PostProcessingStack depth-of-field switches', () => {
-  it('rebuilds the composer when depth of field turns off, so a world frame cannot linger behind Archive', () => {
+describe('PostProcessingStack page switches', () => {
+  it('reuses the same effect instances when the page changes, so no shaders are rebuilt', () => {
+    const { rerender } = render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.universe} quality="high" />)
+    const createdOnMount = effectMocks.created.length
+    expect(depthOfFieldEnabled()).toBe(false)
+
+    rerender(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.autumn} quality="high" />)
+    expect(effectMocks.created).toHaveLength(createdOnMount)
+    expect(depthOfFieldEnabled()).toBe(true)
+    expect(bloom().intensity).toBeCloseTo(0.22)
+
+    rerender(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.neutral} quality="high" />)
+    expect(effectMocks.created).toHaveLength(createdOnMount)
+    expect(depthOfFieldEnabled()).toBe(false)
+  })
+
+  it('keeps depth of field in the pipeline and switches it off by blending, never by removing it', () => {
     const { rerender } = render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.autumn} quality="high" />)
-    const worldComposer = screen.getByTestId('effect-composer')
-    expect(screen.getByTestId('depth-of-field')).toBeInTheDocument()
+    const composer = screen.getByTestId('effect-composer')
 
     rerender(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.neutral} quality="high" />)
 
-    const archiveComposer = screen.getByTestId('effect-composer')
-    expect(archiveComposer).not.toBe(worldComposer)
-    expect(screen.queryByTestId('depth-of-field')).not.toBeInTheDocument()
-  })
-
-  it('keeps the same composer when moving between profiles that both use depth of field', () => {
-    const { rerender } = render(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.autumn} quality="high" />)
-    const autumnComposer = screen.getByTestId('effect-composer')
-
-    rerender(<PostProcessingStack profile={SCENE_EFFECT_PROFILES.spring} quality="high" />)
-
-    expect(screen.getByTestId('effect-composer')).toBe(autumnComposer)
+    expect(screen.getByTestId('effect-composer')).toBe(composer)
+    expect(composer).toHaveAttribute('data-effect-count', '5')
+    expect(depthOfFieldEnabled()).toBe(false)
   })
 })
