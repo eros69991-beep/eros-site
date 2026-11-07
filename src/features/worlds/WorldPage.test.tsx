@@ -64,7 +64,7 @@ describe('WorldPage', () => {
 
     await user.click(screen.getByRole('link', { name: /summer/i }))
 
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'auto' })
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' })
     expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName('SUMMER / BURN')
   })
 

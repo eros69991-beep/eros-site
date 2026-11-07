@@ -82,7 +82,7 @@
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  color: rgb(197 204 206 / 26%);
+  color: rgb(197 204 206 / 62%);
   font-size: 0.62rem;
   letter-spacing: 0.13em;
   text-decoration: none;
@@ -121,8 +121,8 @@
   bottom: clamp(1.3rem, 2.7vh, 2rem);
   min-width: 44px;
   min-height: 44px;
-  color: rgb(228 233 232 / 42%);
-  font-size: 0.56rem;
+  color: rgb(228 233 232 / 78%);
+  font-size: 0.62rem;
   letter-spacing: 0.14em;
   pointer-events: auto;
 }
@@ -163,6 +163,6 @@
   .orbitToggle {
     right: 0.5rem;
     bottom: 4.3rem;
-    opacity: 0.72;
+    opacity: 0.85;
   }
 }

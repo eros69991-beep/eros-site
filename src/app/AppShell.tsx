@@ -25,6 +25,14 @@ import { SceneHost } from '../scene/SceneHost'
 import { useSiteStore } from '../state/siteStore'
 import { useDocumentMeta } from './useDocumentMeta'
 
+const ROUTE_WORLDS = new Set(['spring', 'summer', 'autumn', 'winter'])
+
+// 当前路由所在的季节，用来给页面铺底色和设置顶部导航颜色。
+function routeWorld(pathname: string): string | undefined {
+  const match = /^\/world\/([^/]+)/.exec(pathname)
+  return match && ROUTE_WORLDS.has(match[1]!) ? match[1] : undefined
+}
+
 interface OverlayState {
   backgroundLocation?: Location
 }
@@ -59,6 +67,7 @@ export function AppShell() {
       <div
         className={`app-shell ${sceneStyles.appShell}`}
         data-universe-home={location.pathname === '/' ? 'true' : undefined}
+        data-route-world={routeWorld(location.pathname)}
         data-world-handoff={worldHandoff ?? undefined}
       >
         <SceneHost />

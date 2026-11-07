@@ -20,3 +20,27 @@ describe('AppShell material handoff', () => {
     expect(getComputedStyle(veil!).pointerEvents).toBe('none')
   })
 })
+
+describe('AppShell route ground', () => {
+  it.each([
+    ['/world/spring', 'spring'],
+    ['/world/summer', 'summer'],
+    ['/world/autumn', 'autumn'],
+    ['/world/winter', 'winter'],
+  ])('marks %s with its world so the shell paints a matching ground behind the transparent scene', (path, world) => {
+    const { container } = render(<TestRouter initialEntries={[path]} />)
+    const shell = container.querySelector('.app-shell')
+    expect(shell).toHaveAttribute('data-route-world', world)
+    expect(shell).not.toHaveAttribute('data-universe-home')
+  })
+
+  it('leaves non-world routes without a world ground', () => {
+    const { container } = render(<TestRouter initialEntries={['/archive']} />)
+    expect(container.querySelector('.app-shell')).not.toHaveAttribute('data-route-world')
+  })
+
+  it('ignores unknown world ids', () => {
+    const { container } = render(<TestRouter initialEntries={['/world/mars']} />)
+    expect(container.querySelector('.app-shell')).not.toHaveAttribute('data-route-world')
+  })
+})

@@ -36,10 +36,10 @@ export function WorldPage() {
     if (returnContext) {
       const target = document.querySelector<HTMLElement>(returnContext.selector)
       if (target) {
-        window.scrollTo({ top: returnContext.scrollY, left: 0, behavior: 'auto' })
+        window.scrollTo({ top: returnContext.scrollY, left: 0, behavior: 'instant' })
         window.requestAnimationFrame(() => {
           target.focus({ preventScroll: true })
-          window.scrollTo({ top: returnContext.scrollY, left: 0, behavior: 'auto' })
+          window.scrollTo({ top: returnContext.scrollY, left: 0, behavior: 'instant' })
         })
         return
       }

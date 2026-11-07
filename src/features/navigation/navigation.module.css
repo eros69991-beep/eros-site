@@ -9,6 +9,12 @@
   color: #ffffff;
 }
 
+/* 深色季节页上用浅色导航；夏季是浅色底，保持深色字 */
+:global(.app-shell[data-route-world='spring']) .header { color: #dde6df; }
+:global(.app-shell[data-route-world='autumn']) .header { color: #e6d6c7; }
+:global(.app-shell[data-route-world='winter']) .header { color: #dce1e2; }
+:global(.app-shell[data-route-world='summer']) .header { color: #1a1712; }
+
 .navigation,
 .actions,
 .gateHeader,

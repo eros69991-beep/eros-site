@@ -69,6 +69,31 @@ main:focus {
   outline-offset: -4px;
 }
 
+/*
+  首页和季节页的 3D 画布是透明的（alpha: true）。画布某一帧没画出来、或者换季时新页面
+  还没铺好背景时，会透出 body 的白色，看起来像闪白屏。这里给这些路由铺上和场景一致的底色。
+*/
+.app-shell[data-universe-home='true'] {
+  background: #000000;
+}
+
+.app-shell[data-route-world='spring'] { background: #07100c; }
+.app-shell[data-route-world='summer'] { background: #d7d0c3; }
+.app-shell[data-route-world='autumn'] { background: #1a100c; }
+.app-shell[data-route-world='winter'] { background: #0b0d10; }
+
+/* 页面滚到边界的回弹区域也用同样的颜色，而不是白色 */
+html:has(.app-shell[data-universe-home='true']),
+html:has(.app-shell[data-universe-home='true']) body { background: #000000; }
+html:has(.app-shell[data-route-world='spring']),
+html:has(.app-shell[data-route-world='spring']) body { background: #07100c; }
+html:has(.app-shell[data-route-world='summer']),
+html:has(.app-shell[data-route-world='summer']) body { background: #d7d0c3; }
+html:has(.app-shell[data-route-world='autumn']),
+html:has(.app-shell[data-route-world='autumn']) body { background: #1a100c; }
+html:has(.app-shell[data-route-world='winter']),
+html:has(.app-shell[data-route-world='winter']) body { background: #0b0d10; }
+
 .route-background {
   min-height: 100dvh;
 }
