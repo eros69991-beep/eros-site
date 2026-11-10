@@ -5,6 +5,7 @@ import type { WorldId } from '../../domain/types'
 import { worlds } from '../../domain/worlds'
 import type { DemoMediaKey } from '../../media/mediaManifest'
 import { ManifestPicture, WorldObjectField } from './WorldObjectField'
+import { WORLD_EDITORIAL_SIZES } from '../../media/warmPicture'
 import { WorldSceneFrame } from './WorldSceneFrame'
 import { scrollToWorldTop } from '../transitions/scrollToWorldTop'
 import { consumeWorldReturnContext } from './worldReturnContext'
@@ -76,7 +77,7 @@ export function WorldPage() {
             <p className={styles.editorialLine}>{EDITORIAL_LINES[world.id]}</p>
           </div>
           <div className={styles.editorialMedia}>
-            <ManifestPicture mediaKey={EDITORIAL_MEDIA_KEYS[world.id]} priority sizes="(max-width: 44rem) 100vw, 72vw" />
+            <ManifestPicture mediaKey={EDITORIAL_MEDIA_KEYS[world.id]} priority sizes={WORLD_EDITORIAL_SIZES} />
           </div>
         </section>
 

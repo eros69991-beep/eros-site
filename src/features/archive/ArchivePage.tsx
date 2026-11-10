@@ -49,7 +49,7 @@ function ObjectResult({ object }: { object: ObjectDefinition }) {
   return (
     <article className={styles.object}>
       <Link className="touch-link" to={`/product/${object.slug}`}>
-        <img alt={object.media[0]!.alt} height={object.media[0]!.height} loading="lazy" src={object.media[0]!.src} width={object.media[0]!.width} />
+        <img alt={object.media[0]!.alt} decoding="async" height={object.media[0]!.height} src={object.media[0]!.src} width={object.media[0]!.width} />
         <p className={styles.objectMeta}><span>{object.objectNumber}</span><span>{object.world}</span></p>
         <h2>{object.name}</h2>
         <p className={styles.objectPrice}>{formatUsd(object.price)}</p>

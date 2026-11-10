@@ -1,5 +1,6 @@
 import type { WorldId } from '../../domain/types'
-import { mediaManifest, type DemoMediaKey } from '../../media/mediaManifest'
+import type { DemoMediaKey } from '../../media/mediaManifest'
+import { warmManifestPicture, WORLD_EDITORIAL_SIZES, WORLD_OBJECT_SIZES } from '../../media/warmPicture'
 import { sceneRegistry } from '../worlds/sceneRegistry'
 import type { WorldEntryDependencies, WorldEntrySource } from './worldEntryMachine'
 
@@ -10,10 +11,17 @@ const EDITORIAL_MEDIA_KEYS = {
   winter: 'winter-editorial',
 } as const satisfies Record<WorldId, DemoMediaKey>
 
+const WORLD_OBJECT_MEDIA_KEYS = {
+  spring: ['spring-object-001', 'spring-object-002'],
+  summer: ['summer-object-001', 'summer-object-002'],
+  autumn: ['autumn-object-001', 'autumn-object-002'],
+  winter: ['winter-object-001', 'winter-object-002'],
+} as const satisfies Record<WorldId, readonly DemoMediaKey[]>
+
 interface PreloadCriticalWorldAssetsOptions {
-  createImage?: () => HTMLImageElement
   loadScene?: () => Promise<unknown>
-  mobile?: boolean
+  /** 测试用：替代真正的图片预热。 */
+  warmPicture?: (mediaKey: DemoMediaKey, sizes: string) => Promise<void>
   timeoutMs?: number
 }
 
@@ -38,17 +46,10 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, world: WorldId) 
   })
 }
 
-function readMobileViewport() {
-  if (typeof window === 'undefined') return false
-
-  const coarsePointer = typeof window.matchMedia === 'function'
-    && window.matchMedia('(pointer: coarse)').matches
-  const shortLandscape = Math.min(window.innerWidth, window.innerHeight) <= 480
-    && window.innerHeight <= 500
-
-  return (window.innerWidth <= 900 && coarsePointer) || shortLandscape
-}
-
+/**
+ * 进入季节页前：加载场景代码，并按页面上完全相同的 <picture> 预热主图（必须完成）和单品图（后台进行）。
+ * 这样页面出现时图片已经下载并解码好，不会先空白再出现。
+ */
 export async function preloadCriticalWorldAssets(
   world: WorldId,
   options: PreloadCriticalWorldAssetsOptions = {},
@@ -56,17 +57,15 @@ export async function preloadCriticalWorldAssets(
   const descriptor = sceneRegistry[world]
   if (!descriptor && !options.loadScene) throw new Error(`Realtime scene unavailable for ${world}.`)
 
-  const media = mediaManifest[EDITORIAL_MEDIA_KEYS[world]]
-  const targetWidth = (options.mobile ?? readMobileViewport()) ? 960 : 1600
-  const source = media.sources.webp.find((candidate) => candidate.width === targetWidth)
-  if (!source) throw new Error(`Critical editorial source unavailable for ${world}.`)
-
-  const image = options.createImage?.() ?? new Image()
-  image.src = source.src
+  const warm = options.warmPicture ?? warmManifestPicture
+  const editorial = warm(EDITORIAL_MEDIA_KEYS[world], WORLD_EDITORIAL_SIZES)
+  for (const mediaKey of WORLD_OBJECT_MEDIA_KEYS[world]) {
+    void warm(mediaKey, WORLD_OBJECT_SIZES).catch(() => undefined)
+  }
 
   await withTimeout(Promise.all([
     options.loadScene?.() ?? descriptor!.load(),
-    image.decode(),
+    editorial,
   ]), options.timeoutMs ?? CRITICAL_PRELOAD_TIMEOUT_MS, world)
 }
 

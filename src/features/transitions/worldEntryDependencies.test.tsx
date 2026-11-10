@@ -22,43 +22,33 @@ afterEach(() => {
 })
 
 describe('concrete World Entry dependencies', () => {
-  it.each([
-    { mobile: false, expectedSource: '/media/demo/spring-editorial-1600.webp' },
-    { mobile: true, expectedSource: '/media/demo/spring-editorial-960.webp' },
-  ])('loads the scene module and decodes the $expectedSource editorial source', async ({ expectedSource, mobile }) => {
-    const decode = vi.fn().mockResolvedValue(undefined)
-    const image = { decode, src: '' } as unknown as HTMLImageElement
+  it('loads the scene module and warms the exact editorial and object pictures the World page renders', async () => {
+    const warmPicture = vi.fn().mockResolvedValue(undefined)
     const loadScene = vi.fn().mockResolvedValue({ default: () => null })
 
-    await preloadCriticalWorldAssets('spring', {
-      createImage: () => image,
-      loadScene,
-      mobile,
-    })
+    await preloadCriticalWorldAssets('spring', { loadScene, warmPicture })
 
     expect(loadScene).toHaveBeenCalledOnce()
-    expect(image.src).toBe(expectedSource)
-    expect(decode).toHaveBeenCalledOnce()
+    expect(warmPicture.mock.calls).toEqual([
+      ['spring-editorial', '(max-width: 44rem) 100vw, 72vw'],
+      ['spring-object-001', '(max-width: 44rem) 88vw, 62vw'],
+      ['spring-object-002', '(max-width: 44rem) 88vw, 62vw'],
+    ])
   })
 
-  it('uses the 960px editorial source on a coarse-pointer landscape phone', async () => {
-    const decode = vi.fn().mockResolvedValue(undefined)
-    const image = { decode, src: '' } as unknown as HTMLImageElement
-    const loadScene = vi.fn().mockResolvedValue({ default: () => null })
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 844 })
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 390 })
-    vi.stubGlobal('matchMedia', vi.fn((query: string) => ({ matches: query === '(pointer: coarse)' })))
+  it('does not fail the entry when only a background object picture fails to warm', async () => {
+    const warmPicture = vi.fn((key: string) => key.includes('object') ? Promise.reject(new Error('object failed')) : Promise.resolve())
 
-    await preloadCriticalWorldAssets('spring', { createImage: () => image, loadScene })
-
-    expect(image.src).toBe('/media/demo/spring-editorial-960.webp')
+    await expect(preloadCriticalWorldAssets('winter', {
+      loadScene: async () => ({ default: () => null }),
+      warmPicture,
+    })).resolves.toBeUndefined()
   })
 
   it('rejects a never-resolving critical decode within the configured preload timeout', async () => {
-    const image = { decode: () => new Promise<void>(() => undefined), src: '' } as unknown as HTMLImageElement
     await expect(preloadCriticalWorldAssets('summer', {
-      createImage: () => image,
       loadScene: async () => ({ default: () => null }),
+      warmPicture: () => new Promise<void>(() => undefined),
       timeoutMs: 1,
     })).rejects.toThrow('Critical assets for summer timed out.')
   })
@@ -111,15 +101,13 @@ describe('concrete World Entry dependencies', () => {
 
   it('turns a failed image decode into reduced-visual recovery that preserves the route choice', async () => {
     const committed: string[] = []
-    const decode = vi.fn().mockRejectedValue(new Error('Editorial decode failed.'))
-    const image = { decode, src: '' } as unknown as HTMLImageElement
+    const decode = vi.fn((key: string) => key.endsWith('editorial') ? Promise.reject(new Error('Editorial decode failed.')) : Promise.resolve())
     const dependencies = createWorldEntryDependencies({
       alignUniverse: async () => undefined,
       navigate: (world) => committed.push(world),
       preload: (world) => preloadCriticalWorldAssets(world, {
-        createImage: () => image,
         loadScene: async () => ({ default: () => null }),
-        mobile: false,
+        warmPicture: decode,
       }),
       remember: () => undefined,
       activateReducedVisuals: useSiteStore.getState().setReducedVisualWorld,
@@ -140,6 +128,6 @@ describe('concrete World Entry dependencies', () => {
     await user.click(recovery)
     expect(committed).toEqual(['spring'])
     expect(useSiteStore.getState().reducedVisualWorld).toBe('spring')
-    expect(decode).toHaveBeenCalledOnce()
+    expect(decode).toHaveBeenCalledWith('spring-editorial', '(max-width: 44rem) 100vw, 72vw')
   })
 })

@@ -90,9 +90,8 @@ describe('WorldPage', () => {
       expect(sources[1]?.getAttribute('srcset')).toMatch(/-640\.webp 640w, .+-960\.webp 960w, .+-1600\.webp 1600w/)
     }
 
-    expect(images[0]).not.toHaveAttribute('loading', 'lazy')
-    expect(images[1]).toHaveAttribute('loading', 'lazy')
-    expect(images[2]).toHaveAttribute('loading', 'lazy')
+    // 季节页只有主图和两张单品图，都提前预热过，不再懒加载
+    for (const image of images) expect(image).not.toHaveAttribute('loading', 'lazy')
   })
 })
 

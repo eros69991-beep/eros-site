@@ -2,12 +2,8 @@ import { Link } from 'react-router-dom'
 import { formatUsd } from '../../domain/objects'
 import { filterObjects } from '../../domain/selectors'
 import type { ObjectDefinition, WorldDefinition } from '../../domain/types'
-import {
-  mediaManifest,
-  type DemoMedia,
-  type DemoMediaFormat,
-  type DemoMediaKey,
-} from '../../media/mediaManifest'
+import { mediaManifest, type DemoMediaKey } from '../../media/mediaManifest'
+import { pictureFallbackSource, pictureSourceSet, WORLD_OBJECT_SIZES } from '../../media/warmPicture'
 import styles from './worlds.module.css'
 import { rememberWorldReturnContext } from './worldReturnContext'
 
@@ -18,10 +14,6 @@ const OBJECT_MEDIA_KEYS = {
   winter: ['winter-object-001', 'winter-object-002'],
 } as const satisfies Record<WorldDefinition['id'], readonly DemoMediaKey[]>
 
-function sourceSet(media: DemoMedia, format: DemoMediaFormat) {
-  return media.sources[format].map((source) => `${source.src} ${source.width}w`).join(', ')
-}
-
 interface ManifestPictureProps {
   mediaKey: DemoMediaKey
   priority?: boolean
@@ -30,12 +22,12 @@ interface ManifestPictureProps {
 
 export function ManifestPicture({ mediaKey, priority = false, sizes }: ManifestPictureProps) {
   const media = mediaManifest[mediaKey]
-  const fallback = media.sources.webp.find((source) => source.width === 960) ?? media.sources.webp[0]
+  const fallback = pictureFallbackSource(media)
 
   return (
     <picture>
-      <source sizes={sizes} srcSet={sourceSet(media, 'avif')} type="image/avif" />
-      <source sizes={sizes} srcSet={sourceSet(media, 'webp')} type="image/webp" />
+      <source sizes={sizes} srcSet={pictureSourceSet(media, 'avif')} type="image/avif" />
+      <source sizes={sizes} srcSet={pictureSourceSet(media, 'webp')} type="image/webp" />
       <img
         alt={media.alt}
         className={styles.media}
@@ -59,7 +51,7 @@ function WorldObject({ mediaKey, object, world }: {
   return (
     <article className={styles.objectEncounter}>
       <Link aria-label={`View ${object.name}, ${object.objectNumber}`} className={`${styles.objectMediaLink} touch-link`} data-world-object={object.id} onClick={() => rememberWorldReturnContext(returnSelector)} to={`/product/${object.slug}`}>
-        <ManifestPicture mediaKey={mediaKey} sizes="(max-width: 44rem) 88vw, 62vw" />
+        <ManifestPicture mediaKey={mediaKey} priority sizes={WORLD_OBJECT_SIZES} />
       </Link>
       <div className={styles.objectFacts}>
         <p className={styles.objectNumber}>{object.objectNumber}</p>
