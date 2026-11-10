@@ -34,6 +34,7 @@ type FakeEffect = {
   luminanceMaterial?: { threshold: number }
   offset?: number
   darkness?: number
+  mode?: number
   dispose: () => void
 }
 
@@ -64,8 +65,13 @@ vi.mock('postprocessing', () => {
     NoiseEffect: class extends FakeEffectBase {
       constructor(options: { blendFunction?: number }) { super('noise', options) }
     },
+    ToneMappingMode: { AGX: 7, NEUTRAL: 8 },
     ToneMappingEffect: class extends FakeEffectBase {
-      constructor() { super('tone-mapping') }
+      mode: number | undefined
+      constructor(options: { mode?: number } = {}) {
+        super('tone-mapping')
+        this.mode = options.mode
+      }
     },
     VignetteEffect: class extends FakeEffectBase {
       offset = 0
@@ -126,6 +132,12 @@ describe('PostProcessingStack', () => {
       expect(effect('tone-mapping')).toBeDefined()
     },
   )
+
+  it('tone maps with the Neutral operator so authored scene colours keep their saturation', () => {
+    renderStack('high')
+    // 8 = ToneMappingMode.NEUTRAL；库的默认值是 AgX（7），会把首页银河压成灰色
+    expect(effect('tone-mapping').mode).toBe(8)
+  })
 
   it('reduces Product bloom, noise, and vignette without changing the source World profile', () => {
     const worldProfile = SCENE_EFFECT_PROFILES.winter

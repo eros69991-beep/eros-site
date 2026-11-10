@@ -7,6 +7,7 @@ import {
   MaskFunction,
   NoiseEffect,
   ToneMappingEffect,
+  ToneMappingMode,
   VignetteEffect,
 } from 'postprocessing'
 import { Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
@@ -43,7 +44,9 @@ function createStableEffects(camera: Camera): StableEffects {
   // 与 @react-three/postprocessing 的 <DepthOfField> 一致（maskPass 不在类型声明里）
   ;(depthOfField as unknown as { maskPass: { maskFunction: MaskFunction } }).maskPass.maskFunction = MaskFunction.MULTIPLY_RGB_SET_ALPHA
   return {
-    toneMapping: new ToneMappingEffect(),
+    // 库的默认模式是 AgX，会把饱和度和高光一起压低，银河的暖金银心和冷色旋臂被压成灰米色。
+    // Neutral 基本原样保留着色器里写的颜色，只在接近过曝时才压高光。
+    toneMapping: new ToneMappingEffect({ mode: ToneMappingMode.NEUTRAL }),
     bloom: new BloomEffect({ blendFunction: BlendFunction.ADD, mipmapBlur: true, luminanceSmoothing: 0.12 }),
     noise: new NoiseEffect({ blendFunction: BlendFunction.COLOR_DODGE }),
     vignette: new VignetteEffect(),

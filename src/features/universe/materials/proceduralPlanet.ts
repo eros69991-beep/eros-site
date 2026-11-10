@@ -215,6 +215,8 @@ EroSurface eroSurface(vec3 p) {
   // 白雾：轮廓更清楚的流动雾带
   float mist = smoothstep(0.56, 0.68, eroFbm(vec3(p.x * 1.6, p.y * 7.0, p.z * 1.6) + r * 1.6 + 7.0, 4));
   col = mix(col, vec3(0.99, 1.0, 0.96), mist * 0.6);
+  // Neutral 色调映射原样保留饱和度，这套配色会偏艳；把饱和度收回一部分，保持"安静克制"。
+  col = mix(vec3(dot(col, vec3(0.2126, 0.7152, 0.0722))), col, 0.62);
 #else
   // 当前方案：新叶绿、嫩黄、奶油白、樱花粉
   vec3 leaf = vec3(0.30, 0.58, 0.20);
