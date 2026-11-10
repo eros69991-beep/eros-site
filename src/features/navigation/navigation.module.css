@@ -10,6 +10,11 @@
 }
 
 /* 深色季节页上用浅色导航；夏季是浅色底，保持深色字 */
+/* 导航栏在季节页内容区的上方，盖不到 3D 画布；铺上和季节页相同的底色，避免顶部露出一条色带 */
+:global(.app-shell[data-route-world='spring']) .header { background: rgb(7 16 12 / 92%); }
+:global(.app-shell[data-route-world='summer']) .header { background: rgb(215 208 195 / 92%); }
+:global(.app-shell[data-route-world='autumn']) .header { background: rgb(26 16 12 / 93%); }
+:global(.app-shell[data-route-world='winter']) .header { background: rgb(11 13 16 / 91%); }
 :global(.app-shell[data-route-world='spring']) .header { color: #dde6df; }
 :global(.app-shell[data-route-world='autumn']) .header { color: #e6d6c7; }
 :global(.app-shell[data-route-world='winter']) .header { color: #dce1e2; }
