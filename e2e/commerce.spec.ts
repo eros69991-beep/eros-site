@@ -73,6 +73,6 @@ test('refresh retains Bag contents and the most recently entered World', async (
   await page.reload()
   await page.getByRole('link', { name: /BAG 1/i }).click()
   await expect(page.getByRole('heading', { level: 2, name: 'Still Field' })).toBeVisible()
-  await page.getByRole('link', { name: 'EROS' }).click()
+  await page.getByRole('link', { name: 'HORAE' }).click()
   await expect(page.getByRole('link', { name: '04 / WINTER / FREEZE' })).toHaveAttribute('aria-current', 'true')
 })

@@ -14,10 +14,10 @@ function renderHeader(initialEntry: string) {
 }
 
 describe('GlobalHeader', () => {
-  it('keeps the homepage header limited to EROS and MENU', () => {
+  it('keeps the homepage header limited to HORAE and MENU', () => {
     renderHeader('/')
 
-    expect(screen.getByRole('link', { name: 'EROS' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'HORAE' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'SEARCH' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /BAG/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'MENU' })).toBeInTheDocument()

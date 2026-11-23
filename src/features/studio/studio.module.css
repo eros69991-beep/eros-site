@@ -14,4 +14,5 @@
 .regions h2 { margin: 0 0 2rem; font-size: .75rem; font-weight: 500; letter-spacing: .14em; }
 .regions p { max-width: 29rem; margin: 0; font-family: var(--font-editorial, serif); font-size: clamp(1.1rem, 2vw, 1.5rem); line-height: 1.35; }
 .regions a { color: inherit; font-size: .78rem; letter-spacing: .12em; }
+.regions p + a { display: inline-block; margin-top: 1.5rem; }
 @media (max-width: 44rem) { .studio { padding-top: 7rem; } .regions { grid-template-columns: 1fr; } .regions section { min-height: 0; } }

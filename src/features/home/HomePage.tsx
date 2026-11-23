@@ -43,7 +43,7 @@ export function HomePage() {
 
   return (
     <section aria-labelledby="home-heading" className={styles.home}>
-      <h1 className={styles.visuallyHidden} id="home-heading">EROS</h1>
+      <h1 className={styles.visuallyHidden} id="home-heading">HORAE</h1>
       <HomeIntro active={introActive} />
       <div className={styles.portalContent} data-intro-active={introActive || undefined}>
         <SemanticCelestialControls />
