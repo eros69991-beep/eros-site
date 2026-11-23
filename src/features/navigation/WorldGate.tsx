@@ -96,6 +96,7 @@ export function WorldGate({ openerRef }: WorldGateProps) {
           ))}
           <Link className={styles.gateLink} to="/archive" onClick={closeForNavigation}>ARCHIVE</Link>
           <Link className={styles.gateLink} to="/studio" onClick={closeForNavigation}>STUDIO</Link>
+          <Link className={styles.gateLink} to="/special/01" onClick={closeForNavigation}>SPECIAL</Link>
           <Link className={styles.gateLink} to="/search" state={overlayState} onClick={closeForNavigation}>SEARCH</Link>
           <Link ref={lastControlRef} className={styles.gateLink} to="/bag" state={overlayState} onClick={closeForNavigation} onKeyDown={trapTabAtBoundary}>BAG</Link>
         </nav>

@@ -8,21 +8,22 @@ vi.mock('../scene/SceneHost', () => ({
 
 afterEach(() => {
   cleanup()
-  document.title = 'EROS STUDIO'
+  document.title = 'HORAE STUDIO'
 })
 
 describe('route document metadata', () => {
   it.each([
-    ['/', 'EROS STUDIO'],
-    ['/world/spring', 'SPRING / AWAKENING — EROS'],
-    ['/world/summer', 'SUMMER / BURN — EROS'],
-    ['/world/autumn', 'AUTUMN / FADE — EROS'],
-    ['/world/winter', 'WINTER / FREEZE — EROS'],
-    ['/archive', 'ARCHIVE / ALL OBJECTS — EROS'],
-    ['/studio', 'THE STUDIO — EROS'],
-    ['/search', 'SEARCH — EROS'],
-    ['/bag', 'BAG — EROS'],
-    ['/product/prototype-spring-001', 'MIST SHELL — EROS'],
+    ['/', 'HORAE STUDIO'],
+    ['/world/spring', 'SPRING / AWAKENING — HORAE'],
+    ['/world/summer', 'SUMMER / BURN — HORAE'],
+    ['/world/autumn', 'AUTUMN / FADE — HORAE'],
+    ['/world/winter', 'WINTER / FREEZE — HORAE'],
+    ['/archive', 'ARCHIVE / ALL OBJECTS — HORAE'],
+    ['/studio', 'THE STUDIO — HORAE'],
+    ['/search', 'SEARCH — HORAE'],
+    ['/bag', 'BAG — HORAE'],
+    ['/special/01', 'SPECIAL PROJECT 01 — HORAE'],
+    ['/product/prototype-spring-001', 'MIST SHELL — HORAE'],
   ])('sets the page title for %s', (route, title) => {
     render(<TestRouter initialEntries={[route]} />)
 
@@ -33,9 +34,9 @@ describe('route document metadata', () => {
     document.title = 'A previous document title'
     const { unmount } = render(<TestRouter initialEntries={['/archive']} />)
 
-    expect(document.title).toBe('ARCHIVE / ALL OBJECTS — EROS')
+    expect(document.title).toBe('ARCHIVE / ALL OBJECTS — HORAE')
     unmount()
 
-    expect(document.title).toBe('EROS STUDIO')
+    expect(document.title).toBe('HORAE STUDIO')
   })
 })

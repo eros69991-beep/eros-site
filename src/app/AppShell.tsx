@@ -72,6 +72,7 @@ export function AppShell() {
         className={`app-shell ${sceneStyles.appShell}`}
         data-universe-home={location.pathname === '/' ? 'true' : undefined}
         data-route-world={routeWorld(location.pathname)}
+        data-route-special={location.pathname.startsWith('/special') ? 'true' : undefined}
         data-world-handoff={worldHandoff ?? undefined}
       >
         <SceneHost />
@@ -90,7 +91,7 @@ export function AppShell() {
         <div className={sceneStyles.semanticLayer}>
           <a className="skip-link" href="#main-content" onClick={() => document.getElementById('main-content')?.focus()}>Skip to main content</a>
           <GlobalHeader menuButtonRef={menuButtonRef} />
-          <main aria-label="EROS Studio" id="main-content" tabIndex={-1}>
+          <main aria-label="HORAE Studio" id="main-content" tabIndex={-1}>
             {background ? <BackgroundRoute location={background} /> : null}
             <div className={background ? 'route-overlay' : undefined}>
               <Outlet />

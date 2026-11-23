@@ -10,6 +10,7 @@ import { HomePage } from '../features/home/HomePage'
 import { NotFoundPage } from '../features/not-found/NotFoundPage'
 import { ProductPage } from '../features/product/ProductPage'
 import { SearchPage } from '../features/search/SearchPage'
+import { SpecialProjectPage } from '../features/special/SpecialProjectPage'
 import { StudioPage } from '../features/studio/StudioPage'
 import { WorldPage } from '../features/worlds/WorldPage'
 import { AppShell } from './AppShell'
@@ -22,6 +23,7 @@ const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'world/:worldId', element: <WorldPage /> },
       { path: 'studio', element: <StudioPage /> },
+      { path: 'special/01', element: <SpecialProjectPage /> },
       { path: 'archive', element: <ArchivePage /> },
       { path: 'product/:slug', element: <ProductPage /> },
       { path: 'search', element: <SearchPage /> },

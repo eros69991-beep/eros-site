@@ -14,6 +14,7 @@
 :global(.app-shell[data-route-world='autumn']) .header { color: #e6d6c7; }
 :global(.app-shell[data-route-world='winter']) .header { color: #dce1e2; }
 :global(.app-shell[data-route-world='summer']) .header { color: #1a1712; }
+:global(.app-shell[data-route-special='true']) .header { color: #ecebe6; }
 
 .navigation,
 .actions,
