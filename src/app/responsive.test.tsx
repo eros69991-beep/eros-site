@@ -23,7 +23,7 @@ afterEach(() => {
 })
 
 const routes = [
-  ['/', 'HORAE'],
+  ['/', 'KAIROHOU'],
   ['/world/spring', 'SPRING / AWAKENING'],
   ['/archive', 'ARCHIVE'],
   ['/product/prototype-spring-001', 'Mist Shell'],
@@ -36,7 +36,7 @@ describe('responsive route structure', () => {
   it.each(routes)('gives %s one main landmark, one page heading, and a skip link', (route, heading) => {
     const { container } = render(<TestRouter initialEntries={[route]} />)
 
-    expect(screen.getAllByRole('main', { name: /horae studio/i })).toHaveLength(1)
+    expect(screen.getAllByRole('main', { name: /kairohou studio/i })).toHaveLength(1)
     expect(screen.getAllByRole('heading', { level: 1, name: heading })).toHaveLength(1)
     expect(screen.getByRole('link', { name: /skip to main content/i })).toHaveAttribute('href', '#main-content')
 
@@ -48,7 +48,7 @@ describe('responsive route structure', () => {
     render(<TestRouter initialEntries={['/archive']} />)
 
     const primaryControls = [
-      screen.getByRole('link', { name: 'HORAE' }),
+      screen.getByRole('link', { name: 'KAIROHOU' }),
       screen.getByRole('button', { name: 'Reset filters' }),
       screen.getByRole('button', { name: 'MENU' }),
     ]
@@ -70,7 +70,7 @@ describe('responsive route structure', () => {
     const user = userEvent.setup()
     render(<TestRouter initialEntries={['/']} />)
 
-    const main = screen.getByRole('main', { name: /horae studio/i })
+    const main = screen.getByRole('main', { name: /kairohou studio/i })
     await user.click(screen.getByRole('link', { name: /skip to main content/i }))
 
     expect(main).toHaveFocus()

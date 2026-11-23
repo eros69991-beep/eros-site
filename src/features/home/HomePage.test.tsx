@@ -4,7 +4,7 @@ import { WorldEntryProvider } from '../transitions/useWorldEntry'
 import { HomePage } from './HomePage'
 
 describe('HomePage', () => {
-  it('keeps a concise HORAE homepage landmark without the legacy manifesto', () => {
+  it('keeps a concise KAIROHOU homepage landmark without the legacy manifesto', () => {
     render(
       <MemoryRouter>
         <WorldEntryProvider dependencies={{
@@ -18,7 +18,7 @@ describe('HomePage', () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByRole('heading', { level: 1, name: 'HORAE' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'KAIROHOU' })).toBeInTheDocument()
     expect(screen.queryByText(/Five changing conditions orbit/i)).not.toBeInTheDocument()
   })
 })

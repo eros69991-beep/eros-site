@@ -22,7 +22,7 @@ export function GlobalHeader({ menuButtonRef }: GlobalHeaderProps) {
   return (
     <header className={styles.header} data-global-header="">
       <nav aria-label="Global navigation" className={styles.navigation}>
-        <Link className={styles.link} to="/">HORAE</Link>
+        <Link className={styles.link} to="/">KAIROHOU</Link>
         <div className={styles.actions}>
           {!isHome ? <Link className={styles.link} to="/search" state={overlayState}>SEARCH</Link> : null}
           {!isHome ? <Link className={styles.link} to="/bag" state={overlayState}>BAG {bagCount}</Link> : null}

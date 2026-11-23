@@ -100,7 +100,7 @@ export function SpecialProjectPage() {
           <div className={styles.cap}>
             <hr className={styles.rule} />
             <h2>Close the hood. Keep the view.</h2>
-            <p>HORAE is an evolving collection of material studies, objects, and atmospheres, arranged not by category, but by season. This piece belongs to winter.</p>
+            <p>KAIROHOU is an evolving collection of material studies, objects, and atmospheres, arranged not by category, but by season. This piece belongs to winter.</p>
             <button className={styles.button} onClick={copyLink} type="button">COPY LINK</button>
             <p aria-live="polite" className={styles.small}>{copied ?? 'Footage: Pixabay contributors · Photograph: Hongwei Fan, Unsplash'}</p>
           </div>

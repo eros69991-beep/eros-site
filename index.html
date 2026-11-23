@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HORAE STUDIO</title>
+    <title>KAIROHOU STUDIO</title>
     <script>
       // 启动诊断：页面没能渲染出来时（白屏），把错误显示在页面上，方便在手机上截图排查。
       // 正常启动时不会显示任何东西。
@@ -15,7 +15,7 @@
           var box = document.getElementById('boot-error') || document.createElement('pre')
           box.id = 'boot-error'
           box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;max-height:60vh;overflow:auto;margin:0;padding:12px;font:12px/1.45 ui-monospace,Menlo,monospace;background:#111;color:#f2f2f2;white-space:pre-wrap;word-break:break-word;z-index:2147483647'
-          box.textContent = 'HORAE could not start\n\n' + errors.join('\n\n') + '\n\n' + navigator.userAgent
+          box.textContent = 'KAIROHOU could not start\n\n' + errors.join('\n\n') + '\n\n' + navigator.userAgent
           if (!box.parentNode) document.body.appendChild(box)
         }
         window.addEventListener('error', function (event) {

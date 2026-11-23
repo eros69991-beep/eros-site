@@ -9,7 +9,7 @@ export function StudioPage() {
         <h1 id="studio-heading">THE STUDIO</h1>
       </header>
       <div className={styles.regions}>
-        <section aria-labelledby="what-horae-is"><h2 id="what-horae-is">WHAT HORAE IS</h2><p>HORAE is an evolving collection of material studies, objects, and atmospheres, arranged not by category, but by season.</p></section>
+        <section aria-labelledby="what-kairohou-is"><h2 id="what-kairohou-is">WHAT KAIROHOU IS</h2><p>KAIROHOU is an evolving collection of material studies, objects, and atmospheres, arranged not by category, but by season.</p></section>
         <section aria-labelledby="material-making"><h2 id="material-making">MATERIAL AND MAKING</h2><p>Material direction remains close to process: surface, weight, wear, and the conditions that shape each object.</p></section>
         <section aria-labelledby="future-process-media"><h2 id="future-process-media">FUTURE PROCESS MEDIA</h2><p>Demonstration process media will enter this workroom later.</p></section>
         <section aria-labelledby="special-projects"><h2 id="special-projects">SPECIAL PROJECTS</h2><p>Pieces made outside the seasons, each with something hidden inside.</p><Link className="touch-link" to="/special/01">01 / RE-VIEW — A DOOR IN THE HOOD</Link></section>

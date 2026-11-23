@@ -7,7 +7,7 @@ describe('StudioPage', () => {
     render(<StudioPage />, { wrapper: MemoryRouter })
 
     expect(screen.getByRole('heading', { name: 'THE STUDIO' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'WHAT HORAE IS' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'WHAT KAIROHOU IS' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'MATERIAL AND MAKING' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'FUTURE PROCESS MEDIA' })).toBeInTheDocument()
     expect(screen.getByText('Demonstration process media will enter this workroom later.')).toBeInTheDocument()
