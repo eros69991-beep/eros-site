@@ -100,7 +100,7 @@ export function SpecialProjectPage() {
           <div className={styles.cap}>
             <hr className={styles.rule} />
             <h2>Close the hood. Keep the view.</h2>
-            <p>KAIROHOU is an evolving collection of material studies, objects, and atmospheres, arranged not by category, but by season. This piece belongs to winter.</p>
+            <p>KAIROHOU keeps time two ways: kairos, the right moment, and hou (候), the old Chinese five-day season. Pieces are arranged not by category, but by the moment they belong to. This one belongs to winter.</p>
             <button className={styles.button} onClick={copyLink} type="button">COPY LINK</button>
             <p aria-live="polite" className={styles.small}>{copied ?? 'Footage: Pixabay contributors · Photograph: Hongwei Fan, Unsplash'}</p>
           </div>
