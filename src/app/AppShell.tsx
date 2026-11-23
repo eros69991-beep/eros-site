@@ -91,7 +91,7 @@ export function AppShell() {
         <div className={sceneStyles.semanticLayer}>
           <a className="skip-link" href="#main-content" onClick={() => document.getElementById('main-content')?.focus()}>Skip to main content</a>
           <GlobalHeader menuButtonRef={menuButtonRef} />
-          <main aria-label="HORAE Studio" id="main-content" tabIndex={-1}>
+          <main aria-label="KAIROHOU Studio" id="main-content" tabIndex={-1}>
             {background ? <BackgroundRoute location={background} /> : null}
             <div className={background ? 'route-overlay' : undefined}>
               <Outlet />

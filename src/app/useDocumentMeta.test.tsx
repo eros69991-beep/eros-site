@@ -8,22 +8,22 @@ vi.mock('../scene/SceneHost', () => ({
 
 afterEach(() => {
   cleanup()
-  document.title = 'HORAE STUDIO'
+  document.title = 'KAIROHOU STUDIO'
 })
 
 describe('route document metadata', () => {
   it.each([
-    ['/', 'HORAE STUDIO'],
-    ['/world/spring', 'SPRING / AWAKENING — HORAE'],
-    ['/world/summer', 'SUMMER / BURN — HORAE'],
-    ['/world/autumn', 'AUTUMN / FADE — HORAE'],
-    ['/world/winter', 'WINTER / FREEZE — HORAE'],
-    ['/archive', 'ARCHIVE / ALL OBJECTS — HORAE'],
-    ['/studio', 'THE STUDIO — HORAE'],
-    ['/search', 'SEARCH — HORAE'],
-    ['/bag', 'BAG — HORAE'],
-    ['/special/01', 'SPECIAL PROJECT 01 — HORAE'],
-    ['/product/prototype-spring-001', 'MIST SHELL — HORAE'],
+    ['/', 'KAIROHOU STUDIO'],
+    ['/world/spring', 'SPRING / AWAKENING — KAIROHOU'],
+    ['/world/summer', 'SUMMER / BURN — KAIROHOU'],
+    ['/world/autumn', 'AUTUMN / FADE — KAIROHOU'],
+    ['/world/winter', 'WINTER / FREEZE — KAIROHOU'],
+    ['/archive', 'ARCHIVE / ALL OBJECTS — KAIROHOU'],
+    ['/studio', 'THE STUDIO — KAIROHOU'],
+    ['/search', 'SEARCH — KAIROHOU'],
+    ['/bag', 'BAG — KAIROHOU'],
+    ['/special/01', 'SPECIAL PROJECT 01 — KAIROHOU'],
+    ['/product/prototype-spring-001', 'MIST SHELL — KAIROHOU'],
   ])('sets the page title for %s', (route, title) => {
     render(<TestRouter initialEntries={[route]} />)
 
@@ -34,9 +34,9 @@ describe('route document metadata', () => {
     document.title = 'A previous document title'
     const { unmount } = render(<TestRouter initialEntries={['/archive']} />)
 
-    expect(document.title).toBe('ARCHIVE / ALL OBJECTS — HORAE')
+    expect(document.title).toBe('ARCHIVE / ALL OBJECTS — KAIROHOU')
     unmount()
 
-    expect(document.title).toBe('HORAE STUDIO')
+    expect(document.title).toBe('KAIROHOU STUDIO')
   })
 })
